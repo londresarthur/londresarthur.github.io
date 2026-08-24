@@ -197,17 +197,25 @@ $$
 
 Um erro comum de intuição é supor que a fronteira $\partial D$ de qualquer domínio bidimensional é sempre uma curva simples e suave (como retas ou circunferências). O professor deu grande ênfase a este ponto: **a fronteira $\partial D$ pode ser extremamente complexa ou até fractal!**
 
-### 5.1. O Critério Exato: Conteúdo Nulo de Jordan
-Para que o limite da soma de Riemann exista com rigor para toda função contínua em $D$, a fronteira $\partial D$ deve ser **mensurável a Jordan com área nula** (conteúdo nulo de Jordan):
+### 5.1. A Definição Rigorosa de Conteúdo Nulo no $\mathbb{R}^2$ (Peano-Jordan)
+
+O que significa, formalmente, dizer que um conjunto $A \subset \mathbb{R}^2$ "tem área zero"? A resposta está na definição de **conteúdo nulo**:
+
+> [!IMPORTANT]
+> **Definição de Conteúdo Nulo:**  
+> Um subconjunto $A \subset \mathbb{R}^2$ possui **conteúdo nulo** (ou conteúdo de Jordan zero) se, para todo $\varepsilon \gt 0$, existe uma família finita de retângulos $\lbrace R_1, R_2, \dots, R_k \rbrace$ tais que:
+> 1. Os retângulos cobrem completamente o conjunto $A$: $A \subseteq \bigcup_{i=1}^k R_i$.
+> 2. A soma total das áreas de todos esses retângulos é menor que $\varepsilon$: $\sum_{i=1}^k \text{Area}(R_i) \lt \varepsilon$.
+
+#### O que essa definição diz em português claro?
+* Não importa quão minúsculo seja o número positivo $\varepsilon$ que alguém te desafie a escolher (seja $\varepsilon = 0{,}001$ ou $\varepsilon = 10^{-50}$):
+* Você sempre consegue encontrar um punhado **finito** de caixinhas retangulares que "empacotam" o conjunto $A$, de modo que a área somada de todas as caixas seja menor que $\varepsilon$.
+* **Consequência Fundamental para Integrais Duplas:**  
+  Uma função limitada $f: D \to \mathbb{R}$ contínua é **integrável à Riemann** se, e somente se, a sua fronteira $\partial D$ tiver **conteúdo nulo**.
+  Nesse caso, a incerteza entre a Soma Superior ($S$) e a Soma Inferior ($s$) de Darboux é esmagada a zero:
 
 $$
-\forall \varepsilon \gt 0, \quad \exists \mathcal{P} \text{ tal que } \sum_{R_{ij} \cap \partial D \neq \emptyset} \text{Area}(R_{ij}) \lt \varepsilon
-$$
-
-Se a fronteira $\partial D$ tiver conteúdo nulo, as somas superior e inferior de Darboux convergem para o mesmo valor:
-
-$$
-S(\tilde{f}, \mathcal{P}) - s(\tilde{f}, \mathcal{P}) \le \varepsilon_{\text{int}} + M \sum_{R_{ij} \cap \partial D \neq \emptyset} \text{Area}(R_{ij}) \xrightarrow[\|\mathcal{P}\| \to 0]{} 0
+S(\tilde{f}, \mathcal{P}) - s(\tilde{f}, \mathcal{P}) \le \varepsilon_{\text{int}} + M \sum_{R_i \text{ cobrem } \partial D} \text{Area}(R_i) \lt \varepsilon_{\text{int}} + M \varepsilon \xrightarrow[\varepsilon \to 0]{} 0
 $$
 
 ---

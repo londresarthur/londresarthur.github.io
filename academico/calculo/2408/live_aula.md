@@ -134,3 +134,23 @@ O professor deu ênfase a por que isso **NÃO é trivial**:
    * Curva contínua e fechada de Jordan sem auto-interseção, mas com **área bidimensional positiva** ($\text{Area}(\partial D) \gt 0$).
    * Para uma região limitada por Osgood, a Soma Superior de Darboux nunca encontra a Soma Inferior. A integral de Riemann **falha completamente**!
    * É exatamente por causa de fronteiras como as de Osgood que precisamos do critério topológico formal de **Conteúdo Nulo de Jordan**.
+
+---
+
+### Momento 6: A Definição Formal de Conteúdo Nulo no $\mathbb{R}^2$
+
+O professor formalizou matematicamente o conceito de conjunto de área nula (Jordan):
+
+#### Definição Formal (Lousa):
+Um conjunto $A \subset \mathbb{R}^2$ tem **conteúdo nulo** (ou conteúdo de Jordan zero) se, para todo $\varepsilon \gt 0$, existe uma família finita de retângulos $\lbrace R_1, R_2, \dots, R_k \rbrace$ satisfazendo simultaneamente:
+
+1. **Cobertura do Conjunto:** $A \subseteq \bigcup_{i=1}^k R_i$.
+2. **Soma das Áreas Menor que $\varepsilon$:** $\sum_{i=1}^k \text{Area}(R_i) \lt \varepsilon$.
+
+#### A Intuição da Definição:
+* Não importa quão pequeno seja o número $\varepsilon \gt 0$ escolhido (ex: $10^{-6}$ ou $10^{-100}$), você sempre consegue cobrir o conjunto $A$ usando um número **finito** de retângulos cuja soma total de áreas seja menor que $\varepsilon$.
+* **Exemplos Canônicos de Conteúdo Nulo:**
+  * Qualquer conjunto finito de pontos $\lbrace P_1, \dots, P_n \rbrace$.
+  * Qualquer segmento de reta ou arco de circunferência.
+  * O gráfico de qualquer função contínua $y = g(x)$ em um intervalo fechado $[a, b]$.
+  * A fronteira $\partial D$ de qualquer região comum da Engenharia.
