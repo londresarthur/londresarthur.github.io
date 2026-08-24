@@ -1,6 +1,6 @@
 # 🔴 Live da Aula: Integrais Duplas — Fundamentos e Topologia no $\mathbb{R}^2$ (USP)
 > **Data:** 24 de Agosto  
-> **Status:** Acompanhamento em tempo real — Topologia no $\mathbb{R}^2$, Fronteira e Domínios de Integrabilidade.  
+> **Status:** Acompanhamento em tempo real — Topologia no $\mathbb{R}^2$, Fronteiras Fractais e Integrabilidade de Riemann.  
 > **Objetivo deste arquivo:** Decodificar os momentos da aula, passos algébricos e intuições conceituais do professor.
 
 ---
@@ -14,6 +14,7 @@ timeline
     Momento 2 : A Ponte com Integrais : Por que domínios precisam de fronteira regular (Medida Nula)?
     Momento 3 : Construção 3D de Riemann : Colunas Internas, Externas e o Esmagamento na Fronteira
     Momento 4 : A Multiplicação Elementar : O que significa f(x,y) * (Área da Base)?
+    Momento 5 : O Mito da Fronteira Trivial : Fractais (Koch), Conteúdo de Jordan e a Curva de Osgood
 ```
 
 ---
@@ -22,16 +23,16 @@ timeline
 
 ### Momento 1: Topologia Básica no $\mathbb{R}^2$
 
-#### Bola Aberta (Vizinhança) de raio $r > 0$ em torno de $(x_0, y_0)$
+#### Bola Aberta (Vizinhança) de raio $r \gt 0$ em torno de $(x_0, y_0)$
 
 $$
-B_r(x_0, y_0) = \{ (x, y) \in \mathbb{R}^2 \mid (x - x_0)^2 + (y - y_0)^2 < r^2 \}
+B_r(x_0, y_0) = \lbrace (x, y) \in \mathbb{R}^2 \mid (x - x_0)^2 + (y - y_0)^2 \lt r^2 \rbrace
 $$
 
 #### Classificação de Pontos em relação a um conjunto $A \subset \mathbb{R}^2$
-* **Ponto Interno ($P \in \text{int}(A)$):** Existe $r > 0$ tal que $B_r(P) \subset A$.
-* **Ponto Externo ($P \in \text{ext}(A)$):** Existe $r > 0$ tal que $B_r(P) \cap A = \emptyset$.
-* **Ponto de Fronteira ($P \in \partial A$):** Para todo $r > 0$, $B_r(P)$ contém pontos de $A$ e de fora de $A$.
+* **Ponto Interno ($P \in \text{int}(A)$):** Existe $r \gt 0$ tal que $B_r(P) \subset A$.
+* **Ponto Externo ($P \in \text{ext}(A)$):** Existe $r \gt 0$ tal que $B_r(P) \cap A = \emptyset$.
+* **Ponto de Fronteira ($P \in \partial A$):** Para todo $r \gt 0$, $B_r(P)$ contém pontos de $A$ e de fora de $A$.
 
 #### Tipos de Conjuntos
 * **Aberto:** Todos os seus pontos são internos ($A = \text{int}(A)$). Não contém a fronteira.
@@ -43,7 +44,7 @@ $$
 
 ### Momento 2: Por que precisamos disso para Integrais Duplas?
 
-1. **Em Cálculo 1:** Integramos em intervalos $[a, b]$. A fronteira são apenas 2 pontos: $\{a, b\}$.
+1. **Em Cálculo 1:** Integramos em intervalos $[a, b]$. A fronteira são apenas 2 pontos: $\lbrace a, b \rbrace$.
 2. **Em Cálculo 2/3 (Integrais Duplas):** O domínio $D \subset \mathbb{R}^2$ pode ter qualquer formato (círculo, triângulo, etc.).
 3. **A Definição de Riemann em Domínios Gerais:**
    Colocamos $D$ dentro de um retângulo $R = [a,b] \times [c,d]$ e estendemos $f$ por zero:
@@ -77,7 +78,7 @@ Ao particionar o retângulo $R$ em retângulos $R_{ij} = [x_{i-1}, x_i] \times [
 ```
 
 #### Classificação dos Retângulos da Partição:
-1. **Retângulos Internos ($R_{ij} \subset \text{int}(D)$):** Altura $\tilde{f} = f(x, y) > 0$. Formam colunas com o volume sob a superfície real.
+1. **Retângulos Internos ($R_{ij} \subset \text{int}(D)$):** Altura $\tilde{f} = f(x, y) \gt 0$. Formam colunas com o volume sob a superfície real.
 2. **Retângulos Externos ($R_{ij} \subset \text{ext}(D)$):** Altura $\tilde{f} = 0$. Volume da coluna é nulo ($0 \cdot \Delta A = 0$).
 3. **Retângulos da Fronteira ($R_{ij} \cap \partial D \neq \emptyset$):** Cortam a borda de $D$.
    * Na **Soma Inferior de Darboux ($s$):** A altura mínima dentro do retângulo é $0$ (porque pega o lado de fora) $\implies$ volume $0$.
@@ -102,16 +103,34 @@ O erro na fronteira é **esmagado para zero**, garantindo que a aproximação 3D
 
 ### Momento 4: O Que Significa $f(x, y) \times (\text{Area da Base})$?
 
-A expressão elementar $f(x_{ij}^*, y_{ij}^*) \, \Delta A_{ij}$ possui duas interpretações imediatas:
+A expressão elementar $\tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \, \Delta A_{ij}$ possui duas interpretações imediatas:
 
 #### 1. Interpretação Geométrica (Volume do Prisma 3D)
 * $\Delta A_{ij} = \Delta x_i \Delta y_j$ é a **área do chão** (um pequeno retângulo no plano $xy$).
-* $f(x_{ij}^*, y_{ij}^*)$ é a **altura** até o teto curvo $z = f(x, y)$.
-* $\text{Volume de um Prisma Reto} = (\text{Area da Base}) \times (\text{Altura}) = \Delta A_{ij} \cdot f(x_{ij}^*, y_{ij}^*)$.
-* A soma dupla $\sum \sum f(x, y) \Delta A$ é a soma dos volumes de todos os "edifícios/colunas", aproximando o **volume total sob a superfície**.
+* $\tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast})$ é a **altura** até o teto curvo $z = f(x, y)$.
+* $\text{Volume de um Prisma Reto} = (\text{Area da Base}) \times (\text{Altura}) = \Delta A_{ij} \cdot \tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast})$.
+* A soma dupla $\sum \sum \tilde{f}(x, y) \Delta A$ é a soma dos volumes de todos os "edifícios/colunas", aproximando o **volume total sob a superfície**.
 
 #### 2. Interpretação Física (Massa de uma Chapa)
 * Se $f(x, y)$ for a **densidade superficial de massa** ($\text{g/cm}^2$).
 * $\Delta A_{ij}$ for a área daquele pequeno pedaço de chapa ($\text{cm}^2$).
 * $\text{Massa do pedacinho} = \text{Densidade} \times \text{Area} = f(x, y) \cdot \Delta A$ (em gramas).
 * A soma dupla é a **massa total da chapa plana**.
+
+---
+
+### Momento 5: O Debate na Aula sobre Fronteiras Fractais & Patológicas
+
+Um colega comentou: *"A fronteira deveria ser algo trivial!"*  
+O professor deu ênfase a por que isso **NÃO é trivial**:
+
+1. **Nem toda fronteira é um círculo liso:** Existem domínios cujas fronteiras são **fractais** ou curvas não-diferenciáveis em lugar nenhum.
+2. **O Floco de Neve de Koch (Fractal Integrável):**
+   * Perímetro: Infinito ($\infty$).
+   * Dimensão: $d \approx 1{,}2618$.
+   * Área 2D da fronteira: **Zero** ($\text{Area}(\partial D) = 0$).
+   * **Resultado:** É integrável à Riemann!
+3. **A Curva de Osgood (A Fronteira Monstro / Não Integrável):**
+   * Curva contínua e fechada de Jordan sem auto-interseção, mas com **área bidimensional positiva** ($\text{Area}(\partial D) \gt 0$).
+   * Para uma região limitada por Osgood, a Soma Superior de Darboux nunca encontra a Soma Inferior. A integral de Riemann **falha completamente**!
+   * É exatamente por causa de fronteiras como as de Osgood que precisamos do critério topológico formal de **Conteúdo Nulo de Jordan**.

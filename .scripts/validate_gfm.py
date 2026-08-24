@@ -125,6 +125,24 @@ def validate_gfm_file(filepath: Path) -> list[str]:
                     f"fazendo o KaTeX imprimir o texto literal '\\[...\]' e quebrar a separação de linhas. "
                     f"Correção: Use apenas '\\\\' simples sem colchetes ou use bloco '```math'."
                 )
+
+            # 3.6 Checar asterisco literal em expoente
+            if re.search(r"\^\*|\^\{\*\}", line):
+                errors.append(
+                    f"Linha {i}: Asterisco literal em expoente ('^*'). "
+                    f"Parsers de Markdown interpretam asteriscos como itálico, corrompendo a fórmula para '^_' ou '<em>'. "
+                    f"Correção: Use '^{{\\ast}}'."
+                )
+
+            # 3.7 Checar delimitadores não escapados em \left e \right (ex: \left{ ou \right})
+            if re.search(r"\\left\s*(?!\\)\{", line):
+                errors.append(
+                    f"Linha {i}: Sintaxe LaTeX inválida '\\left{{'. Chaves após \\left DEVEM ser escapadas: '\\left\\{{'."
+                )
+            if re.search(r"\\right\s*(?!\\)\}", line):
+                errors.append(
+                    f"Linha {i}: Sintaxe LaTeX inválida '\\right}}'. Chaves após \\right DEVEM ser escapadas: '\\right\\}}'."
+                )
             continue
 
         # 4. Fora de display math: '$$' NÃO pode estar misturado com texto na mesma linha (ex: '1. Item: $$ expr $$')
@@ -186,6 +204,12 @@ def validate_gfm_file(filepath: Path) -> list[str]:
                 if text_accent_matches:
                     for match in text_accent_matches:
                         errors.append(f"Linha {i}: Caractere acentuado dentro de '\\text{{...}}' ({match}) na fórmula inline.")
+                if re.search(r"\^\*|\^\{\*\}", math_expr):
+                    errors.append(
+                        f"Linha {i}: Asterisco literal em expoente ('^*'). "
+                        f"Parsers de Markdown interpretam asteriscos como itálico, corrompendo a fórmula para '^_' ou '<em>'. "
+                        f"Correção: Use '^{{\\ast}}'."
+                    )
 
     # 8. Checar se algum bloco $$ ficou aberto no fim do arquivo
     if in_display_math_block:

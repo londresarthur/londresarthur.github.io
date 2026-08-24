@@ -1,8 +1,8 @@
-# 🌐 Topologia no $\mathbb{R}^2$ e a Gênese das Integrais Duplas
+# 🌐 Topologia no $\mathbb{R}^2$, Integrais Duplas e o Problema das Fronteiras Fractais
 
 > **Módulo:** Cálculo Diferencial e Integral III / Avançado — USP  
 > **Data:** 24 de Agosto  
-> **Tópico:** Fundamentos Topológicos do Plano, Definição Formal por Somas de Riemann e Condição de Integrabilidade
+> **Tópico:** Fundamentos Topológicos do Plano, Definição Formal por Somas de Riemann, Integrabilidade e Fronteiras Não-Triviais (Fractais e Jordan)
 
 ---
 
@@ -10,7 +10,7 @@
 
 Imagine que você é um engenheiro e precisa calcular a **massa total** de uma chapa metálica plana.
 
-* O formato da chapa no plano $xy$ é um disco circular $D = \{ (x, y) \in \mathbb{R}^2 \mid x^2 + y^2 \le 4 \}$.
+* O formato da chapa no plano $xy$ é um disco circular $D = \lbrace (x, y) \in \mathbb{R}^2 \mid x^2 + y^2 \le 4 \rbrace$.
 * A chapa não é homogênea: a densidade de material varia ponto a ponto segundo a função $f(x, y) = 10 + x^2 + y^2$ (em $\text{g/cm}^2$).
 
 ```text
@@ -41,13 +41,13 @@ $$
 
 ## 2. Conceitos Fundamentais de Topologia no $\mathbb{R}^2$
 
-Para estabelecer quais regiões $D$ são matematicamente válidas, precisamos da linguagem da Topologia Euclidiana. Seja $(x_0, y_0) \in \mathbb{R}^2$ e $r > 0$.
+Para estabelecer quais regiões $D$ são matematicamente válidas, precisamos da linguagem da Topologia Euclidiana. Seja $(x_0, y_0) \in \mathbb{R}^2$ e $r \gt 0$.
 
 ### 2.1. Bola Aberta (Vizinhança)
 A **bola aberta** (ou disco aberto) de centro $(x_0, y_0)$ e raio $r$ é o conjunto:
 
 $$
-B_r(x_0, y_0) = \{ (x, y) \in \mathbb{R}^2 \mid (x - x_0)^2 + (y - y_0)^2 < r^2 \}
+B_r(x_0, y_0) = \lbrace (x, y) \in \mathbb{R}^2 \mid (x - x_0)^2 + (y - y_0)^2 \lt r^2 \rbrace
 $$
 
 Intuitivamente, $B_r(x_0, y_0)$ contém todos os pontos cuja distância euclidiana ao centro é estritamente menor que $r$.
@@ -60,9 +60,9 @@ Dado um conjunto $A \subset \mathbb{R}^2$ e um ponto $P = (x_0, y_0) \in \mathbb
 
 | Classificação | Notação | Definição Formal | Intuição Geométrica |
 | :--- | :---: | :--- | :--- |
-| **Ponto Interno** | $P \in \text{int}(A)$ | Existe um raio $r > 0$ tal que $B_r(P) \subset A$. | O ponto está folgado dentro de $A$; pode-se mover em qualquer direção e continuar em $A$. |
-| **Ponto Externo** | $P \in \text{ext}(A)$ | Existe um raio $r > 0$ tal que $B_r(P) \cap A = \emptyset$. | O ponto está totalmente fora de $A$; há uma vizinhança que não encosta em $A$. |
-| **Ponto de Fronteira** | $P \in \partial A$ | Para todo raio $r > 0$, a bola $B_r(P)$ contém pontos de $A$ e pontos fora de $A$. | O ponto está exatamente na linha divisória ou contorno de $A$. |
+| **Ponto Interno** | $P \in \text{int}(A)$ | Existe um raio $r \gt 0$ tal que $B_r(P) \subset A$. | O ponto está folgado dentro de $A$; pode-se mover em qualquer direção e continuar em $A$. |
+| **Ponto Externo** | $P \in \text{ext}(A)$ | Existe um raio $r \gt 0$ tal que $B_r(P) \cap A = \emptyset$. | O ponto está totalmente fora de $A$; há uma vizinhança que não encosta em $A$. |
+| **Ponto de Fronteira** | $P \in \partial A$ | Para todo raio $r \gt 0$, a bola $B_r(P)$ contém pontos de $A$ e pontos fora de $A$. | O ponto está exatamente na linha divisória ou contorno de $A$. |
 
 ```text
                   Plano R²
@@ -139,8 +139,8 @@ $$
 Agora que o domínio é o retângulo perfeito $R = [a, b] \times [c, d]$, podemos construir com total rigor a partição bidimensional de Riemann.
 
 ### 4.1. Construção da Partição do Retângulo $R$
-1. Dividimos o intervalo $[a, b]$ do eixo $x$ em $n$ subintervalos: $a = x_0 < x_1 < x_2 < \dots < x_n = b$, com $\Delta x_i = x_i - x_{i-1}$.
-2. Dividimos o intervalo $[c, d]$ do eixo $y$ em $m$ subintervalos: $c = y_0 < y_1 < y_2 < \dots < y_m = d$, com $\Delta y_j = y_j - y_{j-1}$.
+1. Dividimos o intervalo $[a, b]$ do eixo $x$ em $n$ subintervalos: $a = x_0 \lt x_1 \lt x_2 \lt \dots \lt x_n = b$, onde $\Delta x_i = x_i - x_{i-1}$.
+2. Dividimos o intervalo $[c, d]$ do eixo $y$ em $m$ subintervalos: $c = y_0 \lt y_1 \lt y_2 \lt \dots \lt y_m = d$, onde $\Delta y_j = y_j - y_{j-1}$.
 3. O produto dessas partições decompõe $R$ em $n \times m$ sub-retângulos elementares: $R_{ij} = [x_{i-1}, x_i] \times [y_{j-1}, y_j]$.
 4. A área de cada sub-retângulo elementar é dada por: $\Delta A_{ij} = \Delta x_i \Delta y_j$.
 5. A **norma da partição** $\|\mathcal{P}\|$ (ou diâmetro da malha) é a maior diagonal entre todos os sub-retângulos: $\|\mathcal{P}\| = \max_{i,j} \sqrt{(\Delta x_i)^2 + (\Delta y_j)^2}$.
@@ -148,13 +148,13 @@ Agora que o domínio é o retângulo perfeito $R = [a, b] \times [c, d]$, podemo
 ---
 
 ### 4.2. A Dupla Soma de Riemann
-Escolhemos um ponto de amostragem arbitrário $(x_{ij}^*, y_{ij}^*)$ dentro de cada sub-retângulo $R_{ij}$. A **dupla soma de Riemann** de $\tilde{f}$ sobre $R$ associada à partição $\mathcal{P}$ é dada por:
+Escolhemos um ponto de amostragem arbitrário $(x_{ij}^{\ast}, y_{ij}^{\ast})$ dentro de cada sub-retângulo $R_{ij}$. A **dupla soma de Riemann** de $\tilde{f}$ sobre $R$ associada à partição $\mathcal{P}$ é dada por:
 
 $$
-S(\tilde{f}, \mathcal{P}) = \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^*, y_{ij}^*) \, \Delta A_{ij} = \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^*, y_{ij}^*) \, \Delta x_i \Delta y_j
+S(\tilde{f}, \mathcal{P}) = \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \, \Delta A_{ij} = \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \, \Delta x_i \Delta y_j
 $$
 
-Cada termo $\tilde{f}(x_{ij}^*, y_{ij}^*) \Delta A_{ij}$ representa o volume de uma coluna prismática vertical 3D de base $\Delta A_{ij}$ e altura $\tilde{f}(x_{ij}^*, y_{ij}^*)$.
+Cada termo $\tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \Delta A_{ij}$ representa o volume de uma coluna prismática vertical 3D de base $\Delta A_{ij}$ e altura $\tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast})$.
 
 ```text
                  3 TIPOS DE COLUNAS 3D (PRISMAS)
@@ -182,39 +182,73 @@ Cada termo $\tilde{f}(x_{ij}^*, y_{ij}^*) \Delta A_{ij}$ representa o volume de 
 O limite formal é expresso por:
 
 $$
-\lim_{\|\mathcal{P}\| \to 0} \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^*, y_{ij}^*) \, \Delta x_i \Delta y_j = L \in \mathbb{R}
+\lim_{\|\mathcal{P}\| \to 0} \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \, \Delta x_i \Delta y_j = L \in \mathbb{R}
 $$
 
 Quando esse limite existe e é finito, esse valor é chamado de **Integral Dupla de $f$ sobre $D$**:
 
 $$
-\iint_D f(x, y) \, dA \equiv \lim_{\|\mathcal{P}\| \to 0} \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^*, y_{ij}^*) \, \Delta A_{ij}
+\iint_D f(x, y) \, dA \equiv \lim_{\|\mathcal{P}\| \to 0} \sum_{i=1}^n \sum_{j=1}^m \tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \, \Delta A_{ij}
 $$
 
 ---
 
-## 5. O Papel da Fronteira $\partial D$ no Cálculo do Limite
+## 5. O Mito da Fronteira Trivial: Fronteiras Regulares vs. Fractais
 
-Por que esse limite finito tem garantia de existir mesmo com a descontinuidade brusca de $\tilde{f}$ na borda?
+Um erro comum de intuição é supor que a fronteira $\partial D$ de qualquer domínio bidimensional é sempre uma curva simples e suave (como retas ou circunferências). O professor deu grande ênfase a este ponto: **a fronteira $\partial D$ pode ser extremamente complexa ou até fractal!**
 
-Pelo critério das Somas de Darboux (Soma Superior $S$ e Soma Inferior $s$):
-1. Para sub-retângulos $R_{ij}$ no **interior** de $D$: a oscilação de $f$ tende a zero porque $f$ é contínua.
-2. Para sub-retângulos $R_{ij}$ no **exterior** de $D$: $\tilde{f} = 0$, oscilação é zero.
-3. Para sub-retângulos $R_{ij}$ na **fronteira** $\partial D$: a oscilação é no máximo $M = \sup |f|$.
-
-A incerteza máxima total é limitada por:
+### 5.1. O Critério Exato: Conteúdo Nulo de Jordan
+Para que o limite da soma de Riemann exista com rigor para toda função contínua em $D$, a fronteira $\partial D$ deve ser **mensurável a Jordan com área nula** (conteúdo nulo de Jordan):
 
 $$
-S(\tilde{f}, \mathcal{P}) - s(\tilde{f}, \mathcal{P}) \le \varepsilon_{\text{int}} + M \sum_{R_{ij} \cap \partial D \neq \emptyset} \text{Area}(R_{ij})
+\forall \varepsilon \gt 0, \quad \exists \mathcal{P} \text{ tal que } \sum_{R_{ij} \cap \partial D \neq \emptyset} \text{Area}(R_{ij}) \lt \varepsilon
 $$
 
-Se a fronteira $\partial D$ tiver **conteúdo nulo de Jordan (área 2D zero)**, ao refinarmos a malha ($\|\mathcal{P}\| \to 0$), a soma das áreas de todos os retângulos que interceptam a fronteira tende a zero:
+Se a fronteira $\partial D$ tiver conteúdo nulo, as somas superior e inferior de Darboux convergem para o mesmo valor:
 
 $$
-\lim_{\|\mathcal{P}\| \to 0} \sum_{R_{ij} \cap \partial D \neq \emptyset} \text{Area}(R_{ij}) = 0
+S(\tilde{f}, \mathcal{P}) - s(\tilde{f}, \mathcal{P}) \le \varepsilon_{\text{int}} + M \sum_{R_{ij} \cap \partial D \neq \emptyset} \text{Area}(R_{ij}) \xrightarrow[\|\mathcal{P}\| \to 0]{} 0
 $$
 
-O erro na borda é completamente **esmagado para zero**, assegurando a existência e unicidade do limite finito!
+---
+
+### 5.2. O Floco de Neve de Koch (Fronteira Fractal Integrável)
+* **Estrutura:** O Floco de Neve de Koch é construído adicionando recursivamente triângulos equiláteros em cada terço de segmento.
+* **Comprimento:** O perímetro da fronteira é **infinito** ($\infty$).
+* **Dimensão Fractal de Hausdorff:** $d = \frac{\ln 4}{\ln 3} \approx 1{,}2618$.
+* **Área da Fronteira:** Apesar do perímetro infinito e das infinitas quinas pontiagudas sem derivada, a fronteira $\partial D$ no plano bidimensional **possui área zero** ($\text{Area}(\partial D) = 0$).
+* **Conclusão:** O domínio limitado pelo Floco de Koch **é integrável à Riemann**!
+
+```text
+                  FLUXOGRAMA: A PATOLOGIA DAS FRONTEIRAS
+                  
+   Curva Suave / Poligonal (Cálculo Comum)
+   ├── Perímetro Finito
+   └── Área 2D = 0 ──────────────► INTEGRÁVEL À RIEMANN
+   
+   Floco de Koch (Fractal de Hausdorff d ≈ 1.26)
+   ├── Perímetro Infinito
+   └── Área 2D = 0 ──────────────► INTEGRÁVEL À RIEMANN
+   
+   Curva de Osgood / Fronteira Espessa
+   ├── Não se auto-intercepta
+   └── Área 2D > 0 ──────────────► NÃO INTEGRÁVEL À RIEMANN (Falha de Jordan)
+```
+
+---
+
+### 5.3. A Curva de Osgood: Quando a Fronteira Destrói a Integral de Riemann
+Em 1903, o matemático William Fogg Osgood provou que existem **curvas de Jordan contínuas e fechadas cuja fronteira possui área bidimensional estritamente positiva** ($\text{Area}(\partial D) \gt 0$):
+
+Uma curva de Osgood serpenteia de forma tão densa pelo plano que a faixa da borda ocupa uma área bidimensional real $A_{\text{borda}} \gt 0$.
+
+Para uma região limitada por uma curva de Osgood, a incerteza entre a Soma Superior e a Soma Inferior de Darboux **nunca vai para zero**:
+
+$$
+S(\tilde{f}, \mathcal{P}) - s(\tilde{f}, \mathcal{P}) \ge M \cdot \text{Area}(\partial D) \gt 0
+$$
+
+O limite da soma de Riemann **não existe** (a função constante $f(x,y)=1$ não é integrável à Riemann sobre $D$). Para integrar sobre tais regiões patológicas, a matemática precisou inventar a **Teoria da Medida e a Integral de Lebesgue**!
 
 ---
 
@@ -258,7 +292,7 @@ $$
 | :--- | :--- | :--- |
 | **Domínio $D$** | $D \subset \mathbb{R}^2$ limitado | Região compacta onde a grandeza física existe. |
 | **Função Estendida $\tilde{f}$** | $\tilde{f}(x,y) = f$ em $D$, $0$ fora | Extensão que permite usar caixas retangulares $R$. |
-| **Dupla Soma de Riemann** | $\sum \sum \tilde{f}(x_{ij}^*, y_{ij}^*) \Delta x_i \Delta y_j$ | Soma dos volumes dos prismas retangulares 3D. |
+| **Dupla Soma de Riemann** | $\sum \sum \tilde{f}(x_{ij}^{\ast}, y_{ij}^{\ast}) \Delta x_i \Delta y_j$ | Soma dos volumes dos prismas retangulares 3D. |
 | **Condição de Integrabilidade** | $\lim_{\|\mathcal{P}\| \to 0} S(\tilde{f}, \mathcal{P}) = L \in \mathbb{R}$ | O limite das somas existe e é finito e único. |
-| **Fronteira $\partial D$** | $\text{Area}(\partial D) = 0$ | A borda tem área nula, esmagando o erro para zero. |
-| **Aberto vs. Fechado** | $\iint_{\text{int}(D)} f = \iint_{\bar{D}} f$ | Como a borda tem área nula, a borda não altera o valor da integral. |
+| **Fronteira com Área Zero** | $\text{Area}(\partial D) = 0$ (ex: círculos, Koch) | O erro na borda é esmagado a zero $\implies$ Integrável. |
+| **Fronteira Fractal Espessa** | $\text{Area}(\partial D) \gt 0$ (ex: Osgood) | O erro na borda não some $\implies$ Não integrável à Riemann. |

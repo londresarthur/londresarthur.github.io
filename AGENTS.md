@@ -81,7 +81,9 @@ When writing or editing Markdown documents containing mathematical notation, the
   - **Prohibition in List Items:** NEVER place a `$$` display math block immediately after or within list items (`*`, `-`, `+`, `1.`). CommonMark nests the block inside `<li>`, breaking KaTeX/MathJax rendering. Convert the list item to a subheading (`####`) or write plain paragraphs.
   - Inside `$$`, never start a line with `- `, `* `, `+ `, `> `, or digits followed by a dot (e.g. `1. `), which triggers CommonMark list/quote parsing.
 - **LaTeX Syntax & Delimiter Escapes:**
-  - Braces after `\left` and `\right` MUST be escaped: `\left\{ ... \right\}`, NEVER `\left{` or `\right}`.
+  - Braces after `\left` and `\right` MUST be escaped: `\left\{ ... \right\}`, NEVER `\left{` or `\right}`. For set-builder notation, prefer `\lbrace ... \rbrace` and `\mid` to prevent Markdown AST stripping.
+  - **No Literal Asterisks in Superscripts:** NEVER use literal `*` in superscripts (e.g. `x^*`). ALWAYS use `x^{\ast}` or `\bar{x}`, because Markdown parsers treat pairs of `*` as italics (`*...*`), corrupting math to `x^_` or HTML tags.
+  - **Inequalities & Tags:** Use `\lt` and `\gt` (or `\le`, `\ge`) in math formulas to prevent HTML/Markdown tag parser collisions.
   - Environments with line breaks (`cases`, `aligned`, `matrix`): use clean `\\` line breaks. NEVER attach bracket spacing arguments (e.g. `\\[1.2em]`).
   - No accented characters inside `\text{...}` (e.g. use `\text{se }`, `\text{impar}`, `\text{caso contrario}`).
   - Vector norms: MUST use `\lVert ... \rVert` (never `\|`).
