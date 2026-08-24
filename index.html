@@ -320,33 +320,27 @@
 
       </div>
 
-      <!-- 2. MAIN WAVEFORM PLOTTER CANVAS (DESMOS / GEOGEBRA STYLE) -->
-      <div class="glass-panel rounded-2xl p-4 border border-slate-800 relative flex flex-col">
-
-        <!-- Canvas Header Bar -->
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-2">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
-              <span class="font-bold text-sm text-slate-200">Plano Gráfico de Fourier</span>
-            </div>
-            <span class="text-xs text-slate-400 hidden sm:inline">| Arraste para mover, role para zoom</span>
+      <!-- 1. INTERACTIVE CANVAS STAGE -->
+      <div class="glass-panel rounded-2xl p-4 lg:p-5 border border-slate-800 flex flex-col relative shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+            <h2 class="font-bold text-sm lg:text-base text-white tracking-wide">Plano Cartesiano & Decomposição Harmônica</h2>
           </div>
 
-          <!-- Canvas Toolbar Buttons -->
-          <div class="flex items-center gap-1.5">
-            <button id="autoFitBtn" title="Auto-Ajustar Escala ao Gráfico" class="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-xs text-cyan-300 font-medium border border-cyan-500/30 transition-colors flex items-center gap-1">
+          <!-- Canvas Viewport Controls -->
+          <div class="flex items-center gap-2">
+            <button id="autoFitBtn" title="Ajuste Automático de Escala Vertical (AutoFit)" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/40 transition-colors shadow-sm">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
               <span>AutoFit</span>
             </button>
-            <button id="resetViewBtn" title="Redefinir Visão (Centralizar)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium border border-slate-700 transition-colors flex items-center gap-1">
+            <button id="resetViewBtn" title="Restaurar Visão Isométrica na Origem" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
               <span>Resetar</span>
             </button>
           </div>
         </div>
 
-        <!-- HTML5 Canvas Container -->
         <div class="relative w-full h-[400px] lg:h-[450px] rounded-xl overflow-hidden bg-slate-950/80 border border-slate-900 shadow-inner">
           <canvas id="mainCanvas" class="w-full h-full cursor-crosshair"></canvas>
         </div>
@@ -362,15 +356,38 @@
               <span id="nValueBadge" class="font-mono font-bold text-sm px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">10</span>
             </div>
 
-            <!-- Animation Range & Play Controls -->
-            <div class="flex flex-wrap items-center gap-2">
-              <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-xs">
+            <!-- Animation Range, Speeds & Play Controls -->
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
                 <span class="text-slate-400 font-mono text-[11px]">N_min:</span>
-                <input type="number" id="nMinInput" min="0" max="100" value="0" class="w-12 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" />
+                <input type="number" id="nMinInput" min="0" max="100" value="0" class="w-11 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" title="Valor mínimo de N para a animação" />
               </div>
-              <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-xs">
+              <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
                 <span class="text-slate-400 font-mono text-[11px]">N_max:</span>
-                <input type="number" id="nMaxInput" min="1" max="120" value="10" class="w-12 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" />
+                <input type="number" id="nMaxInput" min="1" max="120" value="10" class="w-11 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" title="Valor máximo de N para a animação" />
+              </div>
+
+              <!-- Velocidade da Animação de N (Inicia 2x mais lento: 240ms) -->
+              <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
+                <span class="text-slate-400 font-mono text-[11px]">Vel. N:</span>
+                <select id="nSpeedSelect" class="bg-slate-900 text-indigo-300 font-mono text-xs rounded border border-slate-700 py-0.5 px-1 focus:outline-none focus:border-indigo-500 cursor-pointer" title="Velocidade de troca entre ordens harmônicas N">
+                  <option value="480">0.25x (Lento)</option>
+                  <option value="240" selected>0.5x (Padrão: 240ms)</option>
+                  <option value="120">1x (Rápido: 120ms)</option>
+                  <option value="60">2x (Turbo: 60ms)</option>
+                </select>
+              </div>
+
+              <!-- Velocidade dos Fasores/Epiciclos (Inicia 2x mais rápido: 2x) -->
+              <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
+                <span class="text-slate-400 font-mono text-[11px]">Vel. Fasor:</span>
+                <select id="epicyclesSpeedSelect" class="bg-slate-900 text-purple-300 font-mono text-xs rounded border border-slate-700 py-0.5 px-1 focus:outline-none focus:border-purple-500 cursor-pointer" title="Velocidade de rotação dos fasores circulares (epiciclos)">
+                  <option value="0.5">0.5x (Lento)</option>
+                  <option value="1">1x (Normal)</option>
+                  <option value="2" selected>2x (Padrão Rápido)</option>
+                  <option value="3">3x (Veloz)</option>
+                  <option value="5">5x (Ultra)</option>
+                </select>
               </div>
 
               <!-- Animate N Button -->
@@ -379,10 +396,10 @@
                 <span>Animar N</span>
               </button>
 
-              <!-- 3B1B Epicycles Button -->
-              <button id="playEpicyclesBtn" class="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all">
+              <!-- Epiciclos / Fasores Button (Literalmente Descritivo) -->
+              <button id="playEpicyclesBtn" title="Fasores Circulares Girantes (Decomposição em Epiciclos de Fourier)" class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><path stroke-width="2" d="M12 3v9l6 3"></path></svg>
-                <span>3B1B</span>
+                <span id="playEpicyclesBtnText">Fasores Circulares (Epiciclos)</span>
               </button>
             </div>
           </div>
@@ -390,6 +407,7 @@
           <!-- Main N Slider with tick markers -->
           <div class="py-1">
             <input type="range" id="nSlider" min="0" max="10" value="10" step="1" class="w-full accent-emerald-500" />
+            <div id="sliderTicks" class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
               <span id="sliderTickMin">N = 0 (DC)</span>
               <span id="sliderTickMid1">N = 2</span>
               <span id="sliderTickMid2">N = 5</span>

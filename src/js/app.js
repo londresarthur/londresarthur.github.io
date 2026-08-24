@@ -406,8 +406,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Animate N Button with Dynamic Bounds
-  animateNBtn.addEventListener('click', () => {
+  // Speeds and Phasor Controls
+  const nSpeedSelect = document.getElementById('nSpeedSelect');
+  const epicyclesSpeedSelect = document.getElementById('epicyclesSpeedSelect');
+  const playEpicyclesBtnText = document.getElementById('playEpicyclesBtnText');
+
+  function getNSpeedDuration() {
+    return parseInt(nSpeedSelect?.value || '240', 10);
+  }
+
+  function getEpicyclesSpeedMultiplier() {
+    return parseFloat(epicyclesSpeedSelect?.value || '2');
+  }
+
+  function startNAnimation() {
+    if (nAnimationInterval) clearInterval(nAnimationInterval);
+    const minVal = Math.max(0, parseInt(nMinInput?.value || '0', 10));
+    const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '10', 10));
+
+    let currentN = Math.max(minVal, engine.N);
+    if (currentN >= maxVal) currentN = minVal;
+
+    engine.N = currentN;
+    nSlider.value = currentN;
+    nValueBadge.textContent = currentN;
+    updateUI();
+
+    animateNBtn.innerHTML = `
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span>Pausar</span>
+    `;
+    animateNBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+    animateNBtn.classList.add('bg-rose-600', 'hover:bg-rose-500');
+
+    nAnimationInterval = setInterval(() => {
+      const curMin = Math.max(0, parseInt(nMinInput?.value || '0', 10));
+      const curMax = Math.max(curMin + 1, parseInt(nMaxInput?.value || '10', 10));
+
+      currentN++;
+      if (currentN > curMax) currentN = curMin;
+      engine.N = currentN;
+      nSlider.value = currentN;
+      nValueBadge.textContent = currentN;
+      updateUI(true);
+    }, getNSpeedDuration());
+  }
+
+  function stopNAnimation() {
     if (nAnimationInterval) {
       clearInterval(nAnimationInterval);
       nAnimationInterval = null;
@@ -418,38 +463,25 @@ document.addEventListener('DOMContentLoaded', () => {
       animateNBtn.classList.remove('bg-rose-600', 'hover:bg-rose-500');
       animateNBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
       updateUI(false);
+    }
+  }
+
+  // Animate N Button with Dynamic Bounds & Adjustable Speed
+  animateNBtn.addEventListener('click', () => {
+    if (nAnimationInterval) {
+      stopNAnimation();
     } else {
-      const minVal = Math.max(0, parseInt(nMinInput?.value || '0', 10));
-      const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '10', 10));
-
-      let currentN = Math.max(minVal, engine.N);
-      if (currentN >= maxVal) currentN = minVal;
-
-      engine.N = currentN;
-      nSlider.value = currentN;
-      nValueBadge.textContent = currentN;
-      updateUI();
-
-      animateNBtn.innerHTML = `
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span>Pausar</span>
-      `;
-      animateNBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
-      animateNBtn.classList.add('bg-rose-600', 'hover:bg-rose-500');
-
-      nAnimationInterval = setInterval(() => {
-        const curMin = Math.max(0, parseInt(nMinInput?.value || '0', 10));
-        const curMax = Math.max(curMin + 1, parseInt(nMaxInput?.value || '10', 10));
-
-        currentN++;
-        if (currentN > curMax) currentN = curMin;
-        engine.N = currentN;
-        nSlider.value = currentN;
-        nValueBadge.textContent = currentN;
-        updateUI(true);
-      }, 120);
+      startNAnimation();
     }
   });
+
+  if (nSpeedSelect) {
+    nSpeedSelect.addEventListener('change', () => {
+      if (nAnimationInterval) {
+        startNAnimation();
+      }
+    });
+  }
 
   // Half-Range Extension / Mode Selector
   modeSelect.addEventListener('change', (e) => {
@@ -501,15 +533,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderer.render();
   });
 
-  // 3Blue1Brown Epicycles Phasor Mode
+  // Phasor Epicycles Mode with Adjustable Speed (starts 2x faster)
   function stepEpicycles() {
     if (!isEpicyclesPlaying) return;
-    renderer.epicyclesProgress += (2 * engine.L) / 360;
+    const speedMult = getEpicyclesSpeedMultiplier();
+    renderer.epicyclesProgress += ((2 * engine.L) / 360) * speedMult;
     if (renderer.epicyclesProgress > engine.L) {
       renderer.epicyclesProgress = -engine.L;
     }
     renderer.render();
     epicyclesAnimFrame = requestAnimationFrame(stepEpicycles);
+  }
+
+  function updateEpicyclesUIState(isActive) {
+    if (toggleEpicycles) toggleEpicycles.checked = isActive;
+    if (playEpicyclesBtn) {
+      if (isActive) {
+        playEpicyclesBtn.classList.remove('bg-purple-600/30', 'text-purple-200', 'border-purple-500/40');
+        playEpicyclesBtn.classList.add('bg-purple-600', 'text-white', 'border-purple-400', 'shadow-md', 'shadow-purple-600/40', 'animate-pulse');
+        if (playEpicyclesBtnText) playEpicyclesBtnText.textContent = 'Pausar Fasores';
+      } else {
+        playEpicyclesBtn.classList.remove('bg-purple-600', 'text-white', 'border-purple-400', 'shadow-md', 'shadow-purple-600/40', 'animate-pulse');
+        playEpicyclesBtn.classList.add('bg-purple-600/30', 'text-purple-200', 'border-purple-500/40');
+        if (playEpicyclesBtnText) playEpicyclesBtnText.textContent = 'Fasores Circulares (Epiciclos)';
+      }
+    }
   }
 
   toggleEpicycles.addEventListener('change', (e) => {
@@ -521,6 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
       isEpicyclesPlaying = false;
       cancelAnimationFrame(epicyclesAnimFrame);
     }
+    updateEpicyclesUIState(renderer.epicyclesMode);
     renderer.render();
   });
 
