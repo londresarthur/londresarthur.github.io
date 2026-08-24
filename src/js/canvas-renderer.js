@@ -3,6 +3,7 @@
  * High-performance, Retina/HiDPI interactive plotter engine for Fourier Visualizations.
  * Supports Desmos/GeoGebra-style Pan & Zoom, Dirichlet jump markers, Gibbs overshoot,
  * Even/Odd decompositions, error shading, and 3Blue1Brown-style Epicycles animation.
+ * Optimized with requestAnimationFrame VSync throttling and frame-level sample reuse.
  */
 
 class CanvasRenderer {
@@ -39,6 +40,10 @@ class CanvasRenderer {
     this.dragStart = { x: 0, y: 0 };
     this.mouseMath = { x: 0, y: 0, active: false };
 
+    // VSync Throttle State
+    this._renderQueued = false;
+    this._frameSamples = [];
+
     // Setup High DPI
     this.setupHiDPI();
     this.bindEvents();
@@ -47,7 +52,7 @@ class CanvasRenderer {
 
   setupHiDPI() {
     const rect = this.canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for smooth 60fps on 4K/retina
     this.dpr = dpr;
 
     this.width = rect.width || this.canvas.width || 800;
@@ -135,6 +140,7 @@ class CanvasRenderer {
       if (this.isDragging) {
         this.isDragging = false;
         canvas.style.cursor = 'crosshair';
+        this.render();
       }
     });
 
@@ -168,7 +174,9 @@ class CanvasRenderer {
     canvas.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        this.isDragging = true;
       } else if (e.touches.length === 2) {
+        this.isDragging = true;
         initialPinchDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -211,6 +219,8 @@ class CanvasRenderer {
     canvas.addEventListener('touchend', () => {
       lastTouch = null;
       initialPinchDist = null;
+      this.isDragging = false;
+      this.render();
     });
   }
 
@@ -248,76 +258,78 @@ class CanvasRenderer {
     const screenNegL = this.mathToScreen(-L, 0).x;
     const screenPosL = this.mathToScreen(L, 0).x;
 
-    ctx.fillStyle = isDark ? 'rgba(59, 130, 246, 0.05)' : 'rgba(59, 130, 246, 0.08)';
+    ctx.fillStyle = isDark ? 'rgba(14, 165, 233, 0.04)' : 'rgba(14, 165, 233, 0.06)';
     ctx.fillRect(screenNegL, 0, screenPosL - screenNegL, this.height);
 
-    // Interval boundary dashed lines
-    ctx.strokeStyle = isDark ? 'rgba(59, 130, 246, 0.35)' : 'rgba(59, 130, 246, 0.45)';
-    ctx.setLineDash([6, 6]);
-    ctx.lineWidth = 1.5;
-
-    ctx.beginPath();
-    ctx.moveTo(screenNegL, 0);
-    ctx.lineTo(screenNegL, this.height);
-    ctx.moveTo(screenPosL, 0);
-    ctx.lineTo(screenPosL, this.height);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Determine grid step
-    let stepX = isPi ? (Math.PI / 2) : (L / 2);
-    if (this.view.scaleX > 150) stepX /= 2;
-    if (this.view.scaleX < 40) stepX *= 2;
-
-    let stepY = 1;
-    if (this.view.scaleY > 150) stepY = 0.5;
-    if (this.view.scaleY < 40) stepY = 2;
-
-    const startX = Math.floor(min.x / stepX) * stepX;
-    const startY = Math.floor(min.y / stepY) * stepY;
-
-    // Grid lines
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.06)';
-    ctx.font = '11px system-ui, -apple-system, sans-serif';
-    ctx.fillStyle = isDark ? 'rgba(148, 163, 184, 0.8)' : 'rgba(100, 116, 139, 0.9)';
-
-    // Vertical grid & X labels
-    const origin = this.mathToScreen(0, 0);
-
-    for (let x = startX; x <= max.x + stepX; x += stepX) {
-      const pos = this.mathToScreen(x, 0);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, 0);
-      ctx.lineTo(pos.x, this.height);
-      ctx.stroke();
-
-      // X Label
-      const label = this.formatTick(x);
-      const textY = Math.min(Math.max(origin.y + 15, 18), this.height - 8);
-      ctx.textAlign = 'center';
-      ctx.fillText(label, pos.x, textY);
+    // Grid interval step calculation
+    const rawStepX = 80 / this.view.scaleX;
+    let stepX = 1;
+    if (isPi) {
+      if (rawStepX > Math.PI) stepX = Math.PI * Math.ceil(rawStepX / Math.PI);
+      else if (rawStepX > Math.PI / 2) stepX = Math.PI;
+      else if (rawStepX > Math.PI / 4) stepX = Math.PI / 2;
+      else stepX = Math.PI / 4;
+    } else {
+      const pow10 = Math.pow(10, Math.floor(Math.log10(rawStepX)));
+      const mant = rawStepX / pow10;
+      if (mant < 1.5) stepX = pow10;
+      else if (mant < 3.5) stepX = 2 * pow10;
+      else if (mant < 7.5) stepX = 5 * pow10;
+      else stepX = 10 * pow10;
     }
 
-    // Horizontal grid & Y labels
-    for (let y = startY; y <= max.y + stepY; y += stepY) {
-      const pos = this.mathToScreen(0, y);
+    const rawStepY = 60 / this.view.scaleY;
+    const pow10Y = Math.pow(10, Math.floor(Math.log10(rawStepY)));
+    const mantY = rawStepY / pow10Y;
+    let stepY = pow10Y;
+    if (mantY >= 1.5 && mantY < 3.5) stepY = 2 * pow10Y;
+    else if (mantY >= 3.5 && mantY < 7.5) stepY = 5 * pow10Y;
+    else if (mantY >= 7.5) stepY = 10 * pow10Y;
+
+    // Draw Grid Lines
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)';
+    ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
+    ctx.font = '10px JetBrains Mono, monospace';
+
+    // Vertical Lines (X)
+    const firstX = Math.floor(min.x / stepX) * stepX;
+    for (let x = firstX; x <= max.x; x += stepX) {
+      const sp = this.mathToScreen(x, 0);
       ctx.beginPath();
-      ctx.moveTo(0, pos.y);
-      ctx.lineTo(this.width, pos.y);
+      ctx.moveTo(sp.x, 0);
+      ctx.lineTo(sp.x, this.height);
       ctx.stroke();
 
-      // Y Label
-      if (Math.abs(y) > 1e-5) {
-        const textX = Math.min(Math.max(origin.x + 8, 8), this.width - 25);
-        ctx.textAlign = 'left';
-        ctx.fillText(y.toString(), textX, pos.y - 4);
+      // Axis Labels
+      if (Math.abs(x) > 1e-4) {
+        ctx.textAlign = 'center';
+        const labelY = Math.max(15, Math.min(this.height - 5, this.mathToScreen(0, 0).y + 14));
+        ctx.fillText(this.formatTick(x), sp.x, labelY);
       }
     }
 
-    // Main Axes (X and Y = 0)
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.35)';
+    // Horizontal Lines (Y)
+    const firstY = Math.floor(min.y / stepY) * stepY;
+    for (let y = firstY; y <= max.y; y += stepY) {
+      const sp = this.mathToScreen(0, y);
+      ctx.beginPath();
+      ctx.moveTo(0, sp.y);
+      ctx.lineTo(this.width, sp.y);
+      ctx.stroke();
+
+      // Labels
+      if (Math.abs(y) > 1e-4) {
+        ctx.textAlign = 'right';
+        const labelX = Math.max(25, Math.min(this.width - 5, this.mathToScreen(0, 0).x - 6));
+        ctx.fillText(this.formatTick(y), labelX, sp.y + 3);
+      }
+    }
+
+    // Main Axes (X=0, Y=0)
+    const origin = this.mathToScreen(0, 0);
+    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.35)';
+    ctx.lineWidth = 1.5;
 
     // X Axis
     ctx.beginPath();
@@ -331,50 +343,63 @@ class CanvasRenderer {
     ctx.lineTo(origin.x, this.height);
     ctx.stroke();
 
-    // Origin 0 mark
-    ctx.textAlign = 'right';
-    ctx.fillText('0', origin.x - 6, origin.y + 14);
+    // Fundamental Interval Boundaries [-L, L]
+    ctx.strokeStyle = '#0ea5e9';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
 
-    // Interval label [-L, L] tag
-    ctx.fillStyle = isDark ? 'rgba(96, 165, 250, 0.9)' : 'rgba(37, 99, 235, 0.9)';
+    ctx.beginPath();
+    ctx.moveTo(screenNegL, 0);
+    ctx.lineTo(screenNegL, this.height);
+    ctx.moveTo(screenPosL, 0);
+    ctx.lineTo(screenPosL, this.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Interval Labels Top
+    ctx.fillStyle = '#0ea5e9';
     ctx.textAlign = 'center';
     ctx.fillText('-L = -' + (isPi ? 'π' : L.toFixed(2)), screenNegL, 20);
     ctx.fillText('+L = +' + (isPi ? 'π' : L.toFixed(2)), screenPosL, 20);
   }
 
-  // Draw shaded error area between f(x) and S_N(x)
-  drawErrorArea() {
-    if (!this.showErrorArea) return;
-    const ctx = this.ctx;
-    const min = this.screenToMath(0, 0);
-    const max = this.screenToMath(this.width, 0);
+  // Precompute samples once per frame for 100% trig reuse
+  _computeFrameSamples() {
+    const step = this.isDragging ? 3.5 : 2.0;
+    const samples = [];
+    const width = this.width;
 
-    const step = 2; // pixel step
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
-    ctx.beginPath();
-
-    let started = false;
-    const pathS = [];
-
-    for (let px = 0; px <= this.width; px += step) {
+    for (let px = 0; px <= width; px += step) {
       const mx = this.screenToMath(px, 0).x;
       const fVal = this.engine.evalPeriodic(mx);
       const sVal = this.engine.evalFourier(mx);
 
       const pF = this.mathToScreen(mx, fVal);
       const pS = this.mathToScreen(mx, sVal);
-      pathS.push(pS);
-
-      if (!started) {
-        ctx.moveTo(pF.x, pF.y);
-        started = true;
-      } else {
-        ctx.lineTo(pF.x, pF.y);
-      }
+      samples.push({ px, mx, fVal, sVal, pF, pS });
     }
 
-    for (let i = pathS.length - 1; i >= 0; i--) {
-      ctx.lineTo(pathS[i].x, pathS[i].y);
+    this._frameSamples = samples;
+  }
+
+  // Draw shaded error area between f(x) and S_N(x)
+  drawErrorArea() {
+    if (!this.showErrorArea || this._frameSamples.length === 0) return;
+    const ctx = this.ctx;
+    const samples = this._frameSamples;
+
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+    ctx.beginPath();
+
+    for (let i = 0; i < samples.length; i++) {
+      const pF = samples[i].pF;
+      if (i === 0) ctx.moveTo(pF.x, pF.y);
+      else ctx.lineTo(pF.x, pF.y);
+    }
+
+    for (let i = samples.length - 1; i >= 0; i--) {
+      const pS = samples[i].pS;
+      ctx.lineTo(pS.x, pS.y);
     }
 
     ctx.closePath();
@@ -386,10 +411,10 @@ class CanvasRenderer {
     if (!this.showOriginal) return;
     const ctx = this.ctx;
     const L = this.engine.L;
-    const step = 2; // pixel precision
-    const mathStep = (step / this.view.scaleX);
-    const maxExpectedDy = 10 * mathStep * this.view.scaleY; // generous multiple
-    const threshold = Math.max(100, Math.min(400, maxExpectedDy));
+    const samples = this._frameSamples;
+    if (samples.length === 0) return;
+
+    const threshold = 150;
 
     // 1. Draw periodic extension outside [-L, L] (dashed)
     ctx.strokeStyle = this.theme === 'dark' ? 'rgba(56, 189, 248, 0.4)' : 'rgba(14, 165, 233, 0.45)';
@@ -400,12 +425,8 @@ class CanvasRenderer {
     let penDown = false;
     let prevY = 0;
 
-    for (let px = 0; px <= this.width; px += step) {
-      const mx = this.screenToMath(px, 0).x;
-      const my = this.engine.evalPeriodic(mx);
-      const sp = this.mathToScreen(mx, my);
-
-      // Jump discontinuity handling
+    for (let i = 0; i < samples.length; i++) {
+      const sp = samples[i].pF;
       if (!penDown || Math.abs(sp.y - prevY) > threshold) {
         ctx.moveTo(sp.x, sp.y);
         penDown = true;
@@ -426,38 +447,39 @@ class CanvasRenderer {
     ctx.beginPath();
 
     penDown = false;
-    for (let px = Math.max(0, screenNegL); px <= Math.min(this.width, screenPosL); px += step) {
-      const mx = this.screenToMath(px, 0).x;
-      const my = this.engine.evalBase(mx);
-      const sp = this.mathToScreen(mx, my);
+    for (let i = 0; i < samples.length; i++) {
+      const s = samples[i];
+      if (s.px >= screenNegL - 2 && s.px <= screenPosL + 2) {
+        const mx = s.mx;
+        const my = this.engine.evalBase(mx);
+        const sp = this.mathToScreen(mx, my);
 
-      if (!penDown || Math.abs(sp.y - prevY) > threshold) {
-        ctx.moveTo(sp.x, sp.y);
-        penDown = true;
-      } else {
-        ctx.lineTo(sp.x, sp.y);
+        if (!penDown || Math.abs(sp.y - prevY) > threshold) {
+          ctx.moveTo(sp.x, sp.y);
+          penDown = true;
+        } else {
+          ctx.lineTo(sp.x, sp.y);
+        }
+        prevY = sp.y;
       }
-      prevY = sp.y;
     }
     ctx.stroke();
   }
 
   // Draw Even and Odd component curves if enabled
   drawEvenOddComponents() {
-    if (!this.showEvenOdd) return;
+    if (!this.showEvenOdd || this._frameSamples.length === 0) return;
     const ctx = this.ctx;
-    const step = 2;
+    const samples = this._frameSamples;
 
     // Even part (f_par) in cyan
     ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)';
     ctx.lineWidth = 2;
     ctx.setLineDash([6, 3]);
     ctx.beginPath();
-    for (let px = 0; px <= this.width; px += step) {
-      const mx = this.screenToMath(px, 0).x;
-      const my = this.engine.evalEvenPart(mx);
-      const sp = this.mathToScreen(mx, my);
-      if (px === 0) ctx.moveTo(sp.x, sp.y);
+    for (let i = 0; i < samples.length; i++) {
+      const sp = this.mathToScreen(samples[i].mx, this.engine.evalEvenPart(samples[i].mx));
+      if (i === 0) ctx.moveTo(sp.x, sp.y);
       else ctx.lineTo(sp.x, sp.y);
     }
     ctx.stroke();
@@ -465,11 +487,9 @@ class CanvasRenderer {
     // Odd part (f_impar) in amber
     ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
     ctx.beginPath();
-    for (let px = 0; px <= this.width; px += step) {
-      const mx = this.screenToMath(px, 0).x;
-      const my = this.engine.evalOddPart(mx);
-      const sp = this.mathToScreen(mx, my);
-      if (px === 0) ctx.moveTo(sp.x, sp.y);
+    for (let i = 0; i < samples.length; i++) {
+      const sp = this.mathToScreen(samples[i].mx, this.engine.evalOddPart(samples[i].mx));
+      if (i === 0) ctx.moveTo(sp.x, sp.y);
       else ctx.lineTo(sp.x, sp.y);
     }
     ctx.stroke();
@@ -478,21 +498,19 @@ class CanvasRenderer {
 
   // Draw individual harmonic if hovered/inspected
   drawSingleHarmonic() {
-    if (this.showHarmonic === null) return;
+    if (this.showHarmonic === null || this._frameSamples.length === 0) return;
     const n = this.showHarmonic;
     const ctx = this.ctx;
-    const step = 2;
+    const samples = this._frameSamples;
 
     ctx.strokeStyle = '#eab308';
     ctx.lineWidth = 2.5;
     ctx.setLineDash([4, 2]);
     ctx.beginPath();
 
-    for (let px = 0; px <= this.width; px += step) {
-      const mx = this.screenToMath(px, 0).x;
-      const my = this.engine.evalHarmonic(mx, n);
-      const sp = this.mathToScreen(mx, my);
-      if (px === 0) ctx.moveTo(sp.x, sp.y);
+    for (let i = 0; i < samples.length; i++) {
+      const sp = this.mathToScreen(samples[i].mx, this.engine.evalHarmonic(samples[i].mx, n));
+      if (i === 0) ctx.moveTo(sp.x, sp.y);
       else ctx.lineTo(sp.x, sp.y);
     }
     ctx.stroke();
@@ -501,39 +519,36 @@ class CanvasRenderer {
 
   // Draw Fourier Approximation S_N(x)
   drawFourierCurve() {
-    if (!this.showFourier) return;
+    if (!this.showFourier || this._frameSamples.length === 0) return;
     const ctx = this.ctx;
-    const step = 1.5;
+    const samples = this._frameSamples;
 
-    ctx.save();
+    // Fast Neon underglow (hardware-accelerated, 0 shadowBlur penalty)
+    if (this.theme === 'dark') {
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      for (let i = 0; i < samples.length; i++) {
+        const p = samples[i].pS;
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
+
+    // Crisp core stroke
     ctx.strokeStyle = this.theme === 'dark' ? '#10b981' : '#059669';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-
-    // Glowing effect in dark mode
-    if (this.theme === 'dark') {
-      ctx.shadowColor = 'rgba(16, 185, 129, 0.4)';
-      ctx.shadowBlur = 8;
-    }
-
     ctx.beginPath();
-    let started = false;
 
-    for (let px = 0; px <= this.width; px += step) {
-      const mx = this.screenToMath(px, 0).x;
-      const my = this.engine.evalFourier(mx);
-      const sp = this.mathToScreen(mx, my);
-
-      if (!started) {
-        ctx.moveTo(sp.x, sp.y);
-        started = true;
-      } else {
-        ctx.lineTo(sp.x, sp.y);
-      }
+    for (let i = 0; i < samples.length; i++) {
+      const p = samples[i].pS;
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
-    ctx.restore();
   }
 
   // Draw Dirichlet Midpoints & Jump Discontinuities
@@ -573,20 +588,20 @@ class CanvasRenderer {
       ctx.fill();
       ctx.stroke();
 
-      // Solid Glowing Dirichlet Point S(x) = (f(x+) + f(x-))/2
+      // Solid emerald circle at Dirichlet convergence midpoint: (f(x+) + f(x-))/2
       ctx.fillStyle = '#10b981';
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(spMid.x, spMid.y, 6, 0, Math.PI * 2);
+      ctx.arc(spMid.x, spMid.y, 5, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Dirichlet Tag
-      ctx.fillStyle = '#10b981';
-      ctx.font = 'bold 11px system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`S(${d.x.toFixed(1)}) = ${d.dirichletMidpoint.toFixed(2)}`, spMid.x, spMid.y - 12);
+      // Label with midpoint value
+      ctx.fillStyle = this.theme === 'dark' ? '#34d399' : '#059669';
+      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`S(${d.x.toFixed(1)})=${d.dirichletMidpoint.toFixed(2)}`, spMid.x + 8, spMid.y - 4);
     }
   }
 
@@ -595,7 +610,7 @@ class CanvasRenderer {
     if (!this.epicyclesMode) return;
     const ctx = this.ctx;
     const x = this.epicyclesProgress;
-    const { circles, finalVal } = this.engine.getEpicyclesAt(x);
+    const { circles } = this.engine.getEpicyclesAt(x);
 
     // Epicycles base anchor on Y axis or at current point
     const anchor = this.mathToScreen(x, 0);
@@ -725,10 +740,23 @@ class CanvasRenderer {
     ctx.fillText(`Erro |f - S_N| = ${err.toFixed(4)}`, boxX + pad, boxY + 66);
   }
 
-  // Main Render Frame
+  // VSync Throttled Render Pipeline
   render() {
+    if (this._renderQueued) return;
+    this._renderQueued = true;
+    requestAnimationFrame(() => {
+      this._renderQueued = false;
+      this._drawFrame();
+    });
+  }
+
+  // Internal Draw Routine
+  _drawFrame() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
+
+    // 0. Compute samples once per frame
+    this._computeFrameSamples();
 
     // 1. Grid & Axes
     if (this.showGrid) this.drawGrid();
