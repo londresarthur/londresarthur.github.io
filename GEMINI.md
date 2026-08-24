@@ -74,9 +74,36 @@ Whenever creating, restructuring, or planning project documentation in `docs/`:
 
 ---
 
-## 7. Pre-Flight Invariant Checklist
+## 7. Strict Mathematical Notation & GFM / KaTeX Invariants
+When writing or editing Markdown documents containing mathematical notation, the agent MUST strictly enforce:
+- **Display Math Blocks (`$$` / ```` ```math ````):**
+  - Display math `$$` MUST ALWAYS occupy its own isolated lines, surrounded by blank lines. Never place `$$...$$` inline on a text line or inside a table.
+  - **Prohibition in List Items:** NEVER place a `$$` display math block immediately after or within list items (`*`, `-`, `+`, `1.`). CommonMark nests the block inside `<li>`, breaking KaTeX/MathJax rendering. Convert the list item to a subheading (`####`) or write plain paragraphs.
+  - Inside `$$`, never start a line with `- `, `* `, `+ `, `> `, or digits followed by a dot (e.g. `1. `), which triggers CommonMark list/quote parsing.
+- **LaTeX Syntax & Delimiter Escapes:**
+  - Braces after `\left` and `\right` MUST be escaped: `\left\{ ... \right\}`, NEVER `\left{` or `\right}`.
+  - Environments with line breaks (`cases`, `aligned`, `matrix`): use clean `\\` line breaks. NEVER attach bracket spacing arguments (e.g. `\\[1.2em]`).
+  - No accented characters inside `\text{...}` (e.g. use `\text{se }`, `\text{impar}`, `\text{caso contrario}`).
+  - Vector norms: MUST use `\lVert ... \rVert` (never `\|`).
+- **Inline Math (`$...$` or `` $`...`$ ``):**
+  - NEVER leave leading or trailing whitespace inside delimiters (use `$x = 0$`, never `$ x = 0 $`).
+- **Mandatory Pre-Commit Linter Verification:**
+  - In repositories with `.scripts/validate_gfm.py`, the agent MUST run `python .scripts/validate_gfm.py <file>` to verify 100% compliance before committing.
+
+---
+
+## 8. Continuous Git Commit Protocol (*Receipts & Snapshot Invariant*)
+Whenever creating, editing, or updating any files in response to user requests:
+- **Mandatory Immediate Commit:** The agent MUST immediately stage (`git add`) and commit (`git commit -m "..."`) the modified files in the same turn before responding to the user.
+- Never leave unstaged or uncommitted changes when completing an edit or file creation step requested by the user.
+
+---
+
+## 9. Pre-Flight Invariant Checklist
 Before emitting any code review, comparison report, refactoring patch, or documentation plan, the agent MUST internally verify:
 1. *Did I verify the raw primary deliverable before claiming an omission?* If NO $\to$ Inspect now or delete the claim.
 2. *Did I classify a style choice or standard idiom as a bug?* If YES $\to$ Reclassify to Category 3 and remove inflammatory language.
 3. *Is my proposed patch more than $2\times$ larger than the code it fixes?* If YES $\to$ Strip all boilerplate down to the minimal fix.
 4. *Does the documentation plan strictly adhere to the 4 Diátaxis quadrants (`tutorials/`, `how-to/`, `reference/`, `explanation/`)?* If NO $\to$ Restructure immediately.
+5. *Did I validate all LaTeX expressions against the strict GFM KaTeX rules (isolated `$$`, no `$$` inside lists, escaped `\left\{`, clean `\\`)?* If NO $\to$ Fix and lint before delivering.
+6. *Did I stage and commit all modified/created files to the Git repository?* If NO $\to$ Commit immediately before finishing the response.

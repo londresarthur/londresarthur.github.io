@@ -16,6 +16,10 @@ Repositório estruturado de apostilas teóricas, guias conceituais e exercícios
 - **[Teorema de Convergência de Dirichlet & Núcleo de Dirichlet](2008/teorema_convergencia_fourier.md)**: Demonstração rigorosa, limites laterais, ponto médio do salto e Fenômeno de Gibbs.
 - **[Scripts de Geração de Gráficos Vetoriais](2008/)**: Scripts Python com Matplotlib para geração dos gráficos SVG das apostilas.
 
+### 3. [Módulo 24/08 — Fundamentos de Topologia no $\mathbb{R}^2$ & Integrais Duplas](2408/)
+- **[Introdução: Topologia no $\mathbb{R}^2$ e a Gênese das Integrais Duplas](2408/fundamentos_topologia_e_integrais_duplas.md)**: Vizinhanças, pontos internos/externos/fronteira, conjuntos abertos/fechados/compactos e por que a integrabilidade de Riemann exige fronteira com área nula.
+- **[Notas de Aula / Live](2408/live_aula.md)**: Anotações em tempo real e acompanhamento da lousa.
+
 ---
 
 ## 🚀 Simulador Interativo
