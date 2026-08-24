@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Central de Exportação Acadêmica & Didática ---
+  // --- Central de Exportação Acadêmica & Kit Didático (.zip) ---
   const exportModal = document.getElementById('exportModal');
   const openExportModalBtn = document.getElementById('openExportModalBtn');
   const modalExportSvgBtn = document.getElementById('modalExportSvgBtn');
@@ -594,6 +594,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalCopyLatexTableBtn = document.getElementById('modalCopyLatexTableBtn');
   const modalExportPythonBtn = document.getElementById('modalExportPythonBtn');
   const modalExportWavBtn = document.getElementById('modalExportWavBtn');
+  const modalDownloadKitZipBtn = document.getElementById('modalDownloadKitZipBtn');
+
+  // Quick Action Buttons on main panel
+  const quickDownloadKitZipBtn = document.getElementById('quickDownloadKitZipBtn');
+  const quickExportSvgBtn = document.getElementById('quickExportSvgBtn');
+  const quickExportPngBtn = document.getElementById('quickExportPngBtn');
+  const quickCopyTikzBtn = document.getElementById('quickCopyTikzBtn');
+  const quickExportCsvBtn = document.getElementById('quickExportCsvBtn');
+  const quickCopyLatexBtn = document.getElementById('quickCopyLatexBtn');
+  const quickExportPythonBtn = document.getElementById('quickExportPythonBtn');
+  const quickExportWavBtn = document.getElementById('quickExportWavBtn');
 
   if (openExportModalBtn && exportModal) {
     openExportModalBtn.addEventListener('click', () => {
@@ -601,71 +612,81 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 1. Export SVG
-  if (modalExportSvgBtn) {
-    modalExportSvgBtn.addEventListener('click', () => {
-      renderer.exportSVG();
+  // 0. Master ZIP Kit Downloader (With ABRA-ME.txt)
+  function handleDownloadKitZip(btn) {
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<span class="animate-pulse">⏳ Gerando Pacote ZIP...</span>`;
+    renderer.downloadFullKitZip(audio).finally(() => {
+      setTimeout(() => btn.innerHTML = orig, 1500);
     });
   }
+
+  if (quickDownloadKitZipBtn) {
+    quickDownloadKitZipBtn.addEventListener('click', () => handleDownloadKitZip(quickDownloadKitZipBtn));
+  }
+  if (modalDownloadKitZipBtn) {
+    modalDownloadKitZipBtn.addEventListener('click', () => handleDownloadKitZip(modalDownloadKitZipBtn));
+  }
+
+  // 1. Export SVG
+  if (modalExportSvgBtn) modalExportSvgBtn.addEventListener('click', () => renderer.exportSVG());
+  if (quickExportSvgBtn) quickExportSvgBtn.addEventListener('click', () => renderer.exportSVG());
 
   // 2. Export PNG
-  if (modalExportPngBtn) {
-    modalExportPngBtn.addEventListener('click', () => {
-      renderer.exportPNG();
-    });
-  }
+  if (modalExportPngBtn) modalExportPngBtn.addEventListener('click', () => renderer.exportPNG());
+  if (quickExportPngBtn) quickExportPngBtn.addEventListener('click', () => renderer.exportPNG());
 
   // 3. Copy TikZ / PGFPlots Code
-  if (modalCopyTikzBtn) {
-    modalCopyTikzBtn.addEventListener('click', () => {
-      const code = renderer.generateTikZ();
-      navigator.clipboard.writeText(code).then(() => {
-        const orig = modalCopyTikzBtn.innerHTML;
-        modalCopyTikzBtn.innerHTML = `<span>✓ Código TikZ Copiado!</span>`;
-        setTimeout(() => modalCopyTikzBtn.innerHTML = orig, 2000);
-      });
+  function handleCopyTikz(btn) {
+    if (!btn) return;
+    const code = renderer.generateTikZ();
+    navigator.clipboard.writeText(code).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = `<span>✓ Copiado!</span>`;
+      setTimeout(() => btn.innerHTML = orig, 2000);
     });
   }
+
+  if (modalCopyTikzBtn) modalCopyTikzBtn.addEventListener('click', () => handleCopyTikz(modalCopyTikzBtn));
+  if (quickCopyTikzBtn) quickCopyTikzBtn.addEventListener('click', () => handleCopyTikz(quickCopyTikzBtn));
 
   // 4. Export CSV Spreadsheet
-  if (modalExportCsvBtn) {
-    modalExportCsvBtn.addEventListener('click', () => {
-      renderer.exportCSV();
-    });
-  }
+  if (modalExportCsvBtn) modalExportCsvBtn.addEventListener('click', () => renderer.exportCSV());
+  if (quickExportCsvBtn) quickExportCsvBtn.addEventListener('click', () => renderer.exportCSV());
 
   // 5. Copy LaTeX Table Code
-  if (modalCopyLatexTableBtn) {
-    modalCopyLatexTableBtn.addEventListener('click', () => {
-      const code = renderer.generateLatexTable();
-      navigator.clipboard.writeText(code).then(() => {
-        const orig = modalCopyLatexTableBtn.innerHTML;
-        modalCopyLatexTableBtn.innerHTML = `<span>✓ Tabela LaTeX Copiada!</span>`;
-        setTimeout(() => modalCopyLatexTableBtn.innerHTML = orig, 2000);
-      });
+  function handleCopyLatexTable(btn) {
+    if (!btn) return;
+    const code = renderer.generateLatexTable();
+    navigator.clipboard.writeText(code).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = `<span>✓ Copiado!</span>`;
+      setTimeout(() => btn.innerHTML = orig, 2000);
     });
   }
+
+  if (modalCopyLatexTableBtn) modalCopyLatexTableBtn.addEventListener('click', () => handleCopyLatexTable(modalCopyLatexTableBtn));
+  if (quickCopyLatexBtn) quickCopyLatexBtn.addEventListener('click', () => handleCopyLatexTable(quickCopyLatexBtn));
 
   // 6. Export Python Standalone Script
-  if (modalExportPythonBtn) {
-    modalExportPythonBtn.addEventListener('click', () => {
-      const code = renderer.generatePythonScript();
-      const blob = new Blob([code], { type: 'text/x-python;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `fourier_script_N${engine.N}_${engine.presetId || 'custom'}.py`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
+  function handleExportPython() {
+    const code = renderer.generatePythonScript();
+    const blob = new Blob([code], { type: 'text/x-python;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fourier_script_N${engine.N}_${engine.presetId || 'custom'}.py`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  if (modalExportPythonBtn) modalExportPythonBtn.addEventListener('click', handleExportPython);
+  if (quickExportPythonBtn) quickExportPythonBtn.addEventListener('click', handleExportPython);
+
   // 7. Export WAV Audio Synthesizer
-  if (modalExportWavBtn) {
-    modalExportWavBtn.addEventListener('click', () => {
-      audio.exportWav(2.5, 220);
-    });
-  }
+  if (modalExportWavBtn) modalExportWavBtn.addEventListener('click', () => audio.exportWav(2.5, 220));
+  if (quickExportWavBtn) quickExportWavBtn.addEventListener('click', () => audio.exportWav(2.5, 220));
 
   // Copy LaTeX code
   const copyLatexOriginalHTML = copyLatexBtn.innerHTML; // store ONCE

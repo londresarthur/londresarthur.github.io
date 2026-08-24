@@ -132,8 +132,8 @@ class AudioSynth {
     }
   }
 
-  // Synthesize and export WAV audio file for classroom acoustic demonstration
-  exportWav(duration = 2.5, baseFreq = 220) {
+  // Generate raw 16-bit PCM RIFF WAV ArrayBuffer
+  getWavArrayBuffer(duration = 2.5, baseFreq = 220) {
     const sampleRate = 44100;
     const numSamples = Math.floor(duration * sampleRate);
     const N = Math.min(this.engine.N, 64);
@@ -195,6 +195,13 @@ class AudioSynth {
       offset += 2;
     }
 
+    return buffer;
+  }
+
+  // Synthesize and export WAV audio file for classroom acoustic demonstration
+  exportWav(duration = 2.5, baseFreq = 220) {
+    const buffer = this.getWavArrayBuffer(duration, baseFreq);
+    const N = Math.min(this.engine.N, 64);
     const blob = new Blob([buffer], { type: 'audio/wav' });
     const url = URL.createObjectURL(blob);
     const aTag = document.createElement('a');

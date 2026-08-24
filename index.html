@@ -38,6 +38,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="if (typeof renderMathInElement === 'function') { renderMathInElement(document.body, { delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}, {left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true} ], throwOnError: false }); }"></script>
 
+  <!-- JSZip for Client-side Classroom Kit Zip Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <!-- Custom Styles -->
   <link rel="stylesheet" href="src/css/style.css" />
 </head>
@@ -61,14 +64,22 @@
     </div>
 
     <!-- Quick Action Nav Buttons -->
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Academic Kit Export Trigger (Prominent) -->
+      <button onclick="document.getElementById('exportModal').classList.remove('hidden')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+        </svg>
+        <span>Exportar Kit (Professor)</span>
+      </button>
+
       <!-- Audio Player Toggle -->
       <button id="playAudioBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-all shadow-sm">
         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <span>Ouvir Fourier (Áudio)</span>
+        <span>Ouvir Fourier</span>
       </button>
 
       <!-- Theory Modal Trigger -->
@@ -76,14 +87,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
         </svg>
-        <span>Fórmulas & Teoria USP</span>
-      </button>
-
-      <!-- Export Image -->
-      <button id="exportPngBtn" title="Exportar Imagem PNG" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
+        <span>Teoria USP</span>
       </button>
 
       <!-- GitHub Link -->
@@ -386,7 +390,6 @@
           <!-- Main N Slider with tick markers -->
           <div class="py-1">
             <input type="range" id="nSlider" min="0" max="10" value="10" step="1" class="w-full accent-emerald-500" />
-            <div id="sliderTicks" class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
               <span id="sliderTickMin">N = 0 (DC)</span>
               <span id="sliderTickMid1">N = 2</span>
               <span id="sliderTickMid2">N = 5</span>
@@ -399,6 +402,75 @@
         <!-- Dirichlet & Continuity Notice Banner -->
         <div id="dirichletNoteBox" class="mt-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
           <!-- Injected dynamically by app.js -->
+        </div>
+
+        <!-- PROFESSOR EXPORT TOOLBOX & CLASSROOM KIT (.ZIP) -->
+        <div class="mt-4 p-4 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-emerald-950/20 shadow-lg shadow-emerald-950/20">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm">
+                📤
+              </div>
+              <div>
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                  <span>Toolbox de Exportação Acadêmica</span>
+                  <span class="text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">Kit Didático USP</span>
+                </h2>
+                <p class="text-[11px] text-slate-400">Materiais prontos para aulas, provas, slides e relatórios acadêmicos.</p>
+              </div>
+            </div>
+
+            <!-- Featured Master ZIP Download Button (Ultra prominent on Mobile & Desktop) -->
+            <button id="quickDownloadKitZipBtn" class="w-full sm:w-auto py-2 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+              <span>📦 Baixar Kit Completo da Aula (.zip)</span>
+            </button>
+          </div>
+
+          <!-- Quick Export Buttons Grid with explicit full-text labels -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-3 text-xs">
+            <button id="quickExportSvgBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-cyan-300 flex flex-col items-center justify-center gap-1 text-center transition-all group">
+              <span class="text-sm group-hover:scale-110 transition-transform">📐</span>
+              <span class="font-semibold text-[11px]">Vetor SVG</span>
+              <span class="text-[9px] text-slate-500">Overleaf/LaTeX</span>
+            </button>
+
+            <button id="quickExportPngBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-emerald-950/60 border border-slate-800 hover:border-emerald-500/40 text-emerald-300 flex flex-col items-center justify-center gap-1 text-center transition-all group">
+              <span class="text-sm group-hover:scale-110 transition-transform">📷</span>
+              <span class="font-semibold text-[11px]">Imagem PNG</span>
+              <span class="text-[9px] text-slate-500">Slides & Web</span>
+            </button>
+
+            <button id="quickCopyTikzBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-purple-950/60 border border-slate-800 hover:border-purple-500/40 text-purple-300 flex flex-col items-center justify-center gap-1 text-center transition-all group">
+              <span class="text-sm group-hover:scale-110 transition-transform">📉</span>
+              <span class="font-semibold text-[11px]">Código TikZ</span>
+              <span class="text-[9px] text-slate-500">PGFPlots TeX</span>
+            </button>
+
+            <button id="quickExportCsvBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-amber-950/60 border border-slate-800 hover:border-amber-500/40 text-amber-300 flex flex-col items-center justify-center gap-1 text-center transition-all group">
+              <span class="text-sm group-hover:scale-110 transition-transform">📊</span>
+              <span class="font-semibold text-[11px]">Planilha CSV</span>
+              <span class="text-[9px] text-slate-500">Excel / Python</span>
+            </button>
+
+            <button id="quickCopyLatexBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-blue-950/60 border border-slate-800 hover:border-blue-500/40 text-blue-300 flex flex-col items-center justify-center gap-1 text-center transition-all group">
+              <span class="text-sm group-hover:scale-110 transition-transform">📑</span>
+              <span class="font-semibold text-[11px]">Tabela LaTeX</span>
+              <span class="text-[9px] text-slate-500">Provas USP</span>
+            </button>
+
+            <button id="quickExportPythonBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-rose-950/60 border border-slate-800 hover:border-rose-500/40 text-rose-300 flex flex-col items-center justify-center gap-1 text-center transition-all group">
+              <span class="text-sm group-hover:scale-110 transition-transform">🐍</span>
+              <span class="font-semibold text-[11px]">Script Python</span>
+              <span class="text-[9px] text-slate-500">NumPy/Matplotlib</span>
+            </button>
+
+            <button id="quickExportWavBtn" class="p-2 rounded-lg bg-slate-950/80 hover:bg-pink-950/60 border border-slate-800 hover:border-pink-500/40 text-pink-300 flex flex-col items-center justify-center gap-1 text-center transition-all group col-span-2 sm:col-span-1">
+              <span class="text-sm group-hover:scale-110 transition-transform">🎵</span>
+              <span class="font-semibold text-[11px]">Áudio WAV</span>
+              <span class="text-[9px] text-slate-500">Timbre Acústico</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -449,19 +521,18 @@
             <span class="text-[10px] text-slate-500 font-mono">Passe o mouse para destacar</span>
           </div>
 
-          <div class="overflow-y-auto max-h-[220px] rounded-xl border border-slate-800/60 bg-slate-900/40">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 bg-slate-900/90 sticky top-0">
-                  <th class="py-2 px-2.5">Harmônico</th>
-                  <th class="py-2 px-2.5">aₙ (cos)</th>
-                  <th class="py-2 px-2.5">bₙ (sen)</th>
-                  <th class="py-2 px-2.5">|cₙ|</th>
-                  <th class="py-2 px-2.5">Energia</th>
-                  <th class="py-2 px-2.5">% Total</th>
+          <div class="overflow-x-auto max-h-[220px] overflow-y-auto rounded-xl border border-slate-800/60 bg-slate-900/40">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="text-[10px] text-slate-400 uppercase bg-slate-950/60 sticky top-0">
+                <tr>
+                  <th class="py-1.5 px-2">n</th>
+                  <th class="py-1.5 px-2">a_n (Cos)</th>
+                  <th class="py-1.5 px-2">b_n (Sen)</th>
+                  <th class="py-1.5 px-2">c_n (Mag)</th>
+                  <th class="py-1.5 px-2">Energia (%)</th>
                 </tr>
               </thead>
-              <tbody id="coeffsTableBody">
+              <tbody id="coeffsTableBody" class="divide-y divide-slate-800/60 text-slate-300">
                 <!-- Injected dynamically by app.js -->
               </tbody>
             </table>
@@ -482,18 +553,20 @@
   </footer>
 
   <!-- THEORY & FORMULARY MODAL (USP NOTES) -->
-  <div id="theoryModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl relative">
+  <div id="theoryModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
       <button onclick="document.getElementById('theoryModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 transition-colors">
         ✕
       </button>
 
-      <h2 class="text-xl font-bold text-cyan-400 mb-2 flex items-center gap-2">
-        <span>📘 Formulário & Fundamentos Teóricos — USP</span>
-      </h2>
-      <p class="text-xs text-slate-400 mb-4">Síntese dos resultados fundamentais contidos nas apostilas de 17/08 e 20/08.</p>
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>📚</span>
+          <span>Formulário e Teoremas — Séries de Fourier USP</span>
+        </h2>
+      </div>
 
-      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+      <div class="space-y-4 text-xs text-slate-300 leading-relaxed mt-4">
         
         <!-- Section 1 -->
         <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
@@ -573,6 +646,23 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+
+        <!-- Master ZIP Banner inside Modal (TOP) -->
+        <div class="md:col-span-2 p-4 rounded-xl bg-gradient-to-r from-emerald-900/50 via-teal-900/40 to-cyan-900/40 border border-emerald-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold text-sm">📦</span>
+              <h3 class="font-bold text-sm text-white">Kit Completo da Aula (.zip com Guia ABRA-ME)</h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Baixe em um único clique todos os 9 arquivos (gráficos SVG e PNG, código TikZ, planilha CSV, tabela LaTeX, script Python, áudio WAV e relatório teórico com o guia didático <strong>ABRA-ME.txt</strong>).
+            </p>
+          </div>
+          <button id="modalDownloadKitZipBtn" class="w-full sm:w-auto py-2.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 whitespace-nowrap transition-transform active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Baixar Kit Completo (.zip)</span>
+          </button>
+        </div>
         
         <!-- 1. SVG Vector Plot -->
         <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between hover:border-cyan-500/40 transition-all">

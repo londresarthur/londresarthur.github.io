@@ -842,14 +842,13 @@ class CanvasRenderer {
     aTag.click();
   }
 
-  // 2. Export Scalable Vector Graphics (SVG) for Overleaf / LaTeX & Illustrator
-  exportSVG() {
+  // 2. Generate Scalable Vector Graphics (SVG) String
+  getSVGString() {
     const L = this.engine.L;
     const w = 960;
     const h = 540;
     const isDark = this.theme === 'dark';
     const bgColor = isDark ? '#090d16' : '#ffffff';
-    const textColor = isDark ? '#94a3b8' : '#334155';
 
     const xMin = -1.8 * L;
     const xMax = 1.8 * L;
@@ -891,7 +890,7 @@ class CanvasRenderer {
       }
     }
 
-    const svg = `<?xml version="1.0" encoding="utf-8"?>
+    return `<?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
   <rect width="${w}" height="${h}" fill="${bgColor}"/>
   
@@ -916,7 +915,10 @@ class CanvasRenderer {
   <text x="${toSvgX(-L)}" y="${h - 15}" fill="#0ea5e9" font-family="monospace" font-size="11" text-anchor="middle">-L</text>
   <text x="${toSvgX(L)}" y="${h - 15}" fill="#0ea5e9" font-family="monospace" font-size="11" text-anchor="middle">+L</text>
 </svg>`;
+  }
 
+  exportSVG() {
+    const svg = this.getSVGString();
     const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const aTag = document.createElement('a');
@@ -969,7 +971,7 @@ class CanvasRenderer {
   }
 
   // 4. Export CSV of Coefficients and Parseval Energy
-  exportCSV() {
+  getCSVString() {
     const N = this.engine.N;
     const a = this.engine.a;
     const b = this.engine.b;
@@ -986,12 +988,16 @@ class CanvasRenderer {
       const pct = (en / origE) * 100;
       csv += `${n},${an.toFixed(6)},${bn.toFixed(6)},${cn.toFixed(6)},${en.toFixed(6)},${pct.toFixed(2)}\n`;
     }
+    return csv;
+  }
 
+  exportCSV() {
+    const csv = this.getCSVString();
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const aTag = document.createElement('a');
     aTag.href = url;
-    aTag.download = `fourier_coeficientes_N${N}_${this.engine.presetId || 'custom'}.csv`;
+    aTag.download = `fourier_coeficientes_N${this.engine.N}_${this.engine.presetId || 'custom'}.csv`;
     aTag.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -1086,6 +1092,206 @@ plt.tight_layout()
 plt.savefig('fourier_plot.png')
 plt.show()
 `;
+  }
+
+  // 7. Generate ABRA-ME.txt Didactic Guide
+  generateReadme() {
+    const L = this.engine.L;
+    const N = this.engine.N;
+    const expr = this.engine.expression;
+    const mode = this.engine.mode === 'even_cosine' ? 'Par (Série em Cossenos)' : this.engine.mode === 'odd_sine' ? 'Ímpar (Série em Senos)' : 'Geral Completa [-L, L]';
+    const energyPct = this.engine.energy.percentage.toFixed(2);
+    const a0 = this.engine.coefficients.a0.toFixed(4);
+
+    return `========================================================================
+FOURIER STUDIO USP — KIT COMPLETO DE MATERIAIS DIDÁTICOS E CIENTÍFICOS
+========================================================================
+
+Projeto: Fourier Studio (Universidade de São Paulo)
+Autor / Responsável: Prof. Arthur Londres / Departamento de Engenharia e Matemática
+
+------------------------------------------------------------------------
+PARÂMETROS DA ANÁLISE SELECIONADA:
+------------------------------------------------------------------------
+- Função Estudada f(x): ${expr}
+- Semiperíodo L: ${L.toFixed(4)} (Período Fundamental 2L = ${(2 * L).toFixed(4)})
+- Ordem Harmônica Truncada N: ${N} harmônicos
+- Simetria / Extensão: ${mode}
+- Coeficiente Fundamental a0: ${a0}
+- Taxa de Captura de Energia (Parseval): ${energyPct}% do sinal original
+
+------------------------------------------------------------------------
+GUIA DE ARQUIVOS INCLUÍDOS NESTE PACOTE:
+------------------------------------------------------------------------
+
+1. [ABRA-ME.txt] (Este arquivo)
+   - Guia descritivo e instruções didáticas de uso para alunos e docentes.
+
+2. [grafico_fourier_vetorial.svg]
+   - Formato: Vetorial SVG (Scalable Vector Graphics).
+   - Uso: Resolução infinita para incluir diretamente no Overleaf/LaTeX via
+     \\includesvg{...}, ou para editar cores no Inkscape / Adobe Illustrator.
+
+3. [grafico_fourier_alta_resolucao.png]
+   - Formato: Imagem rasterizada PNG em alta definição.
+   - Uso: Slides de aula (PowerPoint, Google Slides, Keynote), apostilas e websites.
+
+4. [grafico_tikz_pgfplots.tex]
+   - Formato: Código-fonte LaTeX puro usando TikZ e PGFPlots.
+   - Uso: Pode ser colado diretamente em artigos ou provas; compila nativamente
+     no pdflatex sem precisar de arquivos de imagem anexos.
+
+5. [tabela_coeficientes_parseval.csv]
+   - Formato: Planilha de texto delimitado por vírgulas (CSV).
+   - Colunas: Harmônico n, Coeficiente a_n (Cos), b_n (Sen), Magnitude c_n,
+     Energia E_n e Percentual de Energia % de Parseval.
+   - Uso: Importação imediata no Microsoft Excel, MATLAB, GNU Octave ou Python (Pandas).
+
+6. [tabela_formatada_provas.tex]
+   - Formato: Fragmento TeX com ambiente \\begin{tabular}.
+   - Uso: Tabela acadêmica pronta para enunciados e gabaritos de provas da USP.
+
+7. [script_simulacao_didatica.py]
+   - Formato: Script em Python 3 usando NumPy e Matplotlib.
+   - Uso: Permite que alunos rodem a simulação localmente no VS Code ou Jupyter Notebook,
+     alterem o número de termos e estudem o fenômeno de Gibbs e a convergência.
+
+8. [audio_timbre_harmonico.wav]
+   - Formato: Áudio PCM 44.1 kHz, 16-bit (Mono).
+   - Uso: Demonstração acústica em sala de aula do timbre correspondente à série de Fourier.
+
+9. [relatorio_teorico_analitico.md]
+   - Formato: Documento estruturado em Markdown.
+   - Uso: Resumo analítico com os teoremas de Dirichlet e Parseval aplicados à função.
+
+------------------------------------------------------------------------
+FUNDAMENTAÇÃO MATEMÁTICA RÁPIDA:
+------------------------------------------------------------------------
+- Série de Euler-Fourier:
+  S_N(x) = a0/2 + sum_{n=1}^N [ a_n cos(n*pi*x/L) + b_n sin(n*pi*x/L) ]
+
+- Conservação de Energia (Identidade de Parseval):
+  (1/L) * int_{-L}^L [f(x)]^2 dx = a0^2/2 + sum_{n=1}^infty (a_n^2 + b_n^2)
+
+- Teorema de Dirichlet:
+  Em descontinuidades de salto x_0, a série converge para o ponto médio:
+  S(x_0) = [f(x_0^+) + f(x_0^-)] / 2
+
+========================================================================
+Fourier Studio USP — Plataforma Aberta de Ensino e Pesquisa
+Disponível online em: https://londresarthur.github.io/
+========================================================================
+`;
+  }
+
+  // 8. Generate Complete Markdown Report
+  generateReportMarkdown() {
+    const L = this.engine.L;
+    const N = this.engine.N;
+    const expr = this.engine.expression;
+    const energyPct = this.engine.energy.percentage.toFixed(2);
+    const origEnergy = this.engine.energy.original.toFixed(4);
+    const fourierEnergy = this.engine.energy.fourier.toFixed(4);
+    const errorEnergy = this.engine.energy.error.toFixed(4);
+
+    return `# Relatório de Análise Harmônica e Decomposição de Fourier
+
+**Instituição:** Universidade de São Paulo (USP)  
+**Ferramenta:** Fourier Studio USP  
+**Data de Emissão:** ${new Date().toLocaleDateString('pt-BR')}  
+
+---
+
+## 1. Definição do Problema e Parâmetros
+
+- **Função Analisada:** $f(x) = ${expr}$
+- **Semiperíodo $L$:** $L = ${L.toFixed(4)}$ (Período Fundamental $T = ${(2 * L).toFixed(4)}$)
+- **Ordem de Truncamento:** $N = ${N}$ harmônicos
+- **Modo de Extensão:** \`${this.engine.mode}\`
+
+---
+
+## 2. Expressão Truncada da Série de Fourier
+
+$$S_{${N}}(x) = ${this.engine.toLatex(10)}$$
+
+---
+
+## 3. Balanço Energético de Parseval
+
+A identidade de Parseval garante a conservação da energia no espaço de Hilbert $L^2[-L, L]$:
+
+$$\\frac{1}{L} \\int_{-L}^L [f(x)]^2 \\, dx = \\frac{a_0^2}{2} + \\sum_{n=1}^{\\infty} (a_n^2 + b_n^2)$$
+
+### Resultados Numéricos:
+- **Energia Total do Sinal Original ($E_{\\text{orig}}$):** \`${origEnergy}\`
+- **Energia Capturada pelos $N=${N}$ Harmônicos ($E_N$):** \`${fourierEnergy}\`
+- **Erro Residual Médio Quadrático ($E_{\\text{erro}}$):** \`${errorEnergy}\`
+- **Eficiência Harmônica (Taxa de Parseval):** **${energyPct}%**
+
+---
+
+## 4. Convergência Pontual (Teorema de Dirichlet)
+
+${this.engine.discontinuities && this.engine.discontinuities.length > 0 
+  ? `Foram identificados **${this.engine.discontinuities.length} pontos de descontinuidade de salto**. Nestes pontos, a série $S_N(x)$ converge rigorosamente para o ponto médio dos limites laterais $\\frac{f(x^+) + f(x^-)}{2}$, exibindo o **Fenômeno de Gibbs** com sobreelevação assintótica de $\\approx 8.95\\%$.` 
+  : `A função $f(x)$ é contínua por partes sem saltos internos no intervalo fundamental $[-L, L]$, garantindo convergência uniforme da série de Fourier.`}
+`;
+  }
+
+  // 9. Master ZIP Downloader (All-in-one Kit with ABRA-ME.txt)
+  async downloadFullKitZip(audioSynth) {
+    if (typeof JSZip === 'undefined') {
+      alert('Carregando gerador ZIP... Por favor tente em 1 segundo.');
+      return;
+    }
+
+    const zip = new JSZip();
+    const N = this.engine.N;
+    const preset = this.engine.presetId || 'custom';
+    const folderName = `Kit_Fourier_USP_N${N}_${preset}`;
+    const folder = zip.folder(folderName);
+
+    // 1. ABRA-ME.txt
+    folder.file("ABRA-ME.txt", this.generateReadme());
+
+    // 2. relatorio_teorico_analitico.md
+    folder.file("relatorio_teorico_analitico.md", this.generateReportMarkdown());
+
+    // 3. grafico_fourier_vetorial.svg
+    folder.file("grafico_fourier_vetorial.svg", this.getSVGString());
+
+    // 4. grafico_tikz_pgfplots.tex
+    folder.file("grafico_tikz_pgfplots.tex", this.generateTikZ());
+
+    // 5. tabela_coeficientes_parseval.csv
+    folder.file("tabela_coeficientes_parseval.csv", this.getCSVString());
+
+    // 6. tabela_formatada_provas.tex
+    folder.file("tabela_formatada_provas.tex", this.generateLatexTable());
+
+    // 7. script_simulacao_didatica.py
+    folder.file("script_simulacao_didatica.py", this.generatePythonScript());
+
+    // 8. grafico_fourier_alta_resolucao.png (Canvas blob)
+    const pngBlob = await new Promise(resolve => this.canvas.toBlob(resolve, 'image/png'));
+    if (pngBlob) {
+      folder.file("grafico_fourier_alta_resolucao.png", pngBlob);
+    }
+
+    // 9. audio_timbre_harmonico.wav (ArrayBuffer)
+    if (audioSynth && typeof audioSynth.getWavArrayBuffer === 'function') {
+      const wavBuffer = audioSynth.getWavArrayBuffer(2.5, 220);
+      folder.file("audio_timbre_harmonico.wav", wavBuffer);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const aTag = document.createElement('a');
+    aTag.href = url;
+    aTag.download = `${folderName}.zip`;
+    aTag.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 }
 
