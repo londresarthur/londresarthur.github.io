@@ -13,6 +13,7 @@ timeline
     Momento 1 : Topologia no R² : Bolas Abertas, Ponto Interno, Externo e Fronteira (∂A)
     Momento 2 : A Ponte com Integrais : Por que domínios precisam de fronteira regular (Medida Nula)?
     Momento 3 : Construção 3D de Riemann : Colunas Internas, Externas e o Esmagamento na Fronteira
+    Momento 4 : A Multiplicação Elementar : O que significa f(x,y) * (Área da Base)?
 ```
 
 ---
@@ -24,7 +25,7 @@ timeline
 #### Bola Aberta (Vizinhança) de raio $r > 0$ em torno de $(x_0, y_0)$
 
 $$
-B_r(x_0, y_0) = \left\{ (x, y) \in \mathbb{R}^2 \;\middle|\; (x - x_0)^2 + (y - y_0)^2 < r^2 \right\}
+B_r(x_0, y_0) = \{ (x, y) \in \mathbb{R}^2 \mid (x - x_0)^2 + (y - y_0)^2 < r^2 \}
 $$
 
 #### Classificação de Pontos em relação a um conjunto $A \subset \mathbb{R}^2$
@@ -96,3 +97,21 @@ $$
 $$
 
 O erro na fronteira é **esmagado para zero**, garantindo que a aproximação 3D convirja exatamente para o volume verdadeiro!
+
+---
+
+### Momento 4: O Que Significa $f(x, y) \times (\text{Area da Base})$?
+
+A expressão elementar $f(x_{ij}^*, y_{ij}^*) \, \Delta A_{ij}$ possui duas interpretações imediatas:
+
+#### 1. Interpretação Geométrica (Volume do Prisma 3D)
+* $\Delta A_{ij} = \Delta x_i \Delta y_j$ é a **área do chão** (um pequeno retângulo no plano $xy$).
+* $f(x_{ij}^*, y_{ij}^*)$ é a **altura** até o teto curvo $z = f(x, y)$.
+* $\text{Volume de um Prisma Reto} = (\text{Area da Base}) \times (\text{Altura}) = \Delta A_{ij} \cdot f(x_{ij}^*, y_{ij}^*)$.
+* A soma dupla $\sum \sum f(x, y) \Delta A$ é a soma dos volumes de todos os "edifícios/colunas", aproximando o **volume total sob a superfície**.
+
+#### 2. Interpretação Física (Massa de uma Chapa)
+* Se $f(x, y)$ for a **densidade superficial de massa** ($\text{g/cm}^2$).
+* $\Delta A_{ij}$ for a área daquele pequeno pedaço de chapa ($\text{cm}^2$).
+* $\text{Massa do pedacinho} = \text{Densidade} \times \text{Area} = f(x, y) \cdot \Delta A$ (em gramas).
+* A soma dupla é a **massa total da chapa plana**.
