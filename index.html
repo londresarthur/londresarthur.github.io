@@ -366,7 +366,7 @@
               </div>
               <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-xs">
                 <span class="text-slate-400 font-mono text-[11px]">N_max:</span>
-                <input type="number" id="nMaxInput" min="1" max="120" value="50" class="w-12 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" />
+                <input type="number" id="nMaxInput" min="1" max="120" value="10" class="w-12 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" />
               </div>
 
               <!-- Animate N Button -->
@@ -385,13 +385,13 @@
 
           <!-- Main N Slider with tick markers -->
           <div class="py-1">
-            <input type="range" id="nSlider" min="0" max="50" value="10" step="1" class="w-full accent-emerald-500" />
+            <input type="range" id="nSlider" min="0" max="10" value="10" step="1" class="w-full accent-emerald-500" />
             <div id="sliderTicks" class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
               <span id="sliderTickMin">N = 0 (DC)</span>
-              <span id="sliderTickMid1">N = 12</span>
-              <span id="sliderTickMid2">N = 25</span>
-              <span id="sliderTickMid3">N = 37</span>
-              <span id="sliderTickMax">N = 50</span>
+              <span id="sliderTickMid1">N = 2</span>
+              <span id="sliderTickMid2">N = 5</span>
+              <span id="sliderTickMid3">N = 8</span>
+              <span id="sliderTickMax">N = 10</span>
             </div>
           </div>
         </div>

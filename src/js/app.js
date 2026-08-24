@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function syncSliderBounds() {
     const minVal = Math.max(0, parseInt(nMinInput?.value || '0', 10));
-    const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '50', 10));
+    const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '10', 10));
     nSlider.min = minVal;
     nSlider.max = maxVal;
 
@@ -390,6 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (nMinInput) nMinInput.addEventListener('input', syncSliderBounds);
   if (nMaxInput) nMaxInput.addEventListener('input', syncSliderBounds);
+  syncSliderBounds();
 
   nSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value, 10);
@@ -419,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateUI(false);
     } else {
       const minVal = Math.max(0, parseInt(nMinInput?.value || '0', 10));
-      const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '50', 10));
+      const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '10', 10));
 
       let currentN = Math.max(minVal, engine.N);
       if (currentN >= maxVal) currentN = minVal;
@@ -438,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       nAnimationInterval = setInterval(() => {
         const curMin = Math.max(0, parseInt(nMinInput?.value || '0', 10));
-        const curMax = Math.max(curMin + 1, parseInt(nMaxInput?.value || '50', 10));
+        const curMax = Math.max(curMin + 1, parseInt(nMaxInput?.value || '10', 10));
 
         currentN++;
         if (currentN > curMax) currentN = curMin;
