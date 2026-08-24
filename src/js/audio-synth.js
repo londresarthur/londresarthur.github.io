@@ -131,6 +131,78 @@ class AudioSynth {
       console.warn('Audio periodic wave update error:', e);
     }
   }
+
+  // Synthesize and export WAV audio file for classroom acoustic demonstration
+  exportWav(duration = 2.5, baseFreq = 220) {
+    const sampleRate = 44100;
+    const numSamples = Math.floor(duration * sampleRate);
+    const N = Math.min(this.engine.N, 64);
+    const a = this.engine.a;
+    const b = this.engine.b;
+
+    const samples = new Float32Array(numSamples);
+    let maxAmp = 0.001;
+
+    for (let i = 0; i < numSamples; i++) {
+      const t = i / sampleRate;
+      let s = 0;
+      for (let n = 1; n <= N; n++) {
+        const omega = 2 * Math.PI * (n * baseFreq);
+        s += (a[n] || 0) * Math.cos(omega * t) + (b[n] || 0) * Math.sin(omega * t);
+      }
+      samples[i] = s;
+      if (Math.abs(s) > maxAmp) maxAmp = Math.abs(s);
+    }
+
+    // Apply anti-click attack and decay envelope
+    const fadeSamples = Math.floor(sampleRate * 0.03);
+    for (let i = 0; i < fadeSamples; i++) {
+      const env = i / fadeSamples;
+      samples[i] *= env;
+      samples[numSamples - 1 - i] *= env;
+    }
+
+    // Encode 16-bit PCM RIFF WAV
+    const buffer = new ArrayBuffer(44 + numSamples * 2);
+    const view = new DataView(buffer);
+
+    const writeString = (offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + numSamples * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, 1, true); // Mono
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, numSamples * 2, true);
+
+    const scale = 0.85 / maxAmp;
+    let offset = 44;
+    for (let i = 0; i < numSamples; i++) {
+      const s = Math.max(-1, Math.min(1, samples[i] * scale));
+      const val = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      view.setInt16(offset, val, true);
+      offset += 2;
+    }
+
+    const blob = new Blob([buffer], { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    const aTag = document.createElement('a');
+    aTag.href = url;
+    aTag.download = `fourier_timbre_N${N}_${this.engine.presetId || 'custom'}.wav`;
+    aTag.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }
 
 if (typeof module !== 'undefined' && module.exports) {

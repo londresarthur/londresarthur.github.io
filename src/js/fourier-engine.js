@@ -706,6 +706,34 @@ class FourierEngine {
 
     return str;
   }
+
+  // Generate PGFPlots/TikZ mathematical expression
+  toPgfplotsFormula(maxTerms = 8) {
+    const { a0, a, b } = this.coefficients;
+    const L = this.L;
+    const isPi = Math.abs(L - Math.PI) < 1e-4;
+
+    let expr = `${(a0 / 2).toFixed(4)}`;
+    let count = 0;
+
+    for (let n = 1; n <= this.N && count < maxTerms; n++) {
+      const an = a[n];
+      const bn = b[n];
+      if (Math.abs(an) < 1e-4 && Math.abs(bn) < 1e-4) continue;
+
+      const arg = isPi ? `deg(${n}*x)` : `deg(${n}*pi*x/${L.toFixed(4)})`;
+
+      if (Math.abs(an) > 1e-4) {
+        expr += ` + (${an.toFixed(4)})*cos(${arg})`;
+        count++;
+      }
+      if (Math.abs(bn) > 1e-4 && count < maxTerms) {
+        expr += ` + (${bn.toFixed(4)})*sin(${arg})`;
+        count++;
+      }
+    }
+    return expr;
+  }
 }
 
 // Export for ES modules and global window usage

@@ -830,6 +830,264 @@ class CanvasRenderer {
     // 9. Interactive Inspection Hover
     this.drawHoverInspection();
   }
+
+  // --- Academic & Professor Export Tools ---
+
+  // 1. Export High Resolution PNG Image
+  exportPNG(filename) {
+    const name = filename || `fourier_grafico_N${this.engine.N}_${this.engine.presetId || 'custom'}.png`;
+    const url = this.canvas.toDataURL('image/png');
+    const aTag = document.createElement('a');
+    aTag.href = url;
+    aTag.download = name;
+    aTag.click();
+  }
+
+  // 2. Export Scalable Vector Graphics (SVG) for Overleaf / LaTeX & Illustrator
+  exportSVG() {
+    const L = this.engine.L;
+    const w = 960;
+    const h = 540;
+    const isDark = this.theme === 'dark';
+    const bgColor = isDark ? '#090d16' : '#ffffff';
+    const textColor = isDark ? '#94a3b8' : '#334155';
+
+    const xMin = -1.8 * L;
+    const xMax = 1.8 * L;
+
+    let yMin = -1.5;
+    let yMax = 1.5;
+    if (this._frameSamples && this._frameSamples.length > 0) {
+      yMin = Math.min(...this._frameSamples.map(s => Math.min(s.fVal, s.sVal)));
+      yMax = Math.max(...this._frameSamples.map(s => Math.max(s.fVal, s.sVal)));
+    }
+    const spanY = Math.max(yMax - yMin, 1);
+    const pYMin = yMin - spanY * 0.22;
+    const pYMax = yMax + spanY * 0.22;
+
+    const toSvgX = (x) => ((x - xMin) / (xMax - xMin)) * w;
+    const toSvgY = (y) => h - ((y - pYMin) / (pYMax - pYMin)) * h;
+
+    const samples = 350;
+    const dx = (xMax - xMin) / samples;
+
+    let pathOrig = '';
+    let pathFourier = '';
+
+    for (let i = 0; i <= samples; i++) {
+      const mx = xMin + i * dx;
+      const fVal = this.engine.evalPeriodic(mx);
+      const sVal = this.engine.evalFourier(mx);
+
+      const sx = toSvgX(mx).toFixed(1);
+      const syF = toSvgY(fVal).toFixed(1);
+      const syS = toSvgY(sVal).toFixed(1);
+
+      if (i === 0) {
+        pathOrig += `M ${sx} ${syF} `;
+        pathFourier += `M ${sx} ${syS} `;
+      } else {
+        pathOrig += `L ${sx} ${syF} `;
+        pathFourier += `L ${sx} ${syS} `;
+      }
+    }
+
+    const svg = `<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+  <rect width="${w}" height="${h}" fill="${bgColor}"/>
+  
+  <!-- Fundamental Domain [-L, L] -->
+  <rect x="${toSvgX(-L)}" y="0" width="${toSvgX(L) - toSvgX(-L)}" height="${h}" fill="${isDark ? 'rgba(14,165,233,0.06)' : 'rgba(14,165,233,0.08)'}"/>
+  <line x1="${toSvgX(-L)}" y1="0" x2="${toSvgX(-L)}" y2="${h}" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <line x1="${toSvgX(L)}" y1="0" x2="${toSvgX(L)}" y2="${h}" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="4,4"/>
+  
+  <!-- Axes X and Y -->
+  <line x1="0" y1="${toSvgY(0)}" x2="${w}" y2="${toSvgY(0)}" stroke="${isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}" stroke-width="1.5"/>
+  <line x1="${toSvgX(0)}" y1="0" x2="${toSvgX(0)}" y2="${h}" stroke="${isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}" stroke-width="1.5"/>
+  
+  <!-- Original Function f(x) -->
+  <path d="${pathOrig}" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.9"/>
+  
+  <!-- Fourier S_N(x) -->
+  <path d="${pathFourier}" fill="none" stroke="#10b981" stroke-width="3"/>
+  
+  <!-- Title & Legend -->
+  <text x="24" y="32" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">f(x) Original</text>
+  <text x="140" y="32" fill="#10b981" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">S_${this.engine.N}(x) Fourier (N=${this.engine.N})</text>
+  <text x="${toSvgX(-L)}" y="${h - 15}" fill="#0ea5e9" font-family="monospace" font-size="11" text-anchor="middle">-L</text>
+  <text x="${toSvgX(L)}" y="${h - 15}" fill="#0ea5e9" font-family="monospace" font-size="11" text-anchor="middle">+L</text>
+</svg>`;
+
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const aTag = document.createElement('a');
+    aTag.href = url;
+    aTag.download = `fourier_grafico_N${this.engine.N}.svg`;
+    aTag.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // 3. Generate Native TikZ / PGFPlots Code for LaTeX
+  generateTikZ() {
+    const L = this.engine.L;
+    const N = this.engine.N;
+    const lStr = Math.abs(L - Math.PI) < 1e-4 ? '\\pi' : L.toFixed(2);
+
+    return `% ==========================================================
+% Código TikZ / PGFPlots para compilar nativamente no LaTeX/Overleaf
+% ==========================================================
+\\documentclass[tikz,border=10pt]{standalone}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+
+\\begin{document}
+\\begin{tikzpicture}
+\\begin{axis}[
+    title={S\\'erie de Fourier $S_{${N}}(x)$ para $L=${lStr}$},
+    xlabel={$x$},
+    ylabel={$y$},
+    xmin=-${(1.4 * L).toFixed(2)}, xmax=${(1.4 * L).toFixed(2)},
+    grid=both,
+    grid style={line width=.1pt, draw=gray!20},
+    major grid style={line width=.2pt, draw=gray!50},
+    axis lines=middle,
+    legend pos=outer north east,
+    width=13cm, height=7.5cm
+]
+
+% Linhas do Intervalo Fundamental [-L, L]
+\\draw[dashed, color=cyan!80, line width=1pt] (axis cs:-${L.toFixed(2)},-10) -- (axis cs:-${L.toFixed(2)},10);
+\\draw[dashed, color=cyan!80, line width=1pt] (axis cs:${L.toFixed(2)},-10) -- (axis cs:${L.toFixed(2)},10);
+
+% Curva da Soma Harmônica S_N(x)
+\\addplot[color=teal!90!black, line width=1.5pt, samples=200, domain=-${(1.3 * L).toFixed(2)}:${(1.3 * L).toFixed(2)}]
+    { ${this.engine.toPgfplotsFormula(8)} };
+\\addlegendentry{$S_{${N}}(x)$}
+
+\\end{axis}
+\\end{tikzpicture}
+\\end{document}`;
+  }
+
+  // 4. Export CSV of Coefficients and Parseval Energy
+  exportCSV() {
+    const N = this.engine.N;
+    const a = this.engine.a;
+    const b = this.engine.b;
+    const origE = this.engine.energy.original || 1;
+
+    let csv = "Harmonico_n,a_n_Cos,b_n_Sen,Magnitude_cn,Energia_En,Percentual_Energia_Pct\n";
+    csv += `0,${a[0].toFixed(6)},0.000000,${(a[0] / 2).toFixed(6)},${(this.engine.energy.harmonicEnergies[0] || 0).toFixed(6)},${(((this.engine.energy.harmonicEnergies[0] || 0) / origE) * 100).toFixed(2)}\n`;
+
+    for (let n = 1; n <= N; n++) {
+      const an = a[n] || 0;
+      const bn = b[n] || 0;
+      const cn = Math.hypot(an, bn);
+      const en = an * an + bn * bn;
+      const pct = (en / origE) * 100;
+      csv += `${n},${an.toFixed(6)},${bn.toFixed(6)},${cn.toFixed(6)},${en.toFixed(6)},${pct.toFixed(2)}\n`;
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const aTag = document.createElement('a');
+    aTag.href = url;
+    aTag.download = `fourier_coeficientes_N${N}_${this.engine.presetId || 'custom'}.csv`;
+    aTag.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // 5. Generate LaTeX Tabular Code for Exams and Worksheets
+  generateLatexTable() {
+    const N = this.engine.N;
+    const a = this.engine.a;
+    const b = this.engine.b;
+    const origE = this.engine.energy.original || 1;
+
+    let tex = `% Tabela de Coeficientes de Fourier para Provas / Listas no LaTeX
+\\begin{table}[htbp]
+\\centering
+\\caption{Coeficientes de Euler-Fourier e Decomposição de Energia ($N=${N}$, $L=${this.engine.L.toFixed(2)}$)}
+\\begin{tabular}{|c|c|c|c|c|c|}
+\\hline
+\\textbf{Harmônico ($n$)} & \\textbf{$a_n$ (Cos)} & \\textbf{$b_n$ (Sen)} & \\textbf{Magnitude $c_n$} & \\textbf{Energia $E_n$} & \\textbf{\\% de $E_{\\text{orig}}$} \\\\
+\\hline
+$0$ (DC) & ${a[0].toFixed(4)} & $0.0000$ & ${(a[0]/2).toFixed(4)} & ${(this.engine.energy.harmonicEnergies[0] || 0).toFixed(4)} & ${(((this.engine.energy.harmonicEnergies[0] || 0)/origE)*100).toFixed(2)}\\% \\\\
+\\hline
+`;
+
+    const limit = Math.min(N, 20);
+    for (let n = 1; n <= limit; n++) {
+      const an = a[n] || 0;
+      const bn = b[n] || 0;
+      const cn = Math.hypot(an, bn);
+      const en = an * an + bn * bn;
+      const pct = (en / origE) * 100;
+      tex += `$${n}$ & $${an.toFixed(4)}$ & $${bn.toFixed(4)}$ & $${cn.toFixed(4)}$ & $${en.toFixed(4)}$ & $${pct.toFixed(2)}\\%$ \\\\\n`;
+    }
+
+    tex += `\\hline
+\\end{tabular}
+\\label{tab:fourier_coeffs_${N}}
+\\end{table}`;
+
+    return tex;
+  }
+
+  // 6. Generate Python Script for Students and Researchers
+  generatePythonScript() {
+    const L = this.engine.L;
+    const N = this.engine.N;
+    const expr = this.engine.expression;
+
+    return `# ==========================================================
+# Fourier Studio USP — Script Científico de Análise Harmônica
+# Gerado para Uso Didático, Pesquisa e Demonstração em Aula
+# ==========================================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Parâmetros
+L = ${Math.abs(L - Math.PI) < 1e-4 ? 'np.pi' : L.toFixed(4)}
+N = ${N}
+
+# 2. Coeficientes de Fourier Truncados
+a0 = ${this.engine.a[0].toFixed(6)}
+a = np.array([${this.engine.a.slice(0, Math.min(N + 1, 30)).map(v => v.toFixed(6)).join(', ')}])
+b = np.array([${this.engine.b.slice(0, Math.min(N + 1, 30)).map(v => v.toFixed(6)).join(', ')}])
+
+def fourier_series(x, order):
+    s = a0 / 2.0
+    for n in range(1, order + 1):
+        if n < len(a):
+            s += a[n] * np.cos(n * np.pi * x / L) + b[n] * np.sin(n * np.pi * x / L)
+    return s
+
+# 3. Plotagem Didática
+x = np.linspace(-2.5 * L, 2.5 * L, 1000)
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), dpi=300)
+
+ax1.plot(x, fourier_series(x, N), 'g-', lw=2.2, label=f'S_{N}(x) Fourier')
+ax1.axvline(-L, color='cyan', linestyle='--', label='-L')
+ax1.axvline(L, color='cyan', linestyle='--', label='+L')
+ax1.set_title(f'Aproximação Harmônica de Fourier (N={N})')
+ax1.grid(True, alpha=0.3)
+ax1.legend()
+
+n_arr = np.arange(1, min(N + 1, 25))
+energies = [a[n]**2 + b[n]**2 for n in n_arr]
+ax2.bar(n_arr, energies, color='purple', alpha=0.7)
+ax2.set_xlabel('Harmônico n')
+ax2.set_ylabel('Energia E_n')
+ax2.set_title('Espectro de Potência e Conservação de Parseval')
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig('fourier_plot.png')
+plt.show()
+`;
+  }
 }
 
 if (typeof module !== 'undefined' && module.exports) {
