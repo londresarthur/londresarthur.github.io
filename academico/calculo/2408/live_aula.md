@@ -154,3 +154,28 @@ Um conjunto $A \subset \mathbb{R}^2$ tem **conteúdo nulo** (ou conteúdo de Jor
   * Qualquer segmento de reta ou arco de circunferência.
   * O gráfico de qualquer função contínua $y = g(x)$ em um intervalo fechado $[a, b]$.
   * A fronteira $\partial D$ de qualquer região comum da Engenharia.
+
+---
+
+### Momento 7: A Intuição: Como Diabos um Contorno Pode Ter Área?
+
+A intuição clássica da geometria diz: *"Uma linha tem comprimento, mas largura zero, logo sua área bidimensional deveria ser sempre zero!"*
+
+Para todas as figuras da vida real (círculos, retângulos, triângulos), isso está **100% correto**! Mas a matemática pura descobriu cenários patológicos:
+
+#### 1. A Analogia do Fio de Costura Infinitamente Dobrado (Curvas de Peano / Hilbert)
+* Pense em um único fio de costura 1D (comprimento, largura zero).
+* Se você esticar o fio no chão, ele tem área zero.
+* Mas se você começar a dobrar esse fio em zig-zag infinito tão apertado que ele passa por **todos os pontos** de uma sala $1 \times 1$:
+* O fio continua sendo uma linha 1D contínua, mas ele **preencheu completamente** o chão 2D da sala, ocupando uma área de $1\text{ m}^2$!
+
+#### 2. O Exemplo Matemático Imediato: Os Pontos Racionais $\mathbb{Q}^2$
+* Considere o conjunto $A = [0, 1] \times [0, 1] \cap \mathbb{Q}^2$ (apenas pontos de coordenadas racionais no quadrado).
+* **Qual é a fronteira $\partial A$?**
+  * Pegue qualquer ponto $(x, y)$ do quadrado unitário.
+  * Qualquer círculo que você desenhe em volta dele (por menor que seja) contém infinitos pontos racionais (dentro de $A$) e infinitos irracionais (fora de $A$).
+  * **Conclusão:** Todo ponto do quadrado $[0, 1]^2$ é ponto de fronteira ($\partial A = [0, 1]^2$).
+  * **A Área da Fronteira é:** $\text{Area}(\partial A) = 1 \times 1 = 1 \gt 0$!
+
+#### 3. Por que isso importa para nós?
+O professor exige que a fronteira tenha **conteúdo nulo** exatamente para **proibir esses domínios patológicos**, garantindo que a integral de Riemann funcione com segurança nas formas da engenharia!

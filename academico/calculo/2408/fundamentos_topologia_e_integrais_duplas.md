@@ -243,8 +243,6 @@ $$
    └── Área 2D > 0 ──────────────► NÃO INTEGRÁVEL À RIEMANN (Falha de Jordan)
 ```
 
----
-
 ### 5.3. A Curva de Osgood: Quando a Fronteira Destrói a Integral de Riemann
 Em 1903, o matemático William Fogg Osgood provou que existem **curvas de Jordan contínuas e fechadas cuja fronteira possui área bidimensional estritamente positiva** ($\text{Area}(\partial D) \gt 0$):
 
@@ -257,6 +255,28 @@ S(\tilde{f}, \mathcal{P}) - s(\tilde{f}, \mathcal{P}) \ge M \cdot \text{Area}(\p
 $$
 
 O limite da soma de Riemann **não existe** (a função constante $f(x,y)=1$ não é integrável à Riemann sobre $D$). Para integrar sobre tais regiões patológicas, a matemática precisou inventar a **Teoria da Medida e a Integral de Lebesgue**!
+
+---
+
+### 5.4. Como um Contorno Pode Ter Área? (A Intuição Visual)
+
+A nossa intuição geométrica cotidiana nos diz: *"Uma linha ou contorno tem comprimento, mas espessura zero. Portanto, sua área bidimensional deveria ser sempre zero!"*
+
+Para todas as figuras regulares (círculos, retângulos, triângulos, parábolas), isso é absolutamente verdadeiro. Contudo, a matemática descobriu como um contorno 1D pode "engordar" e ocupar área 2D:
+
+#### 1. A Linha de Costura Dobrada ao Infinito (Curvas de Peano e Hilbert)
+* Um fio de costura esticado tem área zero.
+* Mas se dobrarmos o fio em zig-zags recursivos infinitos no chão de uma sala $1 \times 1$, o fio passa por **absolutamente todos os pontos $(x, y)$ da sala**.
+* A curva continua sendo 1D contínua, mas preenche todo o chão 2D, ocupando uma área de $1\text{ m}^2$!
+
+#### 2. O Exemplo da "Poeira Densa": Os Racionais $\mathbb{Q}^2$
+* Considere o conjunto $A = [0, 1] \times [0, 1] \cap \mathbb{Q}^2$ (apenas pontos de coordenadas racionais).
+* Todo ponto do quadrado $[0, 1]^2$ possui em qualquer vizinhança pontos racionais (em $A$) e irracionais (fora de $A$).
+* Portanto, **a fronteira $\partial A$ é o próprio quadrado inteiro $[0, 1]^2$**, com área $\text{Area}(\partial A) = 1 \gt 0$.
+
+> [!NOTE]
+> **Por que o Cálculo Exige "Conteúdo Nulo"?**  
+> A exigência de que a fronteira tenha **conteúdo nulo** é a barreira de proteção matemática que elimina essas anomalias e garante que as integrais duplas de Riemann funcionem com perfeição nas geometrias da física e da engenharia.
 
 ---
 
