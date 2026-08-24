@@ -72,15 +72,60 @@ class CanvasRenderer {
     this.render();
   }
 
-  resetView() {
+  autoFit() {
     const L = this.engine.L || Math.PI;
+
+    // Sample function and Fourier approximation over [-L, L] to find bounding range
+    let yMin = Infinity;
+    let yMax = -Infinity;
+    const samples = 80;
+    for (let i = 0; i <= samples; i++) {
+      const x = -L + (2 * L * i) / samples;
+      const yOrig = this.engine.evalBase(x);
+      const yFourier = this.engine.evalFourier(x);
+
+      if (Number.isFinite(yOrig)) {
+        yMin = Math.min(yMin, yOrig);
+        yMax = Math.max(yMax, yOrig);
+      }
+      if (Number.isFinite(yFourier)) {
+        yMin = Math.min(yMin, yFourier);
+        yMax = Math.max(yMax, yFourier);
+      }
+    }
+
+    // Always include zero axis for geometric context
+    yMin = Math.min(yMin, 0);
+    yMax = Math.max(yMax, 0);
+
+    if (!Number.isFinite(yMin) || !Number.isFinite(yMax) || yMax <= yMin) {
+      yMin = -1;
+      yMax = 1;
+    }
+
+    // Add 25% margin on top and bottom
+    const spanY = Math.max(yMax - yMin, 0.5);
+    const paddedYMin = yMin - spanY * 0.22;
+    const paddedYMax = yMax + spanY * 0.22;
+    const totalSpanY = paddedYMax - paddedYMin;
+
+    // Fit [-1.35 L, 1.35 L] on X
+    const targetSpanX = 2.7 * L;
+
     this.view.centerX = 0;
-    this.view.centerY = 0;
-    // Scale so that [-1.5L, 1.5L] fits nicely in width
-    const targetSpanX = 3.2 * L;
-    this.view.scaleX = this.width / targetSpanX;
-    this.view.scaleY = this.view.scaleX;
+    this.view.centerY = (paddedYMin + paddedYMax) / 2;
+
+    const scaleX = this.width / targetSpanX;
+    const scaleY = this.height / totalSpanY;
+
+    this.view.scaleX = Math.max(this.view.minScale, Math.min(this.view.maxScale, scaleX));
+    this.view.scaleY = Math.max(this.view.minScale, Math.min(this.view.maxScale, scaleY));
+
     this.render();
+  }
+
+  resetView() {
+    this.autoFit();
   }
 
   // Coordinate transforms

@@ -144,45 +144,14 @@
         </div>
       </div>
 
-      <!-- 2. HARMONICS & PARAMETERS SLIDER (N TERMOS) -->
+      <!-- 2. DOMAIN EXTENSION & INTERVAL L -->
       <div class="glass-panel rounded-2xl p-5 border border-slate-800">
-        <div class="flex items-center justify-between mb-2">
-          <label class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-            <span>Ordem Harmônica $N$ (Termos)</span>
-          </label>
-          <div class="flex items-center gap-2">
-            <span id="nValueBadge" class="font-mono font-bold text-sm px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">10</span>
-          </div>
-        </div>
+        <label class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 mb-3">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+          <span>Extensão de Domínio & Semiperíodo $L$</span>
+        </label>
 
-        <!-- Slider -->
-        <div class="py-2">
-          <input type="range" id="nSlider" min="0" max="60" value="10" step="1" class="w-full" />
-          <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
-            <span>N = 0 (DC)</span>
-            <span>N = 15</span>
-            <span>N = 30</span>
-            <span>N = 45</span>
-            <span>N = 60</span>
-          </div>
-        </div>
-
-        <!-- Animate N Button -->
-        <div class="mt-3 flex items-center gap-2">
-          <button id="animateNBtn" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/30">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span>Animar N</span>
-          </button>
-
-          <button id="playEpicyclesBtn" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><path stroke-width="2" d="M12 3v9l6 3"></path></svg>
-            <span>Epiciclos 3B1B</span>
-          </button>
-        </div>
-
-        <!-- Half-Range Extensions & Period Interval L -->
-        <div class="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-3">
+        <div class="space-y-3 text-xs">
           <div>
             <label class="block text-[11px] font-semibold text-slate-400 mb-1">Simetria / Meia Onda</label>
             <select id="modeSelect" class="w-full bg-slate-900 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 border border-slate-700/80 focus:outline-none focus:border-cyan-500">
@@ -195,10 +164,10 @@
           <div>
             <label class="block text-[11px] font-semibold text-slate-400 mb-1">Semiperíodo $L$</label>
             <div class="flex items-center gap-1">
-              <input type="text" id="lInput" value="π" class="w-14 bg-slate-900 text-center font-mono text-xs rounded-lg py-1.5 border border-slate-700/80 focus:outline-none focus:border-cyan-500" />
-              <button id="lQuickPi" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-cyan-300 font-mono">π</button>
-              <button id="lQuick1" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 font-mono">1</button>
-              <button id="lQuick2" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 font-mono">2</button>
+              <input type="text" id="lInput" value="π" class="w-16 bg-slate-900 text-center font-mono text-xs rounded-lg py-1.5 border border-slate-700/80 focus:outline-none focus:border-cyan-500" />
+              <button id="lQuickPi" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-cyan-300 font-mono">π</button>
+              <button id="lQuick1" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300 font-mono">1</button>
+              <button id="lQuick2" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300 font-mono">2</button>
             </div>
           </div>
         </div>
@@ -362,16 +331,69 @@
 
           <!-- Canvas Toolbar Buttons -->
           <div class="flex items-center gap-1.5">
+            <button id="autoFitBtn" title="Auto-Ajustar Escala ao Gráfico" class="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-xs text-cyan-300 font-medium border border-cyan-500/30 transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+              <span>AutoFit</span>
+            </button>
             <button id="resetViewBtn" title="Redefinir Visão (Centralizar)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium border border-slate-700 transition-colors flex items-center gap-1">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-              <span>Ajustar</span>
+              <span>Resetar</span>
             </button>
           </div>
         </div>
 
         <!-- HTML5 Canvas Container -->
-        <div class="relative w-full h-[420px] lg:h-[460px] rounded-xl overflow-hidden bg-slate-950/80 border border-slate-900 shadow-inner">
+        <div class="relative w-full h-[400px] lg:h-[450px] rounded-xl overflow-hidden bg-slate-950/80 border border-slate-900 shadow-inner">
           <canvas id="mainCanvas" class="w-full h-full cursor-crosshair"></canvas>
+        </div>
+
+        <!-- HARMONICS (N) & ANIMATION CONTROL BAR (Directly below Graph) -->
+        <div class="mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col gap-2.5 shadow-inner">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                <span>Ordem Harmônica $N$:</span>
+              </span>
+              <span id="nValueBadge" class="font-mono font-bold text-sm px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">10</span>
+            </div>
+
+            <!-- Animation Range & Play Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-xs">
+                <span class="text-slate-400 font-mono text-[11px]">N_min:</span>
+                <input type="number" id="nMinInput" min="0" max="100" value="0" class="w-12 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" />
+              </div>
+              <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-xs">
+                <span class="text-slate-400 font-mono text-[11px]">N_max:</span>
+                <input type="number" id="nMaxInput" min="1" max="120" value="50" class="w-12 bg-slate-900 text-center font-mono text-xs rounded text-cyan-300 border border-slate-700 py-0.5 focus:outline-none focus:border-cyan-500" />
+              </div>
+
+              <!-- Animate N Button -->
+              <button id="animateNBtn" class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/30">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Animar N</span>
+              </button>
+
+              <!-- 3B1B Epicycles Button -->
+              <button id="playEpicyclesBtn" class="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><path stroke-width="2" d="M12 3v9l6 3"></path></svg>
+                <span>3B1B</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main N Slider with tick markers -->
+          <div class="py-1">
+            <input type="range" id="nSlider" min="0" max="50" value="10" step="1" class="w-full accent-emerald-500" />
+            <div id="sliderTicks" class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+              <span id="sliderTickMin">N = 0 (DC)</span>
+              <span id="sliderTickMid1">N = 12</span>
+              <span id="sliderTickMid2">N = 25</span>
+              <span id="sliderTickMid3">N = 37</span>
+              <span id="sliderTickMax">N = 50</span>
+            </div>
+          </div>
         </div>
 
         <!-- Dirichlet & Continuity Notice Banner -->

@@ -329,8 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
     customFormulaInput.value = engine.expression;
     if (modeSelect) modeSelect.value = engine.mode;
     if (lInput) lInput.value = Math.abs(engine.L - Math.PI) < 1e-4 ? 'π' : engine.L.toString();
-    renderer.resetView();
     updateUI();
+    renderer.autoFit();
   });
 
   // Custom Formula Compilation
@@ -339,12 +339,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (expr) {
       engine.compileExpression(expr);
       updateUI();
+      renderer.autoFit();
     }
   }
 
   compileBtn.addEventListener('click', applyCustomFormula);
   customFormulaInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') applyCustomFormula();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyCustomFormula();
+    }
   });
 
   // Quick Formula Buttons
@@ -354,10 +358,39 @@ document.addEventListener('DOMContentLoaded', () => {
       customFormulaInput.value = formula;
       engine.compileExpression(formula);
       updateUI();
+      renderer.autoFit();
     });
   });
 
-  // N Harmonics Slider
+  // N Harmonics Slider & Range Bounds
+  const nMinInput = document.getElementById('nMinInput');
+  const nMaxInput = document.getElementById('nMaxInput');
+  const autoFitBtn = document.getElementById('autoFitBtn');
+
+  function syncSliderBounds() {
+    const minVal = Math.max(0, parseInt(nMinInput?.value || '0', 10));
+    const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '50', 10));
+    nSlider.min = minVal;
+    nSlider.max = maxVal;
+
+    // Update dynamic tick markers
+    const tickMin = document.getElementById('sliderTickMin');
+    const tickMid1 = document.getElementById('sliderTickMid1');
+    const tickMid2 = document.getElementById('sliderTickMid2');
+    const tickMid3 = document.getElementById('sliderTickMid3');
+    const tickMax = document.getElementById('sliderTickMax');
+
+    const span = maxVal - minVal;
+    if (tickMin) tickMin.textContent = `N = ${minVal}`;
+    if (tickMid1) tickMid1.textContent = `N = ${Math.round(minVal + span * 0.25)}`;
+    if (tickMid2) tickMid2.textContent = `N = ${Math.round(minVal + span * 0.50)}`;
+    if (tickMid3) tickMid3.textContent = `N = ${Math.round(minVal + span * 0.75)}`;
+    if (tickMax) tickMax.textContent = `N = ${maxVal}`;
+  }
+
+  if (nMinInput) nMinInput.addEventListener('input', syncSliderBounds);
+  if (nMaxInput) nMaxInput.addEventListener('input', syncSliderBounds);
+
   nSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value, 10);
     engine.N = val;
@@ -365,40 +398,55 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
   });
 
-  // Animate N button
+  // AutoFit Button
+  if (autoFitBtn) {
+    autoFitBtn.addEventListener('click', () => {
+      renderer.autoFit();
+    });
+  }
+
+  // Animate N Button with Dynamic Bounds
   animateNBtn.addEventListener('click', () => {
     if (nAnimationInterval) {
       clearInterval(nAnimationInterval);
       nAnimationInterval = null;
       animateNBtn.innerHTML = `
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span>Animar N</span>
       `;
       animateNBtn.classList.remove('bg-rose-600', 'hover:bg-rose-500');
       animateNBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
       updateUI(false);
     } else {
-      let currentN = 1;
+      const minVal = Math.max(0, parseInt(nMinInput?.value || '0', 10));
+      const maxVal = Math.max(minVal + 1, parseInt(nMaxInput?.value || '50', 10));
+
+      let currentN = Math.max(minVal, engine.N);
+      if (currentN >= maxVal) currentN = minVal;
+
       engine.N = currentN;
       nSlider.value = currentN;
       nValueBadge.textContent = currentN;
       updateUI();
 
       animateNBtn.innerHTML = `
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span>Pausar</span>
       `;
       animateNBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
       animateNBtn.classList.add('bg-rose-600', 'hover:bg-rose-500');
 
       nAnimationInterval = setInterval(() => {
+        const curMin = Math.max(0, parseInt(nMinInput?.value || '0', 10));
+        const curMax = Math.max(curMin + 1, parseInt(nMaxInput?.value || '50', 10));
+
         currentN++;
-        if (currentN > 50) currentN = 1;
+        if (currentN > curMax) currentN = curMin;
         engine.N = currentN;
         nSlider.value = currentN;
         nValueBadge.textContent = currentN;
         updateUI(true);
-      }, 150);
+      }, 120);
     }
   });
 
@@ -406,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
   modeSelect.addEventListener('change', (e) => {
     engine.mode = e.target.value;
     updateUI();
+    renderer.autoFit();
   });
 
   // Interval L Controls
@@ -420,8 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lInput.value = num.toString();
       }
     }
-    renderer.resetView();
     updateUI();
+    renderer.autoFit();
   }
 
   lInput.addEventListener('change', (e) => setL(e.target.value));
