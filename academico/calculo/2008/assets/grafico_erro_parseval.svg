@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; stroke: #30363d; stroke-width: 1; }
+      .grid { stroke: #21262d; stroke-width: 1; stroke-dasharray: 4,4; }
+      .axis { stroke: #8b949e; stroke-width: 2; marker-end: url(#arrow4); }
+      .text-main { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #c9d1d9; }
+      .text-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 600; fill: #58a6ff; }
+      .text-math { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-style: italic; font-size: 14px; fill: #79c0ff; }
+      .text-error { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 600; fill: #f85149; }
+      .text-energy { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 600; fill: #58a6ff; }
+      .bar-energy { fill: rgba(88, 166, 255, 0.4); stroke: #58a6ff; stroke-width: 1.5; }
+      .bar-error { fill: rgba(248, 81, 73, 0.4); stroke: #f85149; stroke-width: 1.5; }
+    </style>
+    <marker id="arrow4" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#8b949e" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="440" rx="8" class="bg"/>
+
+  <text x="40" y="38" class="text-title">Identidade de Parseval &amp; Decaimento do Erro Residual E_N = ||f - S_N||^2</text>
+
+  <!-- Eixos -->
+  <line x1="80" y1="340" x2="740" y2="340" class="axis"/>
+  <text x="745" y="345" class="text-math">N (Harmonicos)</text>
+
+  <line x1="120" y1="360" x2="120" y2="70" class="axis"/>
+  <text x="80" y="65" class="text-math">Energia (%)</text>
+
+  <!-- Linha de 100% de Energia -->
+  <line x1="120" y1="120" x2="720" y2="120" stroke="#7ee787" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="45" y="125" class="text-main" fill="#7ee787" font-weight="bold">100% Total</text>
+
+  <!-- N=0 -->
+  <rect x="150" y="230" width="35" height="110" class="bar-energy"/>
+  <rect x="150" y="120" width="35" height="110" class="bar-error"/>
+  <text x="158" y="360" class="text-math">N=0</text>
+  <text x="153" y="225" class="text-main" font-size="11">50.0%</text>
+
+  <!-- N=1 -->
+  <rect x="250" y="141" width="35" height="199" class="bar-energy"/>
+  <rect x="250" y="120" width="35" height="21" class="bar-error"/>
+  <text x="258" y="360" class="text-math">N=1</text>
+  <text x="253" y="137" class="text-main" font-size="11">90.5%</text>
+
+  <!-- N=3 -->
+  <rect x="350" y="131" width="35" height="209" class="bar-energy"/>
+  <rect x="350" y="120" width="35" height="11" class="bar-error"/>
+  <text x="358" y="360" class="text-math">N=3</text>
+  <text x="353" y="127" class="text-main" font-size="11">95.0%</text>
+
+  <!-- N=5 -->
+  <rect x="450" y="127" width="35" height="213" class="bar-energy"/>
+  <rect x="450" y="120" width="35" height="7" class="bar-error"/>
+  <text x="458" y="360" class="text-math">N=5</text>
+  <text x="453" y="123" class="text-main" font-size="11">96.7%</text>
+
+  <!-- N=19 -->
+  <rect x="550" y="122" width="35" height="218" class="bar-energy"/>
+  <rect x="550" y="120" width="35" height="2" class="bar-error"/>
+  <text x="555" y="360" class="text-math">N=19</text>
+  <text x="553" y="118" class="text-main" font-size="11">98.9%</text>
+
+  <!-- Painel de Legenda -->
+  <rect x="500" y="170" width="280" height="145" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="515" y="195" class="text-main" font-weight="bold">Conservacao de Parseval:</text>
+  <text x="515" y="218" class="text-energy">■ Energia Capturada: P_N</text>
+  <text x="515" y="240" class="text-error">■ Erro Residual: E_N = ||f - S_N||^2</text>
+  <text x="515" y="265" class="text-main">• Teorema da Melhor Aproximacao:</text>
+  <text x="515" y="285" class="text-main" fill="#7ee787" font-weight="bold">E_N e o minimo absoluto em L^2</text>
+  <text x="515" y="303" class="text-math">E_N -&gt; 0 conforme N -&gt; infinito</text>
+</svg>

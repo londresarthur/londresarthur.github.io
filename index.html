@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fourier Studio USP — Transformada & Séries de Fourier Interativas</title>
+  <meta name="description" content="Laboratório interativo estilo Desmos/GeoGebra para Análise de Fourier, Conservação de Energia (Parseval), Convergência de Dirichlet e decomposição harmônica. Disciplina de Cálculo Avançado — USP." />
+  <meta property="og:title" content="Fourier Studio USP" />
+  <meta property="og:description" content="Laboratório interativo para Análise de Fourier" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 50 Q 30 10 50 50 T 90 50' stroke='%230ea5e9' stroke-width='8' fill='none'/></svg>" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for LaTeX rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="if (typeof renderMathInElement === 'function') { renderMathInElement(document.body, { delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}, {left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true} ], throwOnError: false }); }"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="src/css/style.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-white">
+
+  <!-- TOP NAVBAR -->
+  <header class="border-b border-slate-800/80 bg-slate-900/70 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 12c3-8 5-8 8 0s5 8 8 0 5-8 8 0" />
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-lg lg:text-xl text-white tracking-tight">Fourier Studio</h1>
+          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">USP Edition</span>
+        </div>
+        <p class="text-xs text-slate-400">Análise de Fourier & Conservação de Energia (Parseval) — Cálculo Avançado USP</p>
+      </div>
+    </div>
+
+    <!-- Quick Action Nav Buttons -->
+    <div class="flex items-center gap-2">
+      <!-- Audio Player Toggle -->
+      <button id="playAudioBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-all shadow-sm">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>Ouvir Fourier (Áudio)</span>
+      </button>
+
+      <!-- Theory Modal Trigger -->
+      <button onclick="document.getElementById('theoryModal').classList.remove('hidden')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-semibold transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <span>Fórmulas & Teoria USP</span>
+      </button>
+
+      <!-- Export Image -->
+      <button id="exportPngBtn" title="Exportar Imagem PNG" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </button>
+
+      <!-- GitHub Link -->
+      <a href="https://github.com/londresarthur/usp" target="_blank" rel="noreferrer" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Ver no GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN BODY LAYOUT -->
+  <main class="flex-1 p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1720px] mx-auto w-full">
+
+    <!-- LEFT SIDEBAR: CONTROLS & EQUATIONS (4 COLS) -->
+    <aside class="lg:col-span-4 flex flex-col gap-5">
+
+      <!-- 1. PRESET & FORMULA SELECTOR -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <div class="flex items-center justify-between mb-3">
+          <label class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <span>Função Alvo $f(x)$</span>
+          </label>
+          <span class="text-[11px] text-slate-400">Presets & Custom</span>
+        </div>
+
+        <!-- Presets Dropdown -->
+        <select id="presetSelect" class="w-full bg-slate-900/90 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 border border-slate-700/80 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 mb-3 shadow-inner">
+          <!-- Populated dynamically by app.js -->
+        </select>
+
+        <!-- Custom Equation Input -->
+        <div class="flex items-center gap-2 mb-3">
+          <div class="relative flex-1">
+            <span class="absolute left-3 top-2.5 text-xs text-slate-500 font-mono">f(x) =</span>
+            <input type="text" id="customFormulaInput" placeholder="Ex: abs(x), pi - x, sin(3*x)" class="w-full bg-slate-900 text-cyan-300 font-mono text-sm rounded-xl pl-14 pr-3 py-2 border border-slate-700/80 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" />
+          </div>
+          <button id="compileBtn" class="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold transition-all shadow-md shadow-cyan-600/30">
+            Plotar
+          </button>
+        </div>
+
+        <!-- Fast Formula Chips -->
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="abs(x)">|x|</button>
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="pi - x">π - x</button>
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="sign(x)">sgn(x)</button>
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="x">x</button>
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="x^2">x²</button>
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="exp(-abs(x))">e^{-|x|}</button>
+          <button class="quick-formula-btn formula-chip px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300" data-formula="abs(sin(x))">|sin(x)|</button>
+        </div>
+
+        <!-- Preset Context Description & Notes -->
+        <div id="presetDescBox" class="mt-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs">
+          <!-- Injected dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- 2. HARMONICS & PARAMETERS SLIDER (N TERMOS) -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            <span>Ordem Harmônica $N$ (Termos)</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <span id="nValueBadge" class="font-mono font-bold text-sm px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">10</span>
+          </div>
+        </div>
+
+        <!-- Slider -->
+        <div class="py-2">
+          <input type="range" id="nSlider" min="0" max="60" value="10" step="1" class="w-full" />
+          <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+            <span>N = 0 (DC)</span>
+            <span>N = 15</span>
+            <span>N = 30</span>
+            <span>N = 45</span>
+            <span>N = 60</span>
+          </div>
+        </div>
+
+        <!-- Animate N Button -->
+        <div class="mt-3 flex items-center gap-2">
+          <button id="animateNBtn" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/30">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Animar N</span>
+          </button>
+
+          <button id="playEpicyclesBtn" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><path stroke-width="2" d="M12 3v9l6 3"></path></svg>
+            <span>Epiciclos 3B1B</span>
+          </button>
+        </div>
+
+        <!-- Half-Range Extensions & Period Interval L -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Simetria / Meia Onda</label>
+            <select id="modeSelect" class="w-full bg-slate-900 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 border border-slate-700/80 focus:outline-none focus:border-cyan-500">
+              <option value="full">Intervalo Completo [-L, L]</option>
+              <option value="even_cosine">Extensão Par (Cossenos)</option>
+              <option value="odd_sine">Extensão Ímpar (Senos)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Semiperíodo $L$</label>
+            <div class="flex items-center gap-1">
+              <input type="text" id="lInput" value="π" class="w-14 bg-slate-900 text-center font-mono text-xs rounded-lg py-1.5 border border-slate-700/80 focus:outline-none focus:border-cyan-500" />
+              <button id="lQuickPi" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-cyan-300 font-mono">π</button>
+              <button id="lQuick1" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 font-mono">1</button>
+              <button id="lQuick2" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 font-mono">2</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. LAYER TOGGLES & VISUALIZATION OPTIONS -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <label class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5 mb-3">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+          <span>Camadas Gráficas & Opções</span>
+        </label>
+
+        <div class="space-y-2.5 text-xs">
+          <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 cursor-pointer">
+            <span class="flex items-center gap-2 text-emerald-400 font-medium">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+              Soma de Fourier $S_N(x)$
+            </span>
+            <input type="checkbox" id="toggleFourier" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0 focus:ring-offset-0" />
+          </label>
+
+          <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 cursor-pointer">
+            <span class="flex items-center gap-2 text-cyan-400 font-medium">
+              <span class="w-3 h-3 rounded-full bg-cyan-500 shadow-sm shadow-cyan-500/50"></span>
+              Função Original $f(x)$
+            </span>
+            <input type="checkbox" id="toggleOriginal" checked class="rounded border-slate-700 text-cyan-500 focus:ring-0 focus:ring-offset-0" />
+          </label>
+
+          <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 cursor-pointer">
+            <span class="flex items-center gap-2 text-rose-400 font-medium">
+              <span class="w-3 h-3 rounded bg-rose-500/40 border border-rose-500/60"></span>
+              Área de Erro Residual ($\text{MSE}$)
+            </span>
+            <input type="checkbox" id="toggleErrorArea" checked class="rounded border-slate-700 text-rose-500 focus:ring-0 focus:ring-offset-0" />
+          </label>
+
+          <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 cursor-pointer">
+            <span class="flex items-center gap-2 text-amber-400 font-medium">
+              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+              Decomposição Par & Ímpar
+            </span>
+            <input type="checkbox" id="toggleEvenOdd" class="rounded border-slate-700 text-amber-500 focus:ring-0 focus:ring-offset-0" />
+          </label>
+
+          <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 cursor-pointer">
+            <span class="flex items-center gap-2 text-purple-400 font-medium">
+              <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+              Pontos de Salto (Teorema de Dirichlet)
+            </span>
+            <input type="checkbox" id="toggleDirichlet" checked class="rounded border-slate-700 text-purple-500 focus:ring-0 focus:ring-offset-0" />
+          </label>
+
+          <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 cursor-pointer">
+            <span class="flex items-center gap-2 text-pink-400 font-medium">
+              <span class="w-3 h-3 rounded-full bg-pink-500"></span>
+              Epiciclos de Fasores Giratórios
+            </span>
+            <input type="checkbox" id="toggleEpicycles" class="rounded border-slate-700 text-pink-500 focus:ring-0 focus:ring-offset-0" />
+          </label>
+        </div>
+      </div>
+
+      <!-- 4. AUDIO SYNTHESIZER CONTROLS -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <label class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+          <span>Sintetizador de Áudio Harmônico</span>
+        </label>
+        <p class="text-[11px] text-slate-400 mb-3">Ouça a evolução do timbre acústico gerado pela série de Fourier em tempo real.</p>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <span>Frequência Fundamental:</span>
+              <span id="audioFreqBadge" class="font-mono text-amber-400 font-bold">220 Hz (A3)</span>
+            </div>
+            <input type="range" id="audioFreqSlider" min="55" max="880" value="220" step="5" class="w-full" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <span>Volume:</span>
+            </div>
+            <input type="range" id="audioVolSlider" min="0" max="0.5" value="0.2" step="0.01" class="w-full" />
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER / RIGHT: VISUALIZATIONS & ENERGY DASHBOARD (8 COLS) -->
+    <section class="lg:col-span-8 flex flex-col gap-5">
+
+      <!-- 1. PARSEVAL ENERGY LEDGER & METRICS BAR (TOP CARDS) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+
+        <!-- Card: Original Energy -->
+        <div class="glass-panel glass-panel-interactive rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-xs font-semibold">Energia Original</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400">E_orig</span>
+          </div>
+          <div class="text-xl font-bold font-mono text-cyan-400" id="origEnergyVal">0.00000</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono">$\frac{1}{L}\int_{-L}^L [f(x)]^2 dx$</div>
+        </div>
+
+        <!-- Card: Fourier Sum Energy -->
+        <div class="glass-panel glass-panel-interactive rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-xs font-semibold">Energia de Fourier</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">E_N</span>
+          </div>
+          <div class="text-xl font-bold font-mono text-emerald-400" id="fourierEnergyVal">0.00000</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono">$\frac{a_0^2}{2} + \sum_{n=1}^N (a_n^2 + b_n^2)$</div>
+        </div>
+
+        <!-- Card: Residual Error MSE -->
+        <div class="glass-panel glass-panel-interactive rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-xs font-semibold">Erro Residual ($L^2$)</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400">MSE</span>
+          </div>
+          <div class="text-xl font-bold font-mono text-rose-400" id="errorEnergyVal">0.00000</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono">$E_{\text{orig}} - E_N \ge 0$ (Bessel)</div>
+        </div>
+
+        <!-- Card: Energy Capture Percentage -->
+        <div class="glass-panel glass-panel-interactive rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-xs font-semibold">Conservação Parseval</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">η (%)</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-bold font-mono text-purple-300" id="energyPercentVal">100.00%</span>
+            <!-- Mini Progress Ring -->
+            <svg class="w-8 h-8 -rotate-90" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="36" stroke="currentColor" stroke-width="8" class="text-slate-800" fill="transparent"></circle>
+              <circle id="energyProgressRing" cx="40" cy="40" r="36" stroke="currentColor" stroke-width="8" stroke-dasharray="226.19" stroke-dashoffset="0" stroke-linecap="round" class="text-emerald-500 transition-all duration-300" fill="transparent"></circle>
+            </svg>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5">
+            <div id="energyProgressBar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 100%;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. MAIN WAVEFORM PLOTTER CANVAS (DESMOS / GEOGEBRA STYLE) -->
+      <div class="glass-panel rounded-2xl p-4 border border-slate-800 relative flex flex-col">
+
+        <!-- Canvas Header Bar -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-2">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+              <span class="font-bold text-sm text-slate-200">Plano Gráfico de Fourier</span>
+            </div>
+            <span class="text-xs text-slate-400 hidden sm:inline">| Arraste para mover, role para zoom</span>
+          </div>
+
+          <!-- Canvas Toolbar Buttons -->
+          <div class="flex items-center gap-1.5">
+            <button id="resetViewBtn" title="Redefinir Visão (Centralizar)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium border border-slate-700 transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Ajustar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- HTML5 Canvas Container -->
+        <div class="relative w-full h-[420px] lg:h-[460px] rounded-xl overflow-hidden bg-slate-950/80 border border-slate-900 shadow-inner">
+          <canvas id="mainCanvas" class="w-full h-full cursor-crosshair"></canvas>
+        </div>
+
+        <!-- Dirichlet & Continuity Notice Banner -->
+        <div id="dirichletNoteBox" class="mt-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+          <!-- Injected dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- 3. LIVE LATEX RECONSTRUCTION FORMULA -->
+      <div class="glass-panel rounded-2xl p-4 border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+            <span>Expressão Analítica Truncada $S_N(x)$</span>
+          </label>
+          <button id="copyLatexBtn" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Copiar LaTeX</span>
+          </button>
+        </div>
+
+        <div id="latexFormulaBox" class="overflow-x-auto text-sm text-cyan-200 py-1 font-mono">
+          <!-- LaTeX rendered via KaTeX -->
+        </div>
+      </div>
+
+      <!-- 4. SPECTRUM & HARMONIC LEDGER TABS (BOTTOM GRID) -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+
+        <!-- Spectrum Canvas (6 cols) -->
+        <div class="md:col-span-6 glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col">
+          <!-- Tab Navigation -->
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80">
+            <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+              <button id="tabCoeffs" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow">Coeficientes $|c_n|$</button>
+              <button id="tabEnergyDist" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200">Energia $e_n$</button>
+              <button id="tabConvergence" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200">Convergência Parseval</button>
+            </div>
+          </div>
+
+          <div class="relative w-full h-[220px] rounded-xl overflow-hidden bg-slate-950/80 border border-slate-900 shadow-inner">
+            <canvas id="spectrumCanvas" class="w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Discrete Euler-Fourier Coefficients Table (6 cols) -->
+        <div class="md:col-span-6 glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              <span>Rastreamento de Coeficientes</span>
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Passe o mouse para destacar</span>
+          </div>
+
+          <div class="overflow-y-auto max-h-[220px] rounded-xl border border-slate-800/60 bg-slate-900/40">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 bg-slate-900/90 sticky top-0">
+                  <th class="py-2 px-2.5">Harmônico</th>
+                  <th class="py-2 px-2.5">aₙ (cos)</th>
+                  <th class="py-2 px-2.5">bₙ (sen)</th>
+                  <th class="py-2 px-2.5">|cₙ|</th>
+                  <th class="py-2 px-2.5">Energia</th>
+                  <th class="py-2 px-2.5">% Total</th>
+                </tr>
+              </thead>
+              <tbody id="coeffsTableBody">
+                <!-- Injected dynamically by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950/80 py-4 px-6 text-center text-xs text-slate-500">
+    <div class="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Desenvolvido para as disciplinas de Cálculo Avançado & Análise de Fourier — USP.</p>
+      <p class="font-mono text-slate-400">Publicado no GitHub Pages • Projeto de Código Aberto</p>
+    </div>
+  </footer>
+
+  <!-- THEORY & FORMULARY MODAL (USP NOTES) -->
+  <div id="theoryModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl relative">
+      <button onclick="document.getElementById('theoryModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 transition-colors">
+        ✕
+      </button>
+
+      <h2 class="text-xl font-bold text-cyan-400 mb-2 flex items-center gap-2">
+        <span>📘 Formulário & Fundamentos Teóricos — USP</span>
+      </h2>
+      <p class="text-xs text-slate-400 mb-4">Síntese dos resultados fundamentais contidos nas apostilas de 17/08 e 20/08.</p>
+
+      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+        
+        <!-- Section 1 -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <h3 class="font-bold text-sm text-emerald-400 mb-2">1. Coeficientes de Euler-Fourier em $[-L, L]$</h3>
+          <p class="mb-2">Dada uma função periódica $f(x)$ com período $2L$, a série associada é:</p>
+          <div class="font-mono text-cyan-300 p-2 bg-slate-900 rounded border border-slate-800 mb-2">
+            $$S(x) = \frac{a_0}{2} + \sum_{n=1}^\infty \left[ a_n \cos\left(\frac{n\pi x}{L}\right) + b_n \sin\left(\frac{n\pi x}{L}\right) \right]$$
+          </div>
+          <p>com coeficientes obtidos pela ortogonalidade:</p>
+          <div class="font-mono text-emerald-300 p-2 bg-slate-900 rounded border border-slate-800">
+            $$a_0 = \frac{1}{L}\int_{-L}^L f(x)dx, \quad a_n = \frac{1}{L}\int_{-L}^L f(x)\cos\left(\frac{n\pi x}{L}\right)dx, \quad b_n = \frac{1}{L}\int_{-L}^L f(x)\sin\left(\frac{n\pi x}{L}\right)dx$$
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <h3 class="font-bold text-sm text-amber-400 mb-2">2. Teorema de Dirichlet & Convergência Pontual</h3>
+          <p>Se $f$ e $f'$ são contínuas por partes no intervalo fundamental $[-L, L]$, então a série converge para:</p>
+          <div class="font-mono text-amber-300 p-2 bg-slate-900 rounded border border-slate-800 my-2">
+            $$S(x) = \frac{f(x^+) + f(x^-)}{2}$$
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li>Em pontos de continuidade: $S(x) = f(x)$.</li>
+            <li>Em pontos de salto: $S(x_0)$ converge exatamente para o <strong>ponto médio do salto</strong>.</li>
+            <li>Nas extremidades: $S(\pm L) = \frac{f(-L^+) + f(L^-)}{2}$.</li>
+          </ul>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <h3 class="font-bold text-sm text-purple-400 mb-2">3. Conservação de Energia & Identidade de Parseval</h3>
+          <p>O Teorema de Pitágoras em dimensão infinita ($L^2$) estabelece que a energia do sinal no domínio do tempo é igual à soma da energia de seus harmônicos:</p>
+          <div class="font-mono text-purple-300 p-2 bg-slate-900 rounded border border-slate-800 my-2">
+            $$\frac{a_0^2}{2} + \sum_{n=1}^\infty (a_n^2 + b_n^2) = \frac{1}{L}\int_{-L}^L [f(x)]^2 dx$$
+          </div>
+          <p>Para qualquer soma parcial truncada com $N$ termos, vale a <strong>Desigualdade de Bessel</strong>:</p>
+          <div class="font-mono text-slate-400 p-2 bg-slate-900 rounded border border-slate-800">
+            $$E_N = \frac{a_0^2}{2} + \sum_{n=1}^N (a_n^2 + b_n^2) \le E_{\text{original}}$$
+          </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <h3 class="font-bold text-sm text-cyan-400 mb-2">4. Aplicação: Série de Basel e $\sum \frac{1}{n^4}$</h3>
+          <p>Aplicando Dirichlet e Parseval em $f(x) = |x|$ em $[-\pi, \pi]$:</p>
+          <div class="font-mono text-cyan-300 p-2 bg-slate-900 rounded border border-slate-800 my-2">
+            $$\sum_{n=1}^\infty \frac{1}{n^2} = \frac{\pi^2}{6}, \qquad \sum_{n=1}^\infty \frac{1}{n^4} = \frac{\pi^4}{90}$$
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="document.getElementById('theoryModal').classList.add('hidden')" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold">
+          Entendido, Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="src/js/fourier-engine.js"></script>
+  <script src="src/js/canvas-renderer.js"></script>
+  <script src="src/js/spectrum-chart.js"></script>
+  <script src="src/js/audio-synth.js"></script>
+  <script src="src/js/app.js"></script>
+</body>
+</html>
