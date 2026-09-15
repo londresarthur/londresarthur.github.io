@@ -1,6 +1,6 @@
 """
 Testes Unitários para o Filtro de Média Móvel e Algoritmos DSP
-Acervo Acadêmico USP — Processamento Digital de Sinais
+Laboratório Virtual USP — Processamento Digital de Sinais
 """
 
 import math

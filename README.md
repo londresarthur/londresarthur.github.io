@@ -1,6 +1,6 @@
-# 🌌 Arthur Londres — Laboratórios Virtuais & Acervo Acadêmico USP
+# 🌌 Arthur Londres — Laboratórios Virtuais USP
 
-Portal institucional e educacional da **Universidade de São Paulo (USP)** hospedando aplicações web computacionais interativas, ferramentas científicas e o acervo de disciplinas de Ciências Exatas e Engenharia.
+Portal institucional e educacional da **Universidade de São Paulo (USP)** hospedando aplicações web computacionais interativas, ferramentas científicas e simuladores de Processamento Digital de Sinais (PDS) e Análise Harmônica de Fourier.
 
 - 🌐 **Portal Online**: **[https://londresarthur.github.io/](https://londresarthur.github.io/)**
 
@@ -72,13 +72,6 @@ londresarthur.github.io/
 │   ├── reference/                 # 📖 Especificações de APIs e catálogos de presets
 │   ├── explanation/               # 💡 Teoria, Parseval, Dirichlet, Kalman e Wavelets
 │   └── README.md                  # Índice do portal de documentação
-├── academico/                     # Acervo acadêmico e material de estudo USP
-│   ├── calculo/                   # Apostilas e notas de aula de Cálculo Avançado
-│   │   ├── 1708/                  # Fundamentos, Ortogonalidade, Basel & Parseval
-│   │   └── 2008/                  # Extensões par/ímpar, f(x) = pi - x e Dirichlet
-│   ├── numericos/                 # Métodos Numéricos (Método de Euler para EDOs)
-│   ├── prova/                     # Resumos, roteiros e listas para P1 e P2
-│   └── quimica/                   # Apostilas de Físico-Química e Termodinâmica
 ├── .github/                       # Workflows de deploy automático
 │   └── workflows/
 │       └── pages.yml              # GitHub Pages Action (deploy a partir da raiz)

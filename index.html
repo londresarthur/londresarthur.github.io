@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Arthur Londres — Laboratórios Virtuais & Acervo Acadêmico USP</title>
-  <meta name="description" content="Portal de Laboratórios Virtuais Interativos (Fourier Toolbox, Filtragem Digital de Sinais, Filtro de Kalman, Wavelets) e Acervo Acadêmico da Universidade de São Paulo." />
+  <title>Arthur Londres — Laboratórios Virtuais de Processamento de Sinais</title>
+  <meta name="description" content="Portal de Laboratórios Virtuais Interativos: Fourier Toolbox, Filtragem Digital de Sinais, Filtro de Kalman e Wavelets." />
   <meta property="og:title" content="Arthur Londres — Laboratórios Virtuais USP" />
-  <meta property="og:description" content="Laboratórios interativos de Fourier, Filtragem Digital de Sinais (PDS) e Acervo Acadêmico USP." />
+  <meta property="og:description" content="Laboratórios interativos de Fourier, Filtragem Digital de Sinais (PDS), Filtro de Kalman e Wavelets." />
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 50 Q 30 15 50 50 T 90 50' stroke='%230ea5e9' stroke-width='8' fill='none'/></svg>" type="image/svg+xml" />
 
@@ -83,15 +83,14 @@
             <span class="font-bold text-base lg:text-lg text-white tracking-tight">Arthur Londres</span>
             <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">USP</span>
           </div>
-          <p class="text-xs text-slate-400 hidden sm:block">Laboratórios Virtuais & Acervo Acadêmico</p>
+          <p class="text-xs text-slate-400 hidden sm:block">Laboratórios Virtuais Interativos</p>
         </div>
       </a>
 
       <!-- Navegação Superior -->
       <nav class="flex items-center gap-1.5 sm:gap-3 text-xs font-semibold">
         <a href="#laboratorios" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Laboratórios</a>
-        <a href="#academico" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors hidden md:inline-block">Acervo USP</a>
-        <a href="#documentacao" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors hidden sm:inline-block">Docs (Diátaxis)</a>
+        <a href="#documentacao" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Docs (Diátaxis)</a>
 
         <a href="https://github.com/londresarthur/usp" target="_blank" rel="noreferrer" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors shadow-sm ml-1" title="Ver repositório no GitHub">
           <svg class="w-4 h-4 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
@@ -122,7 +121,7 @@
 
       <!-- Descrição Subordinada -->
       <p class="max-w-2xl mx-auto text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-        Plataforma computacional interativa para análise harmônica de Fourier, conservação de energia, filtragem digital de ruído estocástico (Média Móvel, Kalman, Wavelet) e acervo acadêmico da USP.
+        Plataforma computacional interativa para análise harmônica de Fourier, conservação de energia e filtragem digital de ruído estocástico (Média Móvel, Kalman, Wavelet).
       </p>
 
       <!-- Botões de Ação Rápida -->
@@ -135,8 +134,8 @@
           <span>Laboratório de Filtragem (PDS)</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
-        <a href="#academico" class="px-5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold text-xs sm:text-sm transition-colors">
-          <span>Ver Acervo USP</span>
+        <a href="#documentacao" class="px-5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2">
+          <span>Documentação Técnica</span>
         </a>
       </div>
     </div>
@@ -273,57 +272,7 @@
     </div>
   </section>
 
-  <!-- SEÇÃO 2: ACERVO ACADÊMICO USP -->
-  <section id="academico" class="py-12 px-4 max-w-7xl mx-auto w-full border-t border-slate-900">
-    <div class="mb-8">
-      <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-1">Acervo Acadêmico USP</h2>
-      <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Notas de Aula, Teoria &amp; Listas de Exercícios</h3>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- Card Cálculo -->
-      <a href="academico/calculo/" class="glass-card p-5 rounded-2xl transition-all hover:-translate-y-1 block">
-        <div class="text-2xl mb-2">📐</div>
-        <h4 class="font-bold text-sm text-white mb-1">Cálculo Avançado</h4>
-        <p class="text-xs text-slate-400 leading-relaxed mb-3">
-          Séries de Fourier, ortogonalidade, identidades de Parseval, problema de Basel e extensões pares/ímpares de Dirichlet.
-        </p>
-        <span class="text-xs font-bold text-cyan-400 flex items-center gap-1">Ver apostilas →</span>
-      </a>
-
-      <!-- Card Métodos Numéricos -->
-      <a href="academico/numericos/" class="glass-card p-5 rounded-2xl transition-all hover:-translate-y-1 block">
-        <div class="text-2xl mb-2">🔢</div>
-        <h4 class="font-bold text-sm text-white mb-1">Métodos Numéricos</h4>
-        <p class="text-xs text-slate-400 leading-relaxed mb-3">
-          Resolução computacional de Equações Diferenciais Ordinárias (EDOs) com Método de Euler e simulações em Python.
-        </p>
-        <span class="text-xs font-bold text-cyan-400 flex items-center gap-1">Ver simulações →</span>
-      </a>
-
-      <!-- Card Roteiros de Prova -->
-      <a href="academico/prova/" class="glass-card p-5 rounded-2xl transition-all hover:-translate-y-1 block">
-        <div class="text-2xl mb-2">📝</div>
-        <h4 class="font-bold text-sm text-white mb-1">Roteiros de Avaliações</h4>
-        <p class="text-xs text-slate-400 leading-relaxed mb-3">
-          Resumos mnemônicos, roteiros de revisão e formulários para provas P1 e P2 de Cálculo e Eletrofisiologia.
-        </p>
-        <span class="text-xs font-bold text-cyan-400 flex items-center gap-1">Acessar roteiros →</span>
-      </a>
-
-      <!-- Card Físico-Química -->
-      <a href="academico/quimica/" class="glass-card p-5 rounded-2xl transition-all hover:-translate-y-1 block">
-        <div class="text-2xl mb-2">🧪</div>
-        <h4 class="font-bold text-sm text-white mb-1">Físico-Química</h4>
-        <p class="text-xs text-slate-400 leading-relaxed mb-3">
-          Teoria e derivações da Lei Limite de Debye-Hückel, Termodinâmica Eletroquímica, Pilha de Daniell e Mol de Avanço.
-        </p>
-        <span class="text-xs font-bold text-cyan-400 flex items-center gap-1">Ver notas teóricas →</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- SEÇÃO 3: DOCUMENTAÇÃO TÉCNICA (DIÁTAXIS) -->
+  <!-- SEÇÃO 2: DOCUMENTAÇÃO TÉCNICA (DIÁTAXIS) -->
   <section id="documentacao" class="py-12 px-4 max-w-7xl mx-auto w-full border-t border-slate-900">
     <div class="mb-8">
       <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1">Framework Diátaxis</h2>
@@ -367,7 +316,7 @@
       <div class="flex items-center gap-4 text-slate-400">
         <a href="fourier-toolbox/" class="hover:text-cyan-400 transition-colors">Fourier Toolbox</a>
         <a href="media-movel/" class="hover:text-cyan-400 transition-colors">Filtragem de Sinais</a>
-        <a href="academico/" class="hover:text-cyan-400 transition-colors">Acervo Acadêmico</a>
+        <a href="#documentacao" class="hover:text-cyan-400 transition-colors">Documentação</a>
         <a href="https://github.com/londresarthur/usp" target="_blank" rel="noreferrer" class="hover:text-white transition-colors">GitHub</a>
       </div>
     </div>
