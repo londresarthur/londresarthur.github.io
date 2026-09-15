@@ -15,7 +15,12 @@ Biblioteca de notas de aula, apostilas teóricas, roteiros de prova e exercício
 
 ---
 
-## 🔬 Laboratório Virtual
+## 🔬 Laboratórios Virtuais Interativos
 
-O repositório inclui na raiz a aplicação interativa **Fourier Studio**:
-- Acesse online: **[https://londresarthur.github.io/usp/](https://londresarthur.github.io/usp/)**
+O repositório inclui aplicações interativas para exploração visual e computacional:
+
+1. **Fourier Studio**: Análise de Fourier, Conservação de Energia (Parseval) e Decomposição Harmônica.
+   - Acesse online: **[https://londresarthur.github.io/usp/](https://londresarthur.github.io/usp/)**
+
+2. **Filtro de Média Móvel (PDS/DSP)**: Simulação interativa no domínio do tempo e frequência, atenuação de ruído branco, atraso de grupo e resposta ao degrau.
+   - Acesse online: **[https://londresarthur.github.io/media-movel/](https://londresarthur.github.io/media-movel/)**

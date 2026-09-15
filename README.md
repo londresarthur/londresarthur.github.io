@@ -29,6 +29,14 @@ Acesse o simulador online em produção:
 
 ---
 
+## 🔬 Laboratórios Virtuais (Aplicações Web)
+
+O repositório publica aplicações interativas de alta fidelidade:
+1. **[Fourier Studio USP](https://londresarthur.github.io/usp/)**: Análise harmônica, convergência de Dirichlet, conservação de energia de Parseval e síntese sonora.
+2. **[Filtro de Média Móvel (PDS/DSP)](https://londresarthur.github.io/media-movel/)**: Simulação interativa no domínio do tempo e da frequência com sinais degrau, ruído branco aditivo (AWGN), controle de janela $M$, atraso de grupo $\tau_g = (M-1)/2$, resposta analítica sinc/Dirichlet e exportação de dados.
+
+---
+
 ## 🪟 Repositório Irmão: Fourier Windows (Desktop & Python)
 
 O ecossistema conta também com a versão dedicada para Windows / Desktop em repositório separado:
@@ -42,16 +50,21 @@ O projeto segue uma arquitetura modular, limpa e padronizada com documentação 
 
 ```
 usp/
-├── index.html                     # Ponto de entrada web (publicado no GitHub Pages)
+├── index.html                     # Ponto de entrada web (Fourier Studio)
+├── media-movel/                   # Aplicação web do Filtro de Média Móvel (PDS)
+│   └── index.html                 # Simulador interativo com gráficos de tempo e frequência
 ├── src/                           # Código-fonte da aplicação web
 │   ├── css/
 │   │   └── style.css              # Glassmorphism, temas claro/escuro e estilos UI
 │   └── js/
 │       ├── fourier-engine.js      # Motor matemático de quadratura, Parseval e Gibbs
+│       ├── moving-average-engine.js # Motor matemático de DSP e filtragem de média móvel
 │       ├── canvas-renderer.js     # Motor gráfico interativo 2D HiDPI
 │       ├── spectrum-chart.js      # Gráfico de espectro e convergência de energia
 │       ├── audio-synth.js         # Sintetizador aditivo Web Audio API
 │       └── app.js                 # Orquestrador da interface e KaTeX
+├── tests/                         # Suíte de testes unitários automatizados
+│   └── test_moving_average.py     # Testes matemáticos de invariância, resposta e ruído
 ├── docs/                          # Documentação Técnica (Framework Diátaxis)
 │   ├── tutorials/                 # 🚀 Tutoriais práticos (getting started)
 │   ├── how-to/                    # 🛠️ Guias "Como Fazer" (custom formulas, export)

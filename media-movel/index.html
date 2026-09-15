@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Filtro de Média Móvel — Processamento Digital de Sinais USP</title>
+  <meta name="description" content="Simulador interativo avançado do Filtro de Média Móvel (FIR/LTI) em sinal degrau e sinais periódicos com ruído branco. Análise no domínio do tempo e da frequência." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 50 Q 30 15 50 50 T 90 50' stroke='%2338bdf8' stroke-width='8' fill='none'/></svg>" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for LaTeX rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    /* Estilos personalizados e scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    input[type=range] {
+      accent-color: #38bdf8;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-white font-sans antialiased">
+
+  <!-- TOP NAVBAR -->
+  <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <a href="../index.html" class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 hover:scale-105 transition-transform" title="Voltar ao Fourier Studio">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="font-bold text-lg lg:text-xl text-white tracking-tight">Filtro de Média Móvel</h1>
+          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">PDS • USP</span>
+          <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">FIR / LTI</span>
+        </div>
+        <p class="text-xs text-slate-400">Suavização estatística de ruído branco, atraso de grupo e resposta em frequência</p>
+      </div>
+    </div>
+
+    <!-- Actions Header Buttons -->
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Teoria Modal Trigger -->
+      <button id="openTheoryBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-semibold transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <span>Teoria & Deduções</span>
+      </button>
+
+      <!-- Export CSV -->
+      <button id="exportCsvBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700/40 hover:bg-emerald-600/60 text-emerald-300 border border-emerald-600/40 text-xs font-semibold transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        <span>Exportar CSV</span>
+      </button>
+
+      <!-- Export Canvas Image -->
+      <button id="exportPngBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all shadow-sm">
+        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span>Salvar Imagem</span>
+      </button>
+
+      <!-- Back to Fourier Studio -->
+      <a href="../index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-medium transition-colors">
+        <span>Fourier Studio</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN BODY LAYOUT -->
+  <main class="flex-1 p-3 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 max-w-[1780px] mx-auto w-full">
+
+    <!-- LEFT SIDEBAR: CONTROLS & PARAMS (4 COLS) -->
+    <aside class="lg:col-span-4 flex flex-col gap-4">
+
+      <!-- Signal & Noise Panel -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          1. Sinal de Entrada & Ruído
+        </h2>
+
+        <!-- Signal Type -->
+        <div class="space-y-3 text-sm">
+          <div>
+            <label for="signalType" class="block text-xs font-medium text-slate-300 mb-1">Tipo de Sinal Ideal</label>
+            <select id="signalType" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+              <option value="step" selected>Degrau Unitário (Transição 2.0 → 1.0)</option>
+              <option value="square">Trem de Pulsos / Onda Quadrada</option>
+              <option value="sine">Senoide Pura (Harmônico fundamental)</option>
+              <option value="impulse">Resposta ao Impulso δ[n] (Verifica h[n])</option>
+              <option value="ecg">Sinal Biomédico Sintético (Complexo ECG)</option>
+            </select>
+          </div>
+
+          <!-- Noise Model -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="noiseType" class="block text-xs font-medium text-slate-300 mb-1">Modelo de Ruído</label>
+              <select id="noiseType" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                <option value="gaussian" selected>Gaussiano Branco (AWGN)</option>
+                <option value="uniform">Uniforme [-a, a]</option>
+                <option value="impulsive">Impulsivo (Sal e Pimenta)</option>
+              </select>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="noiseSigma" class="text-xs font-medium text-slate-300">Intensidade σ</label>
+                <span id="noiseSigmaVal" class="text-xs font-mono font-bold text-cyan-400">0.10</span>
+              </div>
+              <input id="noiseSigma" type="range" min="0.00" max="0.50" step="0.01" value="0.10" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            </div>
+          </div>
+
+          <!-- Seed / Regen Noise Button -->
+          <button id="regenNoiseBtn" class="w-full py-2 px-3 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-colors">
+            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Gerar Nova Realização de Ruído</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Parameters Panel -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+          2. Parâmetros do Filtro
+        </h2>
+
+        <div class="space-y-3">
+          <!-- Filter Architecture -->
+          <div>
+            <label for="filterType" class="block text-xs font-medium text-slate-300 mb-1">Tipo de Filtro</label>
+            <select id="filterType" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+              <option value="causal" selected>Média Móvel Causal (FIR padrão)</option>
+              <option value="centralized">Média Móvel Centralizada (Fase Zero / Não Causal)</option>
+              <option value="ema">Média Móvel Exponencial (EMA / IIR 1º Polo)</option>
+              <option value="median">Filtro de Mediana (Não-linear, robusto a outliers)</option>
+            </select>
+          </div>
+
+          <!-- Window Size M -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="windowSize" class="text-xs font-medium text-slate-300">Tamanho da Janela ($M$)</label>
+              <span id="windowSizeVal" class="text-xs font-mono font-bold text-cyan-400">5 amostras</span>
+            </div>
+            <input id="windowSize" type="range" min="2" max="25" step="1" value="5" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+
+            <!-- Preset Buttons for M -->
+            <div class="flex items-center gap-1.5 mt-2">
+              <span class="text-[11px] text-slate-400 mr-1">Rápido:</span>
+              <button class="preset-m px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono font-bold text-slate-300 transition-colors" data-m="2">M=2</button>
+              <button class="preset-m px-2 py-1 rounded bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-500/50 text-xs font-mono font-bold text-cyan-300 transition-colors" data-m="5">M=5</button>
+              <button class="preset-m px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono font-bold text-slate-300 transition-colors" data-m="10">M=10</button>
+              <button class="preset-m px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono font-bold text-slate-300 transition-colors" data-m="15">M=15</button>
+              <button class="preset-m px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono font-bold text-slate-300 transition-colors" data-m="21">M=21</button>
+            </div>
+          </div>
+
+          <!-- Formula Display Card -->
+          <div id="activeFormulaCard" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center font-mono text-xs text-cyan-200 overflow-x-auto min-h-[46px] flex items-center justify-center">
+            <!-- KaTeX injected here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            3. Execução & Varredura
+          </span>
+          <span id="animProgressBadge" class="text-[11px] font-mono text-slate-400">Amostra: 0/60</span>
+        </h2>
+
+        <div class="space-y-3">
+          <!-- Play / Step buttons -->
+          <div class="grid grid-cols-4 gap-2">
+            <button id="pauseBtn" class="col-span-2 py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-cyan-600/30">
+              <svg id="pauseIcon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+              <span id="pauseBtnText">Pausar</span>
+            </button>
+
+            <button id="stepPrevBtn" title="Passo anterior (Seta esquerda)" class="py-2 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+
+            <button id="stepNextBtn" title="Próximo passo (Seta direita)" class="py-2 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Speed & Display Mode -->
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="speedRange" class="text-xs text-slate-300">Velocidade</label>
+                <span id="speedVal" class="text-xs font-mono text-cyan-400">95 ms</span>
+              </div>
+              <input id="speedRange" type="range" min="20" max="250" step="5" value="95" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            </div>
+
+            <div class="flex items-center pt-3">
+              <label class="inline-flex items-center cursor-pointer">
+                <input id="showFullCheck" type="checkbox" class="sr-only peer">
+                <div class="relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+                <span class="ms-2 text-xs font-medium text-slate-300">Traçado total</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Statistical Metrics Card -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          4. Métricas & Desempenho Teórico
+        </h2>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <!-- Metric 1: Redução de Variância -->
+          <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-0.5">Atenuação Ruído (1/M)</span>
+            <span id="metricVarReduction" class="font-mono font-bold text-amber-300 text-sm">0.200 (-6.99 dB)</span>
+          </div>
+
+          <!-- Metric 2: Ganho de SNR -->
+          <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-0.5">Ganho Teórico SNR</span>
+            <span id="metricSnrGain" class="font-mono font-bold text-emerald-400 text-sm">+6.99 dB</span>
+          </div>
+
+          <!-- Metric 3: Atraso de Grupo -->
+          <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-0.5">Atraso Grupo (τ)</span>
+            <span id="metricGroupDelay" class="font-mono font-bold text-cyan-300 text-sm">2.0 amostras</span>
+          </div>
+
+          <!-- Metric 4: MSE Experimental -->
+          <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-0.5">MSE Experimental</span>
+            <span id="metricMse" class="font-mono font-bold text-slate-200 text-sm">0.0028</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN AREA: DUAL CANVAS & SPECTRUM (8 COLS) -->
+    <section class="lg:col-span-8 flex flex-col gap-5">
+
+      <!-- TIME DOMAIN CANVAS CARD -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl flex flex-col">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div>
+            <h2 class="font-bold text-sm lg:text-base text-white tracking-tight flex items-center gap-2">
+              <span>Domínio do Tempo: Sinal, Ruído e Janela Deslizante</span>
+            </h2>
+            <p class="text-xs text-slate-400">Visualização em tempo real das amostras sob a média móvel</p>
+          </div>
+
+          <!-- Interactive Legend -->
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-1 rounded bg-slate-400 inline-block"></span>
+              <span class="text-slate-300">Sinal Ideal</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+              <span class="text-slate-300">Sinal com Ruído</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-1.5 rounded bg-cyan-400 inline-block"></span>
+              <span class="text-cyan-300 font-semibold">Saída Filtrada y[n]</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-300 inline-block"></span>
+              <span class="text-amber-300">Janela Ativa</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full rounded-xl overflow-hidden bg-slate-900 border border-slate-800">
+          <canvas id="timeCanvas" class="w-full h-[360px] lg:h-[420px] block cursor-crosshair"></canvas>
+          <div id="tooltip" class="absolute hidden pointer-events-none bg-slate-950/95 border border-cyan-500/50 rounded-lg px-3 py-2 text-xs font-mono shadow-2xl z-30 transition-opacity"></div>
+        </div>
+      </div>
+
+      <!-- FREQUENCY DOMAIN / SPECTRUM CARD -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl flex flex-col">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div>
+            <h2 class="font-bold text-sm lg:text-base text-white tracking-tight flex items-center gap-2">
+              <span>Domínio da Frequência: Resposta em Magnitude |H(e<sup>jω</sup>)|</span>
+            </h2>
+            <p class="text-xs text-slate-400">Núcleo Sinc/Dirichlet, frequência de corte -3dB e atenuação de lóbulos secundários</p>
+          </div>
+
+          <!-- Unit scale toggle (dB vs Linear) -->
+          <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs font-medium">
+            <button id="freqScaleDb" class="px-2.5 py-1 rounded-md bg-cyan-600 text-white font-bold transition-colors">Decibéis (dB)</button>
+            <button id="freqScaleLinear" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition-colors">Linear [0, 1]</button>
+          </div>
+        </div>
+
+        <!-- Frequency Canvas -->
+        <div class="relative w-full rounded-xl overflow-hidden bg-slate-900 border border-slate-800">
+          <canvas id="freqCanvas" class="w-full h-[220px] lg:h-[250px] block"></canvas>
+        </div>
+
+        <!-- Mathematical Insights Bar -->
+        <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+          <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+            <span class="text-slate-400 block text-[11px]">1º Nulo Espectral:</span>
+            <span id="freqFirstNullText" class="font-mono text-cyan-300 font-bold">ω = 0.40π (f = 0.20 fs)</span>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+            <span class="text-slate-400 block text-[11px]">Banda Passante (-3 dB):</span>
+            <span id="freqCutoffText" class="font-mono text-emerald-300 font-bold">ω_c ≈ 0.18π</span>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+            <span class="text-slate-400 block text-[11px]">Atenuação Lóbulo Secundário:</span>
+            <span class="font-mono text-amber-300 font-bold">-13.3 dB (assintótica)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- THEORY MODAL -->
+  <div id="theoryModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+          <h3 class="font-bold text-lg text-white">Fundamentos Teóricos: Filtro de Média Móvel</h3>
+        </div>
+        <button id="closeTheoryBtn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6 overflow-y-auto space-y-6 text-sm text-slate-300 leading-relaxed font-sans">
+        <section>
+          <h4 class="font-bold text-cyan-400 text-base mb-2">1. Equação a Diferenças & Resposta ao Impulso</h4>
+          <p>
+            O filtro de média móvel causal de $M$ pontos é um filtro digital FIR (Finite Impulse Response) LTI cuja saída $y[n]$ é dada pela média aritmética simples das últimas $M$ amostras:
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
+            $$y[n] = \frac{1}{M} \sum_{k=0}^{M-1} x[n-k]$$
+          </div>
+          <p>
+            Sua resposta ao impulso $h[n]$ é um pulso retangular discreto normalizado de duração $M$:
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
+            $$h[n] = \begin{cases} \frac{1}{M}, & 0 \le n \le M-1 \\ 0, & \text{caso contrário} \end{cases}$$
+          </div>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-cyan-400 text-base mb-2">2. Resposta em Frequência (Núcleo de Dirichlet / Sinc Discreta)</h4>
+          <p>
+            Aplicando a Transformada de Fourier de Tempo Discreto (DTFT) a $h[n]$:
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
+            $$H(e^{j\omega}) = \sum_{n=0}^{M-1} \frac{1}{M} e^{-j\omega n} = \frac{1}{M} \frac{1 - e^{-j\omega M}}{1 - e^{-j\omega}} = \frac{1}{M} \frac{\sin(\omega M / 2)}{\sin(\omega / 2)} e^{-j\omega \frac{M-1}{2}}$$
+          </div>
+          <p>
+            A magnitude $|H(e^{j\omega})|$ possui forma de sinc periódica (núcleo de Dirichlet). O primeiro nulo ocorre exatamente em $\omega_0 = \frac{2\pi}{M}$.
+          </p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-cyan-400 text-base mb-2">3. Atraso de Grupo e Resposta de Fase Linear</h4>
+          <p>
+            Como os coeficientes são estritamente simétricos ($h[n] = h[M - 1 - n]$), o filtro possui <strong>fase linear generalizada</strong>:
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
+            $$\tau_g(\omega) = -\frac{d\theta(\omega)}{d\omega} = \frac{M - 1}{2} \text{ amostras}$$
+          </div>
+          <p>
+            Isso implica que todas as frequências sofrem exatamente o mesmo retardo temporal constante, eliminando distorção de fase, mas atrasando transições abruptas (degraus) por $\frac{M-1}{2}$ amostras.
+          </p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-cyan-400 text-base mb-2">4. Redução de Variância de Ruído Branco</h4>
+          <p>
+            Considere um ruído branco $w[n]$ estacionário com média zero e variância $\sigma_w^2$. Como as amostras são estatisticamente descorrelacionadas:
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
+            $$\sigma_y^2 = \text{Var}\left(\frac{1}{M}\sum_{k=0}^{M-1} w[n-k]\right) = \frac{1}{M^2}\sum_{k=0}^{M-1} \text{Var}(w[n-k]) = \frac{1}{M^2}(M \sigma_w^2) = \frac{\sigma_w^2}{M}$$
+          </div>
+          <p>
+            O ganho de relação sinal-ruído (SNR) proporcionado é de $\Delta \text{SNR} = 10\log_{10}(M) \text{ dB}$. Logo, quadruplicar o tamanho da janela $M$ reduz o ruído pela metade em desvio padrão (+6 dB).
+          </p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-amber-400 text-base mb-2">5. O Trade-off Fundamental: Suavização vs Tempo de Subida</h4>
+          <p>
+            Ao aumentar $M$, reduz-se o ruído de alta frequência, porém o tempo de resposta transitória a degraus é proporcional a $M$: $t_r = M \cdot T_s$. Para preservar bordas com ruídos impulsivos intensos, filtros não-lineares como a <strong>Mediana</strong> superam a média linear.
+          </p>
+        </section>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/60 flex justify-end">
+        <button id="closeTheoryBtnFooter" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition-colors">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-900 bg-slate-950/90 text-slate-500 text-xs py-4 px-4 text-center mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <span>USP — Universidade de São Paulo</span> • 
+        <span>Processamento Digital de Sinais</span>
+      </div>
+      <div>
+        Baseado em simulação de média móvel & degrau • Licença MIT
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core Mathematical Engine -->
+  <script src="../src/js/moving-average-engine.js"></script>
+
+  <!-- Application Controller Script -->
+  <script>
+  (() => {
+    'use strict';
+
+    // Canvas & Contexts
+    const timeCanvas = document.getElementById('timeCanvas');
+    const timeCtx = timeCanvas.getContext('2d');
+    const freqCanvas = document.getElementById('freqCanvas');
+    const freqCtx = freqCanvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+
+    // UI Elements
+    const signalTypeSelect = document.getElementById('signalType');
+    const noiseTypeSelect = document.getElementById('noiseType');
+    const noiseSigmaSlider = document.getElementById('noiseSigma');
+    const noiseSigmaVal = document.getElementById('noiseSigmaVal');
+    const regenNoiseBtn = document.getElementById('regenNoiseBtn');
+
+    const filterTypeSelect = document.getElementById('filterType');
+    const windowSizeSlider = document.getElementById('windowSize');
+    const windowSizeVal = document.getElementById('windowSizeVal');
+    const presetButtons = document.querySelectorAll('.preset-m');
+    const activeFormulaCard = document.getElementById('activeFormulaCard');
+
+    const pauseBtn = document.getElementById('pauseBtn');
+    const pauseBtnText = document.getElementById('pauseBtnText');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const stepPrevBtn = document.getElementById('stepPrevBtn');
+    const stepNextBtn = document.getElementById('stepNextBtn');
+    const speedRange = document.getElementById('speedRange');
+    const speedVal = document.getElementById('speedVal');
+    const showFullCheck = document.getElementById('showFullCheck');
+    const animProgressBadge = document.getElementById('animProgressBadge');
+
+    // Metrics elements
+    const metricVarReduction = document.getElementById('metricVarReduction');
+    const metricSnrGain = document.getElementById('metricSnrGain');
+    const metricGroupDelay = document.getElementById('metricGroupDelay');
+    const metricMse = document.getElementById('metricMse');
+
+    // Frequency details
+    const freqScaleDb = document.getElementById('freqScaleDb');
+    const freqScaleLinear = document.getElementById('freqScaleLinear');
+    const freqFirstNullText = document.getElementById('freqFirstNullText');
+    const freqCutoffText = document.getElementById('freqCutoffText');
+
+    // Modals
+    const theoryModal = document.getElementById('theoryModal');
+    const openTheoryBtn = document.getElementById('openTheoryBtn');
+    const closeTheoryBtn = document.getElementById('closeTheoryBtn');
+    const closeTheoryBtnFooter = document.getElementById('closeTheoryBtnFooter');
+
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const exportPngBtn = document.getElementById('exportPngBtn');
+
+    // Simulation State
+    const N = 61;
+    const T_FINAL = 10.0;
+    let M = 5;
+    let signalType = 'step';
+    let noiseType = 'gaussian';
+    let noiseSigma = 0.10;
+    let filterType = 'causal';
+    let isDbScale = true;
+
+    let idealSignal = [];
+    let noiseArray = [];
+    let noisySignal = [];
+    let filteredSignal = [];
+
+    let animIndex = M - 1;
+    let isPaused = false;
+    let frameInterval = 95;
+    let lastFrameTime = 0;
+    let animFrameId = null;
+
+    let timeCanvasW = 0, timeCanvasH = 0;
+    let freqCanvasW = 0, freqCanvasH = 0;
+
+    // Inicialização dos Sinais
+    function updateSignals() {
+      idealSignal = MovingAverageEngine.generateSignal(signalType, N, {
+        stepIndex: Math.floor(N / 2),
+        highVal: 2.0,
+        lowVal: 1.0,
+        freq: 2.0
+      });
+
+      if (!noiseArray || noiseArray.length !== N) {
+        regenerateNoise();
+      } else {
+        combineSignalAndNoise();
+      }
+    }
+
+    function regenerateNoise() {
+      noiseArray = MovingAverageEngine.generateNoise(noiseType, N, noiseSigma);
+      combineSignalAndNoise();
+    }
+
+    function combineSignalAndNoise() {
+      noisySignal = new Array(N);
+      for (let i = 0; i < N; i++) {
+        noisySignal[i] = idealSignal[i] + noiseArray[i];
+      }
+      recalculateFilter();
+    }
+
+    function recalculateFilter() {
+      switch (filterType) {
+        case 'causal':
+          filteredSignal = MovingAverageEngine.filterCausalMovingAverage(noisySignal, M);
+          break;
+        case 'centralized':
+          filteredSignal = MovingAverageEngine.filterCentralizedMovingAverage(noisySignal, M);
+          break;
+        case 'ema':
+          filteredSignal = MovingAverageEngine.filterExponentialMovingAverage(noisySignal, M);
+          break;
+        case 'median':
+          filteredSignal = MovingAverageEngine.filterMedian(noisySignal, M);
+          break;
+        default:
+          filteredSignal = MovingAverageEngine.filterCausalMovingAverage(noisySignal, M);
+      }
+
+      if (animIndex < getMinAnimIndex() || animIndex >= N) {
+        animIndex = getMinAnimIndex();
+      }
+
+      updateActiveFormula();
+      updateMetricsDisplay();
+      drawTimeDomain();
+      drawFrequencyDomain();
+    }
+
+    function getMinAnimIndex() {
+      if (filterType === 'causal') return M - 1;
+      if (filterType === 'centralized') return Math.floor((M - 1) / 2);
+      if (filterType === 'median') return Math.floor(M / 2);
+      return 0; // EMA
+    }
+
+    function updateActiveFormula() {
+      let latex = '';
+      if (filterType === 'causal') {
+        latex = `M = ${M} \\quad y[n] = \\frac{1}{${M}} \\sum_{k=0}^{${M - 1}} x[n-k]`;
+      } else if (filterType === 'centralized') {
+        const kHalf = Math.floor((M - 1) / 2);
+        latex = `M = ${M} \\quad y[n] = \\frac{1}{${M}} \\sum_{k=-${kHalf}}^{${kHalf}} x[n+k]`;
+      } else if (filterType === 'ema') {
+        const alpha = (2 / (M + 1)).toFixed(3);
+        latex = `\\alpha = \\frac{2}{M+1} = ${alpha} \\quad y[n] = ${alpha} x[n] + ${(1 - alpha).toFixed(3)} y[n-1]`;
+      } else if (filterType === 'median') {
+        latex = `M = ${M} \\quad y[n] = \\text{mediana}\\{x[n-\\lfloor M/2\\rfloor], \\dots, x[n+\\lfloor M/2\\rfloor]\\}`;
+      }
+
+      if (window.katex) {
+        try {
+          katex.render(latex, activeFormulaCard, { displayMode: true, throwOnError: false });
+        } catch (e) {
+          activeFormulaCard.textContent = latex;
+        }
+      } else {
+        activeFormulaCard.textContent = latex;
+      }
+    }
+
+    function updateMetricsDisplay() {
+      const metrics = MovingAverageEngine.computeMetrics(idealSignal, noisySignal, filteredSignal, M, filterType);
+
+      metricVarReduction.textContent = `${metrics.theoreticalVarReduction.toFixed(3)} (${(-metrics.theoreticalSnrGainDb).toFixed(2)} dB)`;
+      metricSnrGain.textContent = `+${metrics.theoreticalSnrGainDb.toFixed(2)} dB`;
+      metricGroupDelay.textContent = `${metrics.groupDelaySamples.toFixed(1)} amostras (${(metrics.groupDelaySamples * (T_FINAL / (N - 1))).toFixed(2)} s)`;
+      metricMse.textContent = metrics.mseFiltered.toFixed(4);
+
+      // Frequência
+      const freqInfo = MovingAverageEngine.computeFrequencyResponse(M);
+      const nullPi = (freqInfo.firstNullOmega / Math.PI).toFixed(2);
+      const nullFs = (freqInfo.firstNullOmega / (2 * Math.PI)).toFixed(2);
+      freqFirstNullText.textContent = `ω = ${nullPi}π (f = ${nullFs} fs)`;
+
+      const cutPi = (freqInfo.cutoff3DbOmega / Math.PI).toFixed(2);
+      freqCutoffText.textContent = `ω_c ≈ ${cutPi}π`;
+
+      animProgressBadge.textContent = `Amostra: ${Math.min(animIndex, N - 1)}/${N - 1}`;
+    }
+
+    // Canvas Sizing & DPR Handling
+    function resizeCanvases() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      const timeRect = timeCanvas.getBoundingClientRect();
+      timeCanvasW = Math.max(280, timeRect.width);
+      timeCanvasH = Math.max(240, timeRect.height);
+      timeCanvas.width = Math.round(timeCanvasW * dpr);
+      timeCanvas.height = Math.round(timeCanvasH * dpr);
+      timeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const freqRect = freqCanvas.getBoundingClientRect();
+      freqCanvasW = Math.max(280, freqRect.width);
+      freqCanvasH = Math.max(180, freqRect.height);
+      freqCanvas.width = Math.round(freqCanvasW * dpr);
+      freqCanvas.height = Math.round(freqCanvasH * dpr);
+      freqCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      drawTimeDomain();
+      drawFrequencyDomain();
+    }
+
+    // Time Domain Coordinates Mapping
+    function getTimeMargins() {
+      const isCompact = timeCanvasW < 450;
+      return { top: 24, right: 18, bottom: 44, left: isCompact ? 44 : 52 };
+    }
+
+    function timeXOf(i) {
+      const m = getTimeMargins();
+      const plotW = timeCanvasW - m.left - m.right;
+      return m.left + (i / (N - 1)) * plotW;
+    }
+
+    function timeYOf(val) {
+      const m = getTimeMargins();
+      const plotH = timeCanvasH - m.top - m.bottom;
+      // Escala vertical: amplitude de 0.0 a 2.8
+      const yMin = 0.2;
+      const yMax = 2.8;
+      return m.top + ((yMax - val) / (yMax - yMin)) * plotH;
+    }
+
+    // Desenhar Gráfico de Tempo
+    function drawTimeDomain() {
+      if (!timeCanvasW || !timeCanvasH || noisySignal.length === 0) return;
+
+      const m = getTimeMargins();
+      const pw = timeCanvasW - m.left - m.right;
+      const ph = timeCanvasH - m.top - m.bottom;
+
+      // Limpar
+      timeCtx.clearRect(0, 0, timeCanvasW, timeCanvasH);
+      timeCtx.fillStyle = '#090d16';
+      timeCtx.fillRect(0, 0, timeCanvasW, timeCanvasH);
+
+      // Grid Y e Eixos
+      timeCtx.font = timeCanvasW < 420 ? '10px Fira Code, monospace' : '11px Fira Code, monospace';
+      timeCtx.lineWidth = 1;
+      timeCtx.textBaseline = 'middle';
+
+      const yTicks = [0.5, 1.0, 1.5, 2.0, 2.5];
+      for (const yVal of yTicks) {
+        const y = timeYOf(yVal);
+        timeCtx.strokeStyle = '#1e293b';
+        timeCtx.beginPath();
+        timeCtx.moveTo(m.left, y);
+        timeCtx.lineTo(m.left + pw, y);
+        timeCtx.stroke();
+
+        timeCtx.fillStyle = '#64748b';
+        timeCtx.textAlign = 'right';
+        timeCtx.fillText(yVal.toFixed(1), m.left - 8, y);
+      }
+
+      // Grid X
+      const xTicks = [0, 2.5, 5.0, 7.5, 10.0];
+      for (const t of xTicks) {
+        const x = m.left + (t / T_FINAL) * pw;
+        timeCtx.strokeStyle = '#1e293b';
+        timeCtx.beginPath();
+        timeCtx.moveTo(x, m.top);
+        timeCtx.lineTo(x, m.top + ph);
+        timeCtx.stroke();
+
+        timeCtx.fillStyle = '#64748b';
+        timeCtx.textAlign = 'center';
+        timeCtx.textBaseline = 'top';
+        timeCtx.fillText(t.toFixed(1) + 's', x, m.top + ph + 8);
+      }
+
+      // Eixos principais
+      timeCtx.strokeStyle = '#334155';
+      timeCtx.lineWidth = 1.5;
+      timeCtx.beginPath();
+      timeCtx.moveTo(m.left, m.top);
+      timeCtx.lineTo(m.left, m.top + ph);
+      timeCtx.lineTo(m.left + pw, m.top + ph);
+      timeCtx.stroke();
+
+      // Rótulos de eixos
+      timeCtx.fillStyle = '#94a3b8';
+      timeCtx.textAlign = 'center';
+      timeCtx.textBaseline = 'bottom';
+      timeCtx.fillText('Tempo t (segundos)', m.left + pw / 2, timeCanvasH - 6);
+
+      timeCtx.save();
+      timeCtx.translate(14, m.top + ph / 2);
+      timeCtx.rotate(-Math.PI / 2);
+      timeCtx.textAlign = 'center';
+      timeCtx.textBaseline = 'top';
+      timeCtx.fillText('Amplitude', 0, 0);
+      timeCtx.restore();
+
+      // 1. Sinal Ideal (Tracejado branco/cinza)
+      timeCtx.strokeStyle = '#94a3b8';
+      timeCtx.lineWidth = 2.0;
+      timeCtx.setLineDash([5, 4]);
+      timeCtx.beginPath();
+      for (let i = 0; i < N; i++) {
+        const x = timeXOf(i), y = timeYOf(idealSignal[i]);
+        if (i === 0) timeCtx.moveTo(x, y); else timeCtx.lineTo(x, y);
+      }
+      timeCtx.stroke();
+      timeCtx.setLineDash([]);
+
+      // 2. Marcador de transição de degrau se aplicável
+      if (signalType === 'step') {
+        const stepX = (timeXOf(Math.floor(N / 2) - 1) + timeXOf(Math.floor(N / 2))) / 2;
+        timeCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+        timeCtx.lineWidth = 1.2;
+        timeCtx.setLineDash([3, 3]);
+        timeCtx.beginPath();
+        timeCtx.moveTo(stepX, m.top);
+        timeCtx.lineTo(stepX, m.top + ph);
+        timeCtx.stroke();
+        timeCtx.setLineDash([]);
+
+        timeCtx.fillStyle = '#38bdf8';
+        timeCtx.textAlign = 'center';
+        timeCtx.textBaseline = 'top';
+        timeCtx.fillText('degrau (t = 5s)', stepX, m.top + 4);
+      }
+
+      // 3. Sinal Ruidoso (Linhas e pontos vermelhos/rosas)
+      timeCtx.strokeStyle = 'rgba(244, 63, 94, 0.35)';
+      timeCtx.lineWidth = 1.2;
+      timeCtx.beginPath();
+      for (let i = 0; i < N; i++) {
+        const x = timeXOf(i), y = timeYOf(noisySignal[i]);
+        if (i === 0) timeCtx.moveTo(x, y); else timeCtx.lineTo(x, y);
+      }
+      timeCtx.stroke();
+
+      timeCtx.fillStyle = '#f43f5e';
+      const ptRadius = timeCanvasW < 420 ? 2.2 : 2.7;
+      for (let i = 0; i < N; i++) {
+        timeCtx.beginPath();
+        timeCtx.arc(timeXOf(i), timeYOf(noisySignal[i]), ptRadius, 0, Math.PI * 2);
+        timeCtx.fill();
+      }
+
+      // 4. Janela Deslizante Ativa (se não estiver em modo 'showFull')
+      const isFull = showFullCheck.checked;
+      const currentEnd = isFull ? N - 1 : Math.min(animIndex, N - 1);
+
+      if (!isFull && animIndex >= 0 && animIndex < N) {
+        let winStart = animIndex;
+        let winEnd = animIndex;
+
+        if (filterType === 'causal') {
+          winStart = Math.max(0, animIndex - M + 1);
+          winEnd = animIndex;
+        } else if (filterType === 'centralized') {
+          const halfLeft = Math.floor((M - 1) / 2);
+          const halfRight = Math.floor(M / 2);
+          winStart = Math.max(0, animIndex - halfLeft);
+          winEnd = Math.min(N - 1, animIndex + halfRight);
+        } else if (filterType === 'median') {
+          const half = Math.floor(M / 2);
+          winStart = Math.max(0, animIndex - half);
+          winEnd = Math.min(N - 1, animIndex + half);
+        }
+
+        const dx = timeXOf(1) - timeXOf(0);
+        const x0 = timeXOf(winStart) - dx * 0.45;
+        const x1 = timeXOf(winEnd) + dx * 0.45;
+
+        // Fundo âmbar translúcido
+        timeCtx.fillStyle = 'rgba(245, 158, 11, 0.16)';
+        timeCtx.fillRect(x0, m.top, x1 - x0, ph);
+        timeCtx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+        timeCtx.lineWidth = 1;
+        timeCtx.strokeRect(x0, m.top, x1 - x0, ph);
+
+        // Circunferências destacando as amostras ativas na janela
+        timeCtx.strokeStyle = '#38bdf8';
+        timeCtx.lineWidth = 2.0;
+        for (let i = winStart; i <= winEnd; i++) {
+          timeCtx.beginPath();
+          timeCtx.arc(timeXOf(i), timeYOf(noisySignal[i]), ptRadius + 3.0, 0, Math.PI * 2);
+          timeCtx.stroke();
+        }
+      }
+
+      // 5. Sinal Filtrado (Curva contínua ciano vibrante e pontos)
+      const minValid = getMinAnimIndex();
+      if (currentEnd >= minValid) {
+        timeCtx.strokeStyle = '#38bdf8';
+        timeCtx.lineWidth = 3.2;
+        timeCtx.lineJoin = 'round';
+        timeCtx.lineCap = 'round';
+        timeCtx.beginPath();
+
+        let first = true;
+        for (let i = minValid; i <= currentEnd; i++) {
+          if (filteredSignal[i] !== null && !isNaN(filteredSignal[i])) {
+            const x = timeXOf(i), y = timeYOf(filteredSignal[i]);
+            if (first) {
+              timeCtx.moveTo(x, y);
+              first = false;
+            } else {
+              timeCtx.lineTo(x, y);
+            }
+          }
+        }
+        timeCtx.stroke();
+
+        // Pontos filtrados
+        timeCtx.fillStyle = '#0284c7';
+        timeCtx.strokeStyle = '#38bdf8';
+        timeCtx.lineWidth = 1.5;
+        for (let i = minValid; i <= currentEnd; i++) {
+          if (filteredSignal[i] !== null && !isNaN(filteredSignal[i])) {
+            timeCtx.beginPath();
+            timeCtx.arc(timeXOf(i), timeYOf(filteredSignal[i]), ptRadius + 0.8, 0, Math.PI * 2);
+            timeCtx.fill();
+            timeCtx.stroke();
+          }
+        }
+      }
+    }
+
+    // Desenhar Gráfico de Resposta em Frequência
+    function drawFrequencyDomain() {
+      if (!freqCanvasW || !freqCanvasH) return;
+
+      const m = { top: 20, right: 18, bottom: 38, left: 46 };
+      const pw = freqCanvasW - m.left - m.right;
+      const ph = freqCanvasH - m.top - m.bottom;
+
+      freqCtx.clearRect(0, 0, freqCanvasW, freqCanvasH);
+      freqCtx.fillStyle = '#090d16';
+      freqCtx.fillRect(0, 0, freqCanvasW, freqCanvasH);
+
+      const freqData = MovingAverageEngine.computeFrequencyResponse(M, 256);
+      const pts = freqData.frequencies.length;
+
+      // Escala Vertical
+      let yMin = 0, yMax = 1.05;
+      if (isDbScale) {
+        yMin = -40; // dB
+        yMax = 3;   // dB
+      }
+
+      function fyOf(val) {
+        return m.top + ((yMax - val) / (yMax - yMin)) * ph;
+      }
+
+      function fxOf(omega) {
+        return m.left + (omega / Math.PI) * pw;
+      }
+
+      // Grade e Ticks Y
+      freqCtx.font = '10px Fira Code, monospace';
+      freqCtx.lineWidth = 1;
+      freqCtx.textBaseline = 'middle';
+
+      const yTicks = isDbScale ? [0, -10, -20, -30, -40] : [0, 0.25, 0.5, 0.75, 1.0];
+      for (const yVal of yTicks) {
+        const y = fyOf(yVal);
+        freqCtx.strokeStyle = '#1e293b';
+        freqCtx.beginPath();
+        freqCtx.moveTo(m.left, y);
+        freqCtx.lineTo(m.left + pw, y);
+        freqCtx.stroke();
+
+        freqCtx.fillStyle = '#64748b';
+        freqCtx.textAlign = 'right';
+        freqCtx.fillText(isDbScale ? `${yVal}dB` : yVal.toFixed(2), m.left - 6, y);
+      }
+
+      // Linha de referência -3 dB
+      if (isDbScale) {
+        const y3db = fyOf(-3);
+        freqCtx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+        freqCtx.lineWidth = 1;
+        freqCtx.setLineDash([4, 4]);
+        freqCtx.beginPath();
+        freqCtx.moveTo(m.left, y3db);
+        freqCtx.lineTo(m.left + pw, y3db);
+        freqCtx.stroke();
+        freqCtx.setLineDash([]);
+      }
+
+      // Grade e Ticks X (0, 0.25pi, 0.5pi, 0.75pi, pi)
+      const xFractions = [
+        { val: 0, label: '0' },
+        { val: 0.25 * Math.PI, label: '0.25π' },
+        { val: 0.50 * Math.PI, label: '0.5π' },
+        { val: 0.75 * Math.PI, label: '0.75π' },
+        { val: Math.PI, label: 'π (fs/2)' }
+      ];
+
+      for (const t of xFractions) {
+        const x = fxOf(t.val);
+        freqCtx.strokeStyle = '#1e293b';
+        freqCtx.beginPath();
+        freqCtx.moveTo(x, m.top);
+        freqCtx.lineTo(x, m.top + ph);
+        freqCtx.stroke();
+
+        freqCtx.fillStyle = '#64748b';
+        freqCtx.textAlign = 'center';
+        freqCtx.textBaseline = 'top';
+        freqCtx.fillText(t.label, x, m.top + ph + 6);
+      }
+
+      // Eixos
+      freqCtx.strokeStyle = '#334155';
+      freqCtx.lineWidth = 1.5;
+      freqCtx.beginPath();
+      freqCtx.moveTo(m.left, m.top);
+      freqCtx.lineTo(m.left, m.top + ph);
+      freqCtx.lineTo(m.left + pw, m.top + ph);
+      freqCtx.stroke();
+
+      // Primeiro Nulo (Linha Vertical Marcadora)
+      const xNull = fxOf(freqData.firstNullOmega);
+      if (xNull <= m.left + pw) {
+        freqCtx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+        freqCtx.lineWidth = 1.2;
+        freqCtx.setLineDash([3, 3]);
+        freqCtx.beginPath();
+        freqCtx.moveTo(xNull, m.top);
+        freqCtx.lineTo(xNull, m.top + ph);
+        freqCtx.stroke();
+        freqCtx.setLineDash([]);
+
+        freqCtx.fillStyle = '#38bdf8';
+        freqCtx.textAlign = 'center';
+        freqCtx.textBaseline = 'bottom';
+        freqCtx.fillText('1º nulo', xNull, m.top - 2);
+      }
+
+      // Curva da Resposta em Frequência
+      freqCtx.strokeStyle = '#06b6d4';
+      freqCtx.lineWidth = 2.4;
+      freqCtx.beginPath();
+
+      for (let i = 0; i < pts; i++) {
+        const omega = freqData.frequencies[i];
+        const val = isDbScale ? Math.max(yMin, freqData.magnitudeDb[i]) : freqData.magnitudeLinear[i];
+        const x = fxOf(omega);
+        const y = fyOf(val);
+
+        if (i === 0) freqCtx.moveTo(x, y); else freqCtx.lineTo(x, y);
+      }
+      freqCtx.stroke();
+
+      // Preenchimento gradiente suave sob a curva
+      const grad = freqCtx.createLinearGradient(0, m.top, 0, m.top + ph);
+      grad.addColorStop(0, 'rgba(6, 182, 212, 0.2)');
+      grad.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+      freqCtx.fillStyle = grad;
+      freqCtx.lineTo(m.left + pw, m.top + ph);
+      freqCtx.lineTo(m.left, m.top + ph);
+      freqCtx.closePath();
+      freqCtx.fill();
+    }
+
+    // Loop de Animação
+    function animate(currentTime) {
+      if (!isPaused && !showFullCheck.checked) {
+        if (!lastFrameTime) lastFrameTime = currentTime;
+        const elapsed = currentTime - lastFrameTime;
+
+        if (elapsed >= frameInterval) {
+          animIndex++;
+          if (animIndex > N + 8) {
+            animIndex = getMinAnimIndex();
+          }
+          lastFrameTime = currentTime;
+          animProgressBadge.textContent = `Amostra: ${Math.min(animIndex, N - 1)}/${N - 1}`;
+          drawTimeDomain();
+        }
+      }
+      animFrameId = requestAnimationFrame(animate);
+    }
+
+    // Tooltip interativo com mouse sobre o canvas
+    timeCanvas.addEventListener('mousemove', (e) => {
+      const rect = timeCanvas.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const m = getTimeMargins();
+      const pw = timeCanvasW - m.left - m.right;
+
+      if (clientX < m.left || clientX > m.left + pw) {
+        tooltip.classList.add('hidden');
+        return;
+      }
+
+      const fraction = (clientX - m.left) / pw;
+      const idx = Math.min(N - 1, Math.max(0, Math.round(fraction * (N - 1))));
+      const t = (idx / (N - 1)) * T_FINAL;
+
+      const idealVal = idealSignal[idx].toFixed(3);
+      const noisyVal = noisySignal[idx].toFixed(3);
+      const filtVal = (filteredSignal[idx] !== null && !isNaN(filteredSignal[idx]))
+        ? filteredSignal[idx].toFixed(3)
+        : 'N/A';
+
+      tooltip.innerHTML = `
+        <div class="text-cyan-400 font-bold mb-1 border-b border-slate-700 pb-0.5">Amostra n = ${idx} (t = ${t.toFixed(2)}s)</div>
+        <div class="text-slate-300">Sinal Ideal: <span class="text-white">${idealVal}</span></div>
+        <div class="text-rose-400">Com Ruído: <span class="text-rose-200">${noisyVal}</span></div>
+        <div class="text-cyan-300 font-bold">Filtrado y[n]: <span class="text-cyan-100">${filtVal}</span></div>
+      `;
+
+      tooltip.classList.remove('hidden');
+      const tooltipX = Math.min(timeCanvasW - 160, Math.max(10, clientX + 12));
+      const tooltipY = Math.max(10, (e.clientY - rect.top) - 80);
+      tooltip.style.left = `${tooltipX}px`;
+      tooltip.style.top = `${tooltipY}px`;
+    });
+
+    timeCanvas.addEventListener('mouseleave', () => {
+      tooltip.classList.add('hidden');
+    });
+
+    // Event Listeners dos Controles
+    signalTypeSelect.addEventListener('change', () => {
+      signalType = signalTypeSelect.value;
+      updateSignals();
+    });
+
+    noiseTypeSelect.addEventListener('change', () => {
+      noiseType = noiseTypeSelect.value;
+      regenerateNoise();
+    });
+
+    noiseSigmaSlider.addEventListener('input', () => {
+      noiseSigma = Number(noiseSigmaSlider.value);
+      noiseSigmaVal.textContent = noiseSigma.toFixed(2);
+      regenerateNoise();
+    });
+
+    regenNoiseBtn.addEventListener('click', () => {
+      regenerateNoise();
+    });
+
+    filterTypeSelect.addEventListener('change', () => {
+      filterType = filterTypeSelect.value;
+      recalculateFilter();
+    });
+
+    function setWindowSize(newM) {
+      M = Math.max(2, Math.min(31, Number(newM)));
+      windowSizeSlider.value = M;
+      windowSizeVal.textContent = `${M} amostras`;
+
+      presetButtons.forEach(btn => {
+        if (Number(btn.dataset.m) === M) {
+          btn.className = 'preset-m px-2 py-1 rounded bg-cyan-600/40 border border-cyan-500 text-xs font-mono font-bold text-cyan-300 transition-colors';
+        } else {
+          btn.className = 'preset-m px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono font-bold text-slate-300 transition-colors';
+        }
+      });
+
+      recalculateFilter();
+    }
+
+    windowSizeSlider.addEventListener('input', () => {
+      setWindowSize(windowSizeSlider.value);
+    });
+
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setWindowSize(btn.dataset.m);
+      });
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseBtnText.textContent = isPaused ? 'Continuar' : 'Pausar';
+      pauseBtn.classList.toggle('bg-emerald-600', isPaused);
+      pauseBtn.classList.toggle('hover:bg-emerald-500', isPaused);
+      pauseBtn.classList.toggle('bg-cyan-600', !isPaused);
+      pauseBtn.classList.toggle('hover:bg-cyan-500', !isPaused);
+
+      pauseIcon.innerHTML = isPaused
+        ? '<path d="M8 5v14l11-7z"/>'
+        : '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+      if (!isPaused) lastFrameTime = 0;
+    });
+
+    stepPrevBtn.addEventListener('click', () => {
+      isPaused = true;
+      pauseBtnText.textContent = 'Continuar';
+      pauseBtn.classList.add('bg-emerald-600');
+      pauseBtn.classList.remove('bg-cyan-600');
+      animIndex = Math.max(getMinAnimIndex(), animIndex - 1);
+      drawTimeDomain();
+      animProgressBadge.textContent = `Amostra: ${Math.min(animIndex, N - 1)}/${N - 1}`;
+    });
+
+    stepNextBtn.addEventListener('click', () => {
+      isPaused = true;
+      pauseBtnText.textContent = 'Continuar';
+      pauseBtn.classList.add('bg-emerald-600');
+      pauseBtn.classList.remove('bg-cyan-600');
+      animIndex = Math.min(N - 1, animIndex + 1);
+      drawTimeDomain();
+      animProgressBadge.textContent = `Amostra: ${Math.min(animIndex, N - 1)}/${N - 1}`;
+    });
+
+    speedRange.addEventListener('input', () => {
+      frameInterval = Number(speedRange.value);
+      speedVal.textContent = `${frameInterval} ms`;
+    });
+
+    showFullCheck.addEventListener('change', () => {
+      drawTimeDomain();
+    });
+
+    // Escala dB vs Linear
+    freqScaleDb.addEventListener('click', () => {
+      isDbScale = true;
+      freqScaleDb.className = 'px-2.5 py-1 rounded-md bg-cyan-600 text-white font-bold transition-colors';
+      freqScaleLinear.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition-colors';
+      drawFrequencyDomain();
+    });
+
+    freqScaleLinear.addEventListener('click', () => {
+      isDbScale = false;
+      freqScaleLinear.className = 'px-2.5 py-1 rounded-md bg-cyan-600 text-white font-bold transition-colors';
+      freqScaleDb.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition-colors';
+      drawFrequencyDomain();
+    });
+
+    // Exportar CSV
+    exportCsvBtn.addEventListener('click', () => {
+      let csv = 'amostra,tempo_s,sinal_ideal,sinal_ruidoso,sinal_filtrado\n';
+      for (let i = 0; i < N; i++) {
+        const t = ((i / (N - 1)) * T_FINAL).toFixed(4);
+        const ideal = idealSignal[i].toFixed(6);
+        const noisy = noisySignal[i].toFixed(6);
+        const filt = (filteredSignal[i] !== null && !isNaN(filteredSignal[i])) ? filteredSignal[i].toFixed(6) : '';
+        csv += `${i},${t},${ideal},${noisy},${filt}\n`;
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `media_movel_usp_M${M}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Exportar Imagem PNG
+    exportPngBtn.addEventListener('click', () => {
+      const offscreen = document.createElement('canvas');
+      offscreen.width = timeCanvas.width;
+      offscreen.height = timeCanvas.height;
+      const oCtx = offscreen.getContext('2d');
+      oCtx.drawImage(timeCanvas, 0, 0);
+
+      const link = document.createElement('a');
+      link.download = `media_movel_grafico_M${M}.png`;
+      link.href = offscreen.toDataURL('image/png');
+      link.click();
+    });
+
+    // Modal de Teoria
+    openTheoryBtn.addEventListener('click', () => {
+      theoryModal.classList.remove('hidden');
+    });
+
+    closeTheoryBtn.addEventListener('click', () => {
+      theoryModal.classList.add('hidden');
+    });
+
+    closeTheoryBtnFooter.addEventListener('click', () => {
+      theoryModal.classList.add('hidden');
+    });
+
+    theoryModal.addEventListener('click', (e) => {
+      if (e.target === theoryModal) {
+        theoryModal.classList.add('hidden');
+      }
+    });
+
+    // Atalhos de teclado
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        pauseBtn.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        stepNextBtn.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        stepPrevBtn.click();
+      } else if (e.code === 'KeyR') {
+        animIndex = getMinAnimIndex();
+        drawTimeDomain();
+      }
+    });
+
+    // Observer de redimensionamento
+    const ro = new ResizeObserver(() => {
+      resizeCanvases();
+    });
+    ro.observe(timeCanvas);
+    ro.observe(freqCanvas);
+
+    // Inicialização
+    updateSignals();
+    resizeCanvases();
+    requestAnimationFrame(animate);
+  })();
+  </script>
+</body>
+</html>
