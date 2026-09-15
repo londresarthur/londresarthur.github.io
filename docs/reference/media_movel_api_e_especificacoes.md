@@ -1,6 +1,6 @@
-# Referência Técnica: Filtro de Média Móvel & Especificações de DSP
+# Referência Técnica: Filtragem Digital de Sinais & Especificações de DSP
 
-Este documento consolida as especificações matemáticas, algoritmos, funções do motor computacional e parâmetros técnicos do módulo interativo de Média Móvel.
+Este documento consolida as especificações matemáticas, algoritmos, funções do motor computacional e parâmetros técnicos dos métodos de filtragem disponíveis: Média Móvel, Filtro de Kalman e Denoising por Wavelets.
 
 ---
 
@@ -60,6 +60,66 @@ $$
 \alpha = \frac{2}{M + 1}
 $$
 
+### 1.4 Filtro de Kalman (Estimação Ótima em Espaço de Estados)
+
+O filtro de Kalman formula o rastreamento do sinal através do modelo linear estocástico discreto:
+
+$$
+x_k = x_{k-1} + w_k, \quad w_k \sim \mathcal{N}(0, Q)
+$$
+
+$$
+z_k = x_k + v_k, \quad v_k \sim \mathcal{N}(0, R)
+$$
+
+As equações recursivas de atualização dividem-se em predição e correção:
+
+#### Predição a Priori
+$$
+\hat{x}_k^- = \hat{x}_{k-1}
+$$
+
+$$
+P_k^- = P_{k-1} + Q
+$$
+
+#### Correção a Posteriori
+$$
+K_k = \frac{P_k^-}{P_k^- + R}
+$$
+
+$$
+\hat{x}_k = \hat{x}_k^- + K_k (z_k - \hat{x}_k^-)
+$$
+
+$$
+P_k = (1 - K_k) P_k^-
+$$
+
+Onde $K_k$ é o Ganho de Kalman ótimo que minimiza o erro quadrático médio da estimativa em cada instante de amostragem.
+
+### 1.5 Denoising por Wavelet (DWT Multi-escala & VisuShrink)
+
+A Transformada Wavelet Discreta projeta o sinal sobre uma base ortonormal de funções escala $\phi(t)$ e wavelets $\psi(t)$ geradas por dilatação e translação.
+
+Os coeficientes de detalhe da escala mais fina $d_1$ fornecem o desvio padrão estimado do ruído via estimador robusto MAD:
+
+$$
+\hat{\sigma} = \frac{\text{mediana}(|d_1|)}{0.6745}
+$$
+
+O limiar universal de Donoho-Johnstone (VisuShrink) é dado por:
+
+$$
+\lambda = \hat{\sigma} \sqrt{2 \ln(N)}
+$$
+
+A operação não-linear de limiarização suave (*Soft-Thresholding*) preserva bordas acentuadas atenuando ruído:
+
+$$
+\eta_{\text{soft}}(d, \lambda) = \text{sgn}(d) \cdot \max(0, |d| - \lambda)
+$$
+
 ---
 
 ## 2. Parâmetros do Motor Computacional (`MovingAverageEngine`)
@@ -73,18 +133,20 @@ O módulo exporta em `src/js/moving-average-engine.js` as seguintes funções pr
 | `filterCausalMovingAverage` | `(x, M, opts)` | Aplica média móvel causal com janela $M$ | $\mathcal{O}(N)$ |
 | `filterCentralizedMovingAverage` | `(x, M)` | Aplica média móvel centralizada simétrica | $\mathcal{O}(N)$ |
 | `filterExponentialMovingAverage` | `(x, M)` | Aplica filtro recursivo EMA com $\alpha = 2/(M+1)$ | $\mathcal{O}(N)$ |
+| `filterKalman` | `(z, Q, R, x0, P0)` | Executa estimação ótima recursiva de Kalman | $\mathcal{O}(N)$ |
+| `filterWaveletDenoise` | `(signal, options)` | Decomposição DWT Haar, VisuShrink e IDWT | $\mathcal{O}(N)$ |
 | `filterMedian` | `(x, M)` | Aplica filtro de mediana móvel 1D | $\mathcal{O}(N \cdot M \log M)$ |
 | `computeFrequencyResponse` | `(M, numPts)` | Avalia magnitude analítica linear e em dB | $\mathcal{O}(\text{pts})$ |
 | `computeMetrics` | `(ideal, noisy, filt, M, type)` | Computa MSE, SNR, ganho em dB e atraso de grupo | $\mathcal{O}(N)$ |
 
 ---
 
-## 3. Resumo de Métricas de Desempenho
+## 3. Resumo Comparativo de Métricas de Desempenho
 
-| Grandeza | Fórmula Teórica | Interpretação Física |
-| :--- | :--- | :--- |
-| **Redução de Variância** | $\frac{\sigma_y^2}{\sigma_w^2} = \frac{1}{M}$ | Atenuação da potência de ruído branco |
-| **Ganho de SNR** | $\Delta \text{SNR} = 10 \log_{10}(M) \text{ dB}$ | Aumento da relação sinal-ruído na saída |
-| **Atraso de Grupo Causal** | $\tau_g = \frac{M-1}{2} \text{ amostras}$ | Retardo constante em todas as frequências |
-| **Primeiro Nulo Espectral** | $\omega_0 = \frac{2\pi}{M} \text{ rad/amostra}$ | Frequência de corte com cancelamento completo |
-| **Atenuação Lóbulo Secundário** | $\approx -13.3 \text{ dB}$ | Nível máximo de rejeição fora da banda |
+| Método | Atraso de Grupo ($\tau_g$) | Tempo de Subida ($t_r$) | Supressão de Ruído Branco | Rejeição a Outliers |
+| :--- | :--- | :--- | :--- | :--- |
+| **Média Móvel Causal** | $\frac{M-1}{2}$ amostras | $M \cdot T_s$ | Redução por fator $M$ | Baixa (espalha o pulso) |
+| **Média Centralizada** | $0$ (Fase zero) | Simétrico ($M \cdot T_s$) | Redução por fator $M$ | Baixa |
+| **Filtro de Kalman** | Mínimo adaptativo | Rápido ($Q/R$ dependente) | Ótima no sentido MMSE | Moderada |
+| **Wavelet (DWT)** | $0$ (Sem defasagem) | $t_r \approx 1$ amostra | Excelente em multi-escala | Muito boa |
+| **Filtro de Mediana** | $\approx 0$ amostras | Preserva degraus ideais | Subótima p/ Gaussiano | Imbatível ($100\%$ rejeição) |

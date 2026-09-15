@@ -158,3 +158,100 @@ t_r = M \cdot T_s
 $$
 
 O atraso de grupo $\tau_g = \frac{M - 1}{2}$ coincide exatamente com o instante no qual o degrau atinge $50\%$ da sua amplitude final, demonstrando a perfeita consistência geométrica entre a resposta no tempo e a derivada de fase linear.
+
+---
+
+## 5. Teoria e Dedução do Filtro de Kalman (1D)
+
+O filtro de Kalman aborda o problema de filtragem sob a ótica da estimação estatística ótima em espaço de estados. Para um sinal degrau sob ruído aditivo, o modelo escalar é:
+
+$$
+x_k = x_{k-1} + w_k, \quad w_k \sim \mathcal{N}(0, Q)
+$$
+
+$$
+z_k = x_k + v_k, \quad v_k \sim \mathcal{N}(0, R)
+$$
+
+Onde $Q$ representa a incerteza do processo (permitindo saltos transitórios de degrau) e $R = \sigma_w^2$ é a covariância do ruído de observação.
+
+### Dedução do Ganho de Kalman Ótimo ($K_k$)
+A estimativa a posteriori é procurada como uma combinação linear da estimativa a priori $\hat{x}_k^-$ e da nova medição $z_k$:
+
+$$
+\hat{x}_k = \hat{x}_k^- + K_k (z_k - \hat{x}_k^-) = (1 - K_k) \hat{x}_k^- + K_k z_k
+$$
+
+O erro de estimação resultante é dado por:
+
+$$
+e_k = x_k - \hat{x}_k = x_k - \left[\hat{x}_k^- + K_k (x_k + v_k - \hat{x}_k^-)\right] = (1 - K_k)(x_k - \hat{x}_k^-) - K_k v_k
+$$
+
+Calculando a covariância do erro $P_k = \mathbb{E}[e_k^2]$, sabendo que o erro a priori $e_k^- = x_k - \hat{x}_k^-$ e o ruído de medição $v_k$ são mutuamente descorrelacionados:
+
+$$
+P_k = (1 - K_k)^2 P_k^- + K_k^2 R
+$$
+
+Para encontrar o ganho $K_k$ que minimiza o Erro Quadrático Médio (MMSE), derivamos $P_k$ em relação a $K_k$ e igualamos a zero:
+
+$$
+\frac{dP_k}{dK_k} = -2(1 - K_k) P_k^- + 2 K_k R = 0
+$$
+
+$$
+-P_k^- + K_k (P_k^- + R) = 0 \implies K_k = \frac{P_k^-}{P_k^- + R}
+$$
+
+Substituindo $K_k$ de volta na equação de covariância, obtém-se a forma canônica reduzida:
+
+$$
+P_k = (1 - K_k) P_k^-
+$$
+
+### Vantagem Dinâmica no Sinal Degrau
+Nos trechos patamares onde o sinal é constante, $P_k$ decresce rapidamente para um valor mínimo de regime permanente, fazendo $K_k$ diminuir e atenuando o ruído tão eficientemente quanto uma média móvel de janela longa. Durante a transição abrupta do degrau, o resíduo $(z_k - \hat{x}_k^-)$ torna-se grande, acelerando a correção do estado sem a latência simétrica inerente à média móvel.
+
+---
+
+## 6. Denoising por Transformada Wavelet (DWT Multi-escala)
+
+Ao contrário das transformadas de Fourier e das médias temporais puras, a Transformada Wavelet Discreta (DWT) opera com localização conjunta no tempo e na frequência, decomponto o sinal em bases ortogonais de suporte compacto.
+
+### Decomposição Piramidal de Mallat
+Em cada nível de escala $j$, o sinal passa por um banco de filtros espelho em quadratura (QMF) seguido de dizimação por $2$:
+
+$$
+a_j[k] = \sum_n a_{j-1}[n] h_0[2k - n] \quad (\text{Coeficientes de Aproximacao})
+$$
+
+$$
+d_j[k] = \sum_n a_{j-1}[n] h_1[2k - n] \quad (\text{Coeficientes de Detalhe})
+$$
+
+### Propriedade de Esparsidade do Degrau
+Um sinal degrau é extremamente suave em quase todo o domínio, com uma única descontinuidade isolada. Portanto:
+- O ruído branco de entrada distribui-se uniformemente por todos os coeficientes de detalhe $d_j[k]$ com amplitudes baixas proporcionais a $\sigma_w$.
+- O degrau gera coeficientes de detalhe de altíssima magnitude concentrados exclusivamente na coordenada temporal do salto.
+
+### Estimador Robusto MAD e Limiar VisuShrink
+Donoho e Johnstone (1994) demonstraram que o desvio padrão do ruído pode ser estimado de forma imune a saltos determinísticos pela mediana dos desvios absolutos (MAD) no primeiro nível:
+
+$$
+\hat{\sigma} = \frac{\text{mediana}(|d_1|)}{0.6745}
+$$
+
+O limiar universal assintótico de VisuShrink que garante ausência de artefatos espúrios com probabilidade tendendo a $1$ quando $N \to \infty$ é:
+
+$$
+\lambda = \hat{\sigma} \sqrt{2 \ln(N)}
+$$
+
+Aplicando a limiarização suave (*Soft-Thresholding*):
+
+$$
+\eta_{\text{soft}}(d, \lambda) = \text{sgn}(d) \cdot \max(0, |d| - \lambda)
+$$
+
+Reconstruindo o sinal via Transformada Wavelet Inversa (IDWT), os patamares têm o ruído branco removido, enquanto o salto do degrau é reconstituído em uma única amostra ($t_r \approx 1$), superando a limitação fundamental de dispersão temporal da média móvel.

@@ -53,7 +53,32 @@ O atraso de grupo passa a ser nulo ($\tau_g = 0$), centralizando a resposta tran
 
 ---
 
-## 3. Como Tratar Ruídos Impulsivos (*Outliers*)
+## 3. Como Preservar a Borda do Degrau Usando Wavelet
+
+A maior limitação da média móvel é a dispersão temporal da transição do degrau em uma rampa de $M$ amostras.
+
+### Procedimento com Wavelet:
+1. No seletor de algoritmo, escolha `Denoising por Wavelets (DWT Haar + VisuShrink)`.
+2. Configure **Níveis DWT** para $3$ e **Modo** para `Soft-Threshold`.
+3. Compare o traçado obtido com a média móvel de $M = 10$:
+   - O ruído sobre os patamares horizontais é atenuado de maneira comparável à média móvel.
+   - O salto abrupto do degrau em $t = 5\text{ s}$ ocorre em uma única amostra ($t_r \approx 1$), sem atraso de grupo e sem arredondamento das quinas.
+
+---
+
+## 4. Como Rastrear o Degrau em Tempo Real com Filtro de Kalman
+
+Quando a aplicação exige processamento estritamente causal em tempo real com rápida resposta ao degrau:
+
+1. Selecione `Filtro de Kalman (Estimação Ótima Recursiva)`.
+2. Ajuste o ruído de processo $Q$ para $0.0050$ e o ruído de medição $R$ para $0.0400$.
+3. Observe como o ganho de Kalman adapta a largura de banda:
+   - Em patamares estáveis, o ganho de Kalman reduz a variância do ruído com alta atenuação.
+   - No instante do degrau, a grande inovação $(z_k - \hat{x}_k^-)$ força o estado a convergir muito mais depressa do que um filtro FIR causal equivalente.
+
+---
+
+## 5. Como Tratar Ruídos Impulsivos (*Outliers*)
 
 Quando o sinal está corrompido por ruído do tipo impulsivo (picos esparsos de alta amplitude, como falhas de comunicação ou descargas atmosféricas):
 
@@ -64,7 +89,7 @@ Quando o sinal está corrompido por ruído do tipo impulsivo (picos esparsos de 
 
 ---
 
-## 4. Exportação dos Resultados Experimentais
+## 6. Exportação dos Resultados Experimentais
 
 Para documentar seus experimentos laboratoriais:
 - Clique em **Exportar CSV** no cabeçalho superior para salvar a tabela com colunas `amostra, tempo_s, sinal_ideal, sinal_ruidoso, sinal_filtrado`.

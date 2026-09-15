@@ -355,6 +355,154 @@
     };
   }
 
+  /**
+   * Filtro de Kalman 1D Estocástico Ótimo
+   * Modelo de espaço de estados:
+   * x_k = x_{k-1} + w_k,  w_k ~ N(0, Q)  (ruído de processo)
+   * z_k = x_k + v_k,      v_k ~ N(0, R)  (ruído de medição)
+   * @param {number[]} z Sinal ruidoso medido
+   * @param {number} Q Variância do processo
+   * @param {number} R Variância da medição
+   * @param {number} [x0] Estado inicial
+   * @param {number} [P0] Covariância inicial
+   */
+  function filterKalman(z, Q, R, x0, P0) {
+    const N = z.length;
+    const y = new Array(N);
+    const gains = new Array(N);
+    const covs = new Array(N);
+
+    let xHat = (x0 !== undefined && x0 !== null) ? x0 : (z[0] || 0);
+    let P = (P0 !== undefined && P0 !== null) ? P0 : 1.0;
+    const qVal = Math.max(1e-7, Number(Q) || 0.005);
+    const rVal = Math.max(1e-7, Number(R) || 0.04);
+
+    for (let k = 0; k < N; k++) {
+      // 1. Predição a priori
+      const xHatMinus = xHat;
+      const PMinus = P + qVal;
+
+      // 2. Atualização a posteriori (Ganho de Kalman)
+      const K = PMinus / (PMinus + rVal);
+      xHat = xHatMinus + K * (z[k] - xHatMinus);
+      P = (1 - K) * PMinus;
+
+      y[k] = xHat;
+      gains[k] = K;
+      covs[k] = P;
+    }
+
+    return {
+      filtered: y,
+      gains: gains,
+      covariances: covs
+    };
+  }
+
+  /**
+   * Transformada Wavelet Discreta 1D (DWT Haar) — Decomposição 1 nível
+   */
+  function dwtHaar1D(signal) {
+    const n = signal.length;
+    const half = Math.floor(n / 2);
+    const approx = new Float64Array(half);
+    const detail = new Float64Array(half);
+    const sqrt2 = Math.SQRT2;
+
+    for (let i = 0; i < half; i++) {
+      const s0 = signal[2 * i];
+      const s1 = (2 * i + 1 < n) ? signal[2 * i + 1] : signal[2 * i];
+      approx[i] = (s0 + s1) / sqrt2;
+      detail[i] = (s1 - s0) / sqrt2;
+    }
+    return { approx: approx, detail: detail };
+  }
+
+  /**
+   * Transformada Wavelet Inversa 1D (IDWT Haar) — Reconstrução 1 nível
+   */
+  function idwtHaar1D(approx, detail, targetLen) {
+    const half = approx.length;
+    const n = targetLen || half * 2;
+    const rec = new Float64Array(n);
+    const sqrt2 = Math.SQRT2;
+
+    for (let i = 0; i < half; i++) {
+      const a = approx[i];
+      const d = detail[i];
+      if (2 * i < n) rec[2 * i] = (a - d) / sqrt2;
+      if (2 * i + 1 < n) rec[2 * i + 1] = (a + d) / sqrt2;
+    }
+    return rec;
+  }
+
+  /**
+   * Denoising por Wavelet (DWT Multi-nível + Limiarização VisuShrink de Donoho-Johnstone)
+   * Preserva transições abruptas (degraus) eliminando ruído branco de alta frequência.
+   * @param {number[]} signal Sinal discreto ruidoso
+   * @param {object} [options] Configurações (levels, thresholdMultiplier, mode)
+   */
+  function filterWaveletDenoise(signal, options) {
+    const opts = Object.assign({
+      levels: 3,
+      thresholdMultiplier: 1.0,
+      mode: 'soft' // 'soft' ou 'hard'
+    }, options || {});
+
+    const N = signal.length;
+    if (N < 4) return signal.slice();
+
+    const maxLevels = Math.min(opts.levels, Math.floor(Math.log2(N)) - 1);
+    const approxPyramid = [];
+    const detailPyramid = [];
+
+    let currentApprox = Float64Array.from(signal);
+
+    // Decomposição piramidal de Mallat
+    for (let lvl = 0; lvl < maxLevels; lvl++) {
+      const { approx, detail } = dwtHaar1D(currentApprox);
+      detailPyramid.push(detail);
+      approxPyramid.push(approx);
+      currentApprox = approx;
+    }
+
+    // Estimativa de ruído estocástico pelo MAD dos coeficientes de detalhe do nível 1 (Donoho & Johnstone, 1994)
+    const d1 = detailPyramid[0];
+    const absD1 = Array.from(d1, Math.abs).sort((a, b) => a - b);
+    const medianAbs = absD1.length % 2 === 0
+      ? (absD1[absD1.length / 2 - 1] + absD1[absD1.length / 2]) / 2
+      : absD1[Math.floor(absD1.length / 2)];
+
+    const sigmaHat = (medianAbs / 0.6745) || 0.05;
+    // Limiar universal VisuShrink: lambda = sigma * sqrt(2 * ln(N))
+    const universalThreshold = sigmaHat * Math.sqrt(2 * Math.log(N)) * opts.thresholdMultiplier;
+
+    // Limiarização dos detalhes em todas as escalas
+    for (let lvl = 0; lvl < maxLevels; lvl++) {
+      const det = detailPyramid[lvl];
+      for (let i = 0; i < det.length; i++) {
+        const val = det[i];
+        if (opts.mode === 'soft') {
+          // Soft-thresholding: sign(d) * max(0, |d| - lambda)
+          det[i] = Math.sign(val) * Math.max(0, Math.abs(val) - universalThreshold);
+        } else {
+          // Hard-thresholding: d * (|d| >= lambda)
+          det[i] = Math.abs(val) >= universalThreshold ? val : 0;
+        }
+      }
+    }
+
+    // Reconstrução inversa IDWT de baixo para cima
+    let reconstructed = currentApprox;
+    for (let lvl = maxLevels - 1; lvl >= 0; lvl--) {
+      const det = detailPyramid[lvl];
+      const targetLen = (lvl === 0) ? N : approxPyramid[lvl - 1].length;
+      reconstructed = idwtHaar1D(reconstructed, det, targetLen);
+    }
+
+    return Array.from(reconstructed);
+  }
+
   return {
     gaussianRandom: gaussianRandom,
     generateSignal: generateSignal,
@@ -363,7 +511,12 @@
     filterCentralizedMovingAverage: filterCentralizedMovingAverage,
     filterExponentialMovingAverage: filterExponentialMovingAverage,
     filterMedian: filterMedian,
+    filterKalman: filterKalman,
+    filterWaveletDenoise: filterWaveletDenoise,
+    dwtHaar1D: dwtHaar1D,
+    idwtHaar1D: idwtHaar1D,
     computeFrequencyResponse: computeFrequencyResponse,
     computeMetrics: computeMetrics
   };
 }));
+

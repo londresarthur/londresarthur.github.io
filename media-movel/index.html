@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Filtro de Média Móvel — Processamento Digital de Sinais USP</title>
-  <meta name="description" content="Simulador interativo avançado do Filtro de Média Móvel (FIR/LTI) em sinal degrau e sinais periódicos com ruído branco. Análise no domínio do tempo e da frequência." />
+  <title>Filtragem Digital de Sinais — Média Móvel, Kalman & Wavelet (USP)</title>
+  <meta name="description" content="Simulador interativo comparativo de Filtro de Média Móvel, Filtro de Kalman e Denoising por Wavelets em sinal degrau com ruído branco. Domínio do tempo e da frequência." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 50 Q 30 15 50 50 T 90 50' stroke='%2338bdf8' stroke-width='8' fill='none'/></svg>" type="image/svg+xml" />
 
   <!-- Google Fonts -->
@@ -37,12 +37,12 @@
     }
   </script>
 
-  <!-- KaTeX for LaTeX rendering -->
+  <!-- KaTeX for LaTeX rendering with auto-render extension -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
   <style>
-    /* Estilos personalizados e scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -54,6 +54,13 @@
     }
     input[type=range] {
       accent-color: #38bdf8;
+    }
+    /* Estilos para KaTeX em blocos matemáticos */
+    .katex-display {
+      margin: 0.5em 0 !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.25em 0;
     }
   </style>
 </head>
@@ -69,11 +76,11 @@
       </a>
       <div>
         <div class="flex items-center gap-2 flex-wrap">
-          <h1 class="font-bold text-lg lg:text-xl text-white tracking-tight">Filtro de Média Móvel</h1>
+          <h1 class="font-bold text-lg lg:text-xl text-white tracking-tight">Filtragem de Sinais: Média Móvel, Kalman & Wavelet</h1>
           <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">PDS • USP</span>
-          <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">FIR / LTI</span>
+          <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">LTI / Estocástico / Multi-escala</span>
         </div>
-        <p class="text-xs text-slate-400">Suavização estatística de ruído branco, atraso de grupo e resposta em frequência</p>
+        <p class="text-xs text-slate-400">Comparação interativa entre filtros temporais lineares, estimação de Kalman e Wavelets</p>
       </div>
     </div>
 
@@ -84,7 +91,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
         </svg>
-        <span>Teoria & Deduções</span>
+        <span>Deduções Matemáticas (KaTeX)</span>
       </button>
 
       <!-- Export CSV -->
@@ -119,7 +126,7 @@
     <!-- LEFT SIDEBAR: CONTROLS & PARAMS (4 COLS) -->
     <aside class="lg:col-span-4 flex flex-col gap-4">
 
-      <!-- Signal & Noise Panel -->
+      <!-- 1. Signal & Noise Panel -->
       <div class="glass-panel p-4 rounded-2xl shadow-xl">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -168,29 +175,35 @@
         </div>
       </div>
 
-      <!-- Filter Parameters Panel -->
+      <!-- 2. Filter Parameters Panel -->
       <div class="glass-panel p-4 rounded-2xl shadow-xl">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-          2. Parâmetros do Filtro
+          2. Algoritmo de Filtragem
         </h2>
 
         <div class="space-y-3">
           <!-- Filter Architecture -->
           <div>
-            <label for="filterType" class="block text-xs font-medium text-slate-300 mb-1">Tipo de Filtro</label>
+            <label for="filterType" class="block text-xs font-medium text-slate-300 mb-1">Selecione o Filtro / Paradigma</label>
             <select id="filterType" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-medium focus:ring-2 focus:ring-cyan-500 focus:outline-none">
-              <option value="causal" selected>Média Móvel Causal (FIR padrão)</option>
-              <option value="centralized">Média Móvel Centralizada (Fase Zero / Não Causal)</option>
-              <option value="ema">Média Móvel Exponencial (EMA / IIR 1º Polo)</option>
-              <option value="median">Filtro de Mediana (Não-linear, robusto a outliers)</option>
+              <optgroup label="Filtros Lineares Temporais (FIR/IIR)">
+                <option value="causal" selected>Média Móvel Causal (FIR padrão)</option>
+                <option value="centralized">Média Móvel Centralizada (Fase Zero / Pós-processamento)</option>
+                <option value="ema">Média Móvel Exponencial (EMA / IIR 1º Polo)</option>
+              </optgroup>
+              <optgroup label="Estimação de Estado & Multi-escala">
+                <option value="kalman">Filtro de Kalman (Estimação Ótima Recursiva)</option>
+                <option value="wavelet">Denoising por Wavelets (DWT Haar + VisuShrink)</option>
+                <option value="median">Filtro de Mediana (Não-linear / Sal & Pimenta)</option>
+              </optgroup>
             </select>
           </div>
 
-          <!-- Window Size M -->
-          <div>
+          <!-- Dynamic Parameter Section: Window Size M (for Causal, Centralized, EMA, Median) -->
+          <div id="windowSizeContainer">
             <div class="flex justify-between items-center mb-1">
-              <label for="windowSize" class="text-xs font-medium text-slate-300">Tamanho da Janela ($M$)</label>
+              <label for="windowSize" class="text-xs font-medium text-slate-300">Tamanho da Janela (<span class="font-mono text-cyan-400">M</span>)</label>
               <span id="windowSizeVal" class="text-xs font-mono font-bold text-cyan-400">5 amostras</span>
             </div>
             <input id="windowSize" type="range" min="2" max="25" step="1" value="5" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
@@ -206,14 +219,72 @@
             </div>
           </div>
 
+          <!-- Dynamic Parameter Section: Kalman Filter Parameters -->
+          <div id="kalmanContainer" class="hidden space-y-2 p-3 bg-slate-900/90 rounded-xl border border-indigo-500/30">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-bold text-indigo-300">Parâmetros de Kalman</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">Q / R Adaptativo</span>
+            </div>
+            <div>
+              <div class="flex justify-between items-center text-xs mb-0.5">
+                <span class="text-slate-300">Ruído de Processo (Q):</span>
+                <span id="kalmanQVal" class="font-mono text-cyan-400 font-bold">0.0050</span>
+              </div>
+              <input id="kalmanQ" type="range" min="0.0001" max="0.05" step="0.0005" value="0.0050" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+              <span class="text-[10px] text-slate-400 block">Valores maiores aumentam a velocidade de resposta ao degrau.</span>
+            </div>
+            <div>
+              <div class="flex justify-between items-center text-xs mb-0.5">
+                <span class="text-slate-300">Ruído de Medição (R):</span>
+                <span id="kalmanRVal" class="font-mono text-cyan-400 font-bold">0.0400</span>
+              </div>
+              <input id="kalmanR" type="range" min="0.001" max="0.25" step="0.005" value="0.0400" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+              <span class="text-[10px] text-slate-400 block">Geralmente calibrado próximo à variância do ruído (σ²).</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Parameter Section: Wavelet Parameters -->
+          <div id="waveletContainer" class="hidden space-y-2 p-3 bg-slate-900/90 rounded-xl border border-cyan-500/30">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-bold text-cyan-300">Parâmetros Wavelet</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">DWT Haar</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="waveletLevels" class="block text-[11px] text-slate-300 mb-0.5">Níveis DWT</label>
+                <select id="waveletLevels" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                  <option value="1">1 Nível</option>
+                  <option value="2">2 Níveis</option>
+                  <option value="3" selected>3 Níveis</option>
+                  <option value="4">4 Níveis</option>
+                </select>
+              </div>
+              <div>
+                <label for="waveletMode" class="block text-[11px] text-slate-300 mb-0.5">Limiarização</label>
+                <select id="waveletMode" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                  <option value="soft" selected>Soft-Threshold</option>
+                  <option value="hard">Hard-Threshold</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center text-xs mb-0.5">
+                <span class="text-slate-300">Multiplicador do Limiar (λ):</span>
+                <span id="waveletMultVal" class="font-mono text-cyan-400 font-bold">1.0x</span>
+              </div>
+              <input id="waveletMultiplier" type="range" min="0.3" max="2.5" step="0.1" value="1.0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+              <span class="text-[10px] text-slate-400 block">Baseado no limiar universal de Donoho-Johnstone: λ = σ√(2 ln N)</span>
+            </div>
+          </div>
+
           <!-- Formula Display Card -->
-          <div id="activeFormulaCard" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center font-mono text-xs text-cyan-200 overflow-x-auto min-h-[46px] flex items-center justify-center">
-            <!-- KaTeX injected here -->
+          <div id="activeFormulaCard" class="p-3 rounded-xl bg-slate-900/95 border border-slate-800 text-center font-mono text-xs text-cyan-200 overflow-x-auto min-h-[56px] flex items-center justify-center">
+            <!-- KaTeX rendered dynamically here -->
           </div>
         </div>
       </div>
 
-      <!-- Playback Controls -->
+      <!-- 3. Playback Controls -->
       <div class="glass-panel p-4 rounded-2xl shadow-xl">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
           <span class="flex items-center gap-2">
@@ -267,7 +338,7 @@
         </div>
       </div>
 
-      <!-- Real-Time Statistical Metrics Card -->
+      <!-- 4. Real-Time Statistical Metrics Card -->
       <div class="glass-panel p-4 rounded-2xl shadow-xl">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-amber-400"></span>
@@ -275,27 +346,27 @@
         </h2>
 
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <!-- Metric 1: Redução de Variância -->
+          <!-- Metric 1 -->
           <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">Atenuação Ruído (1/M)</span>
+            <span id="metricLbl1" class="text-[11px] text-slate-400 block mb-0.5">Atenuação de Ruído</span>
             <span id="metricVarReduction" class="font-mono font-bold text-amber-300 text-sm">0.200 (-6.99 dB)</span>
           </div>
 
-          <!-- Metric 2: Ganho de SNR -->
+          <!-- Metric 2 -->
           <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">Ganho Teórico SNR</span>
+            <span id="metricLbl2" class="text-[11px] text-slate-400 block mb-0.5">Ganho Teórico SNR</span>
             <span id="metricSnrGain" class="font-mono font-bold text-emerald-400 text-sm">+6.99 dB</span>
           </div>
 
-          <!-- Metric 3: Atraso de Grupo -->
+          <!-- Metric 3 -->
           <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">Atraso Grupo (τ)</span>
+            <span id="metricLbl3" class="text-[11px] text-slate-400 block mb-0.5">Atraso de Grupo (τ)</span>
             <span id="metricGroupDelay" class="font-mono font-bold text-cyan-300 text-sm">2.0 amostras</span>
           </div>
 
-          <!-- Metric 4: MSE Experimental -->
+          <!-- Metric 4 -->
           <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">MSE Experimental</span>
+            <span id="metricLbl4" class="text-[11px] text-slate-400 block mb-0.5">MSE Experimental</span>
             <span id="metricMse" class="font-mono font-bold text-slate-200 text-sm">0.0028</span>
           </div>
         </div>
@@ -310,9 +381,9 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
             <h2 class="font-bold text-sm lg:text-base text-white tracking-tight flex items-center gap-2">
-              <span>Domínio do Tempo: Sinal, Ruído e Janela Deslizante</span>
+              <span id="timePlotTitle">Domínio do Tempo: Sinal, Ruído e Saída Filtrada</span>
             </h2>
-            <p class="text-xs text-slate-400">Visualização em tempo real das amostras sob a média móvel</p>
+            <p id="timePlotSubtitle" class="text-xs text-slate-400">Comparação visual da resposta transitória e redução de variância</p>
           </div>
 
           <!-- Interactive Legend -->
@@ -323,15 +394,15 @@
             </div>
             <div class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-              <span class="text-slate-300">Sinal com Ruído</span>
+              <span class="text-slate-300">Com Ruído</span>
             </div>
             <div class="flex items-center gap-1.5">
               <span class="w-3.5 h-1.5 rounded bg-cyan-400 inline-block"></span>
-              <span class="text-cyan-300 font-semibold">Saída Filtrada y[n]</span>
+              <span id="legendFilterName" class="text-cyan-300 font-semibold">Saída Filtrada y[n]</span>
             </div>
-            <div class="flex items-center gap-1.5">
+            <div id="legendActiveArea" class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-300 inline-block"></span>
-              <span class="text-amber-300">Janela Ativa</span>
+              <span class="text-amber-300">Janela / Amostra</span>
             </div>
           </div>
         </div>
@@ -348,9 +419,9 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
             <h2 class="font-bold text-sm lg:text-base text-white tracking-tight flex items-center gap-2">
-              <span>Domínio da Frequência: Resposta em Magnitude |H(e<sup>jω</sup>)|</span>
+              <span id="freqPlotTitle">Domínio da Frequência: Resposta em Magnitude |H(e<sup>jω</sup>)|</span>
             </h2>
-            <p class="text-xs text-slate-400">Núcleo Sinc/Dirichlet, frequência de corte -3dB e atenuação de lóbulos secundários</p>
+            <p id="freqPlotSubtitle" class="text-xs text-slate-400">Resposta espectral analítica e atenuação de altas frequências</p>
           </div>
 
           <!-- Unit scale toggle (dB vs Linear) -->
@@ -368,7 +439,7 @@
         <!-- Mathematical Insights Bar -->
         <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
           <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
-            <span class="text-slate-400 block text-[11px]">1º Nulo Espectral:</span>
+            <span class="text-slate-400 block text-[11px]">1º Nulo / Frequência Notável:</span>
             <span id="freqFirstNullText" class="font-mono text-cyan-300 font-bold">ω = 0.40π (f = 0.20 fs)</span>
           </div>
           <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
@@ -376,99 +447,182 @@
             <span id="freqCutoffText" class="font-mono text-emerald-300 font-bold">ω_c ≈ 0.18π</span>
           </div>
           <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
-            <span class="text-slate-400 block text-[11px]">Atenuação Lóbulo Secundário:</span>
-            <span class="font-mono text-amber-300 font-bold">-13.3 dB (assintótica)</span>
+            <span class="text-slate-400 block text-[11px]">Comportamento Fora da Banda:</span>
+            <span id="freqSideLobeText" class="font-mono text-amber-300 font-bold">-13.3 dB (assintótica)</span>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- THEORY MODAL -->
-  <div id="theoryModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+  <!-- THEORY MODAL (Com deduções matemáticas KaTeX completas) -->
+  <div id="theoryModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 lg:p-6">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
       <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-2">
-          <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
-          <h3 class="font-bold text-lg text-white">Fundamentos Teóricos: Filtro de Média Móvel</h3>
+          <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+          <h3 class="font-bold text-lg text-white">Fundamentos Teóricos & Deduções Analíticas de PDS</h3>
         </div>
-        <button id="closeTheoryBtn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button id="closeTheoryBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors" title="Fechar modal">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
 
-      <!-- Modal Content -->
-      <div class="p-6 overflow-y-auto space-y-6 text-sm text-slate-300 leading-relaxed font-sans">
-        <section>
-          <h4 class="font-bold text-cyan-400 text-base mb-2">1. Equação a Diferenças & Resposta ao Impulso</h4>
+      <!-- Modal Content (Renderizado rigorosamente pelo KaTeX) -->
+      <div id="theoryModalContent" class="p-6 overflow-y-auto space-y-7 text-sm text-slate-300 leading-relaxed font-sans">
+
+        <!-- 1. Média Móvel -->
+        <section class="border-b border-slate-800/80 pb-6">
+          <h4 class="font-bold text-cyan-400 text-base mb-2">1. Filtro de Média Móvel (FIR Linear)</h4>
           <p>
-            O filtro de média móvel causal de $M$ pontos é um filtro digital FIR (Finite Impulse Response) LTI cuja saída $y[n]$ é dada pela média aritmética simples das últimas $M$ amostras:
+            O filtro de média móvel causal calcula a média aritmética das últimas $M$ amostras:
           </p>
-          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-cyan-200">
             $$y[n] = \frac{1}{M} \sum_{k=0}^{M-1} x[n-k]$$
           </div>
           <p>
-            Sua resposta ao impulso $h[n]$ é um pulso retangular discreto normalizado de duração $M$:
+            Sua resposta ao impulso discreta $h[n]$ é finita:
           </p>
-          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
-            $$h[n] = \begin{cases} \frac{1}{M}, & 0 \le n \le M-1 \\ 0, & \text{caso contrário} \end{cases}$$
-          </div>
-        </section>
-
-        <section>
-          <h4 class="font-bold text-cyan-400 text-base mb-2">2. Resposta em Frequência (Núcleo de Dirichlet / Sinc Discreta)</h4>
-          <p>
-            Aplicando a Transformada de Fourier de Tempo Discreto (DTFT) a $h[n]$:
-          </p>
-          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
-            $$H(e^{j\omega}) = \sum_{n=0}^{M-1} \frac{1}{M} e^{-j\omega n} = \frac{1}{M} \frac{1 - e^{-j\omega M}}{1 - e^{-j\omega}} = \frac{1}{M} \frac{\sin(\omega M / 2)}{\sin(\omega / 2)} e^{-j\omega \frac{M-1}{2}}$$
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-cyan-200">
+            $$h[n] = \begin{cases} \frac{1}{M}, & 0 \le n \le M-1 \\ 0, & \text{caso contrario} \end{cases}$$
           </div>
           <p>
-            A magnitude $|H(e^{j\omega})|$ possui forma de sinc periódica (núcleo de Dirichlet). O primeiro nulo ocorre exatamente em $\omega_0 = \frac{2\pi}{M}$.
+            Para ruído branco estacionário $w[n]$ com variância $\sigma_w^2$ e descorrelação temporal $\mathbb{E}[w[i]w[j]] = \sigma_w^2 \delta[i-j]$:
           </p>
-        </section>
-
-        <section>
-          <h4 class="font-bold text-cyan-400 text-base mb-2">3. Atraso de Grupo e Resposta de Fase Linear</h4>
-          <p>
-            Como os coeficientes são estritamente simétricos ($h[n] = h[M - 1 - n]$), o filtro possui <strong>fase linear generalizada</strong>:
-          </p>
-          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
-            $$\tau_g(\omega) = -\frac{d\theta(\omega)}{d\omega} = \frac{M - 1}{2} \text{ amostras}$$
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-cyan-200">
+            $$\sigma_y^2 = \text{Var}\left(\frac{1}{M}\sum_{k=0}^{M-1} w[n-k]\right) = \frac{1}{M^2}\sum_{k=0}^{M-1} \sigma_w^2 = \frac{\sigma_w^2}{M}$$
           </div>
           <p>
-            Isso implica que todas as frequências sofrem exatamente o mesmo retardo temporal constante, eliminando distorção de fase, mas atrasando transições abruptas (degraus) por $\frac{M-1}{2}$ amostras.
+            A resposta em frequência analítica possui a forma do núcleo de Dirichlet (sinc discreta):
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-cyan-200">
+            $$H(e^{j\omega}) = \frac{1}{M} \frac{\sin(\omega M / 2)}{\sin(\omega / 2)} e^{-j\omega \frac{M-1}{2}}$$
+          </div>
+          <p>
+            O atraso de grupo é rigorosamente constante em todas as frequências: $\tau_g = \frac{M-1}{2}$ amostras.
           </p>
         </section>
 
-        <section>
-          <h4 class="font-bold text-cyan-400 text-base mb-2">4. Redução de Variância de Ruído Branco</h4>
+        <!-- 2. Filtro de Kalman -->
+        <section class="border-b border-slate-800/80 pb-6">
+          <h4 class="font-bold text-indigo-400 text-base mb-2">2. Filtro de Kalman (Estimação Ótima de Estado)</h4>
           <p>
-            Considere um ruído branco $w[n]$ estacionário com média zero e variância $\sigma_w^2$. Como as amostras são estatisticamente descorrelacionadas:
+            Diferente da média móvel, o filtro de Kalman modela explicitamente a dinâmica estocástica do sinal e o ruído de medição em espaço de estados:
           </p>
-          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-center text-cyan-200">
-            $$\sigma_y^2 = \text{Var}\left(\frac{1}{M}\sum_{k=0}^{M-1} w[n-k]\right) = \frac{1}{M^2}\sum_{k=0}^{M-1} \text{Var}(w[n-k]) = \frac{1}{M^2}(M \sigma_w^2) = \frac{\sigma_w^2}{M}$$
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-indigo-200">
+            $$x_k = x_{k-1} + w_k, \quad w_k \sim \mathcal{N}(0, Q)$$
+            $$z_k = x_k + v_k, \quad v_k \sim \mathcal{N}(0, R)$$
           </div>
           <p>
-            O ganho de relação sinal-ruído (SNR) proporcionado é de $\Delta \text{SNR} = 10\log_{10}(M) \text{ dB}$. Logo, quadruplicar o tamanho da janela $M$ reduz o ruído pela metade em desvio padrão (+6 dB).
+            O algoritmo opera recursivamente em duas etapas iterativas:
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-3">
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-xs font-bold text-slate-400 block mb-1">A. Predição (A Priori):</span>
+              $$\hat{x}_k^- = \hat{x}_{k-1}$$
+              $$P_k^- = P_{k-1} + Q$$
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-xs font-bold text-slate-400 block mb-1">B. Correção (A Posteriori):</span>
+              $$K_k = \frac{P_k^-}{P_k^- + R}$$
+              $$\hat{x}_k = \hat{x}_k^- + K_k(z_k - \hat{x}_k^-)$$
+              $$P_k = (1 - K_k) P_k^-$$
+            </div>
+          </div>
+          <p>
+            <strong>Dedução do Ganho $K_k$:</strong> O ganho de Kalman é derivado analiticamente para minimizar a variância do erro $P_k = \mathbb{E}[(x_k - \hat{x}_k)^2]$. Diferenciando em relação a $K_k$ e igualando a zero, obtém-se exatamente $K_k = \frac{P_k^-}{P_k^- + R}$. Quando o sinal varia bruscamente (degrau), o erro $z_k - \hat{x}_k^-$ é grande, fazendo o filtro convergir muito mais rápido que uma janela fixa de média móvel.
           </p>
         </section>
 
-        <section>
-          <h4 class="font-bold text-amber-400 text-base mb-2">5. O Trade-off Fundamental: Suavização vs Tempo de Subida</h4>
+        <!-- 3. Wavelet Denoising -->
+        <section class="border-b border-slate-800/80 pb-6">
+          <h4 class="font-bold text-emerald-400 text-base mb-2">3. Denoising por Transformada Wavelet (DWT & VisuShrink)</h4>
           <p>
-            Ao aumentar $M$, reduz-se o ruído de alta frequência, porém o tempo de resposta transitória a degraus é proporcional a $M$: $t_r = M \cdot T_s$. Para preservar bordas com ruídos impulsivos intensos, filtros não-lineares como a <strong>Mediana</strong> superam a média linear.
+            A Transformada Wavelet Discreta (DWT) decompõe o sinal em diferentes escalas de tempo e frequência usando um banco de filtros ortogonais conjugados (QMF):
           </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-emerald-200">
+            $$a_j[k] = \sum_n x[n] h_0[2k - n] \quad (\text{Aproximacao}), \qquad d_j[k] = \sum_n x[n] h_1[2k - n] \quad (\text{Detalhes})$$
+          </div>
+          <p>
+            Como os degraus concentram suas transições em coeficientes de detalhe localizados e de grande magnitude, enquanto o ruído branco se espalha uniformemente com pequenas amplitudes, aplica-se o <strong>Limiar Universal de Donoho-Johnstone (VisuShrink)</strong>:
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-emerald-200">
+            $$\hat{\sigma} = \frac{\text{mediana}(|d_1|)}{0.6745}, \qquad \lambda = \hat{\sigma} \sqrt{2 \ln(N)}$$
+          </div>
+          <p>
+            Os detalhes em todas as escalas sofrem <strong>Soft-Thresholding</strong> (limiarização suave):
+          </p>
+          <div class="my-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-emerald-200">
+            $$\eta_{\text{soft}}(d, \lambda) = \text{sgn}(d) \cdot \max(0, |d| - \lambda)$$
+          </div>
+          <p>
+            A reconstrução pela IDWT restaura o sinal com <strong>preservação nítida da borda do degrau</strong> ($t_r \approx 1$ amostra), eliminando o atraso de grupo da média móvel.
+          </p>
+        </section>
+
+        <!-- 4. Matriz Comparativa -->
+        <section>
+          <h4 class="font-bold text-amber-400 text-base mb-3">4. Comparativo de Desempenho e Trade-offs</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse border border-slate-800">
+              <thead>
+                <tr class="bg-slate-950 text-slate-300">
+                  <th class="p-2 border border-slate-800">Método</th>
+                  <th class="p-2 border border-slate-800">Atraso Temporal</th>
+                  <th class="p-2 border border-slate-800">Preservação do Degrau</th>
+                  <th class="p-2 border border-slate-800">Atenuação Ruído Branco</th>
+                  <th class="p-2 border border-slate-800">Rejeição a Outliers</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-400 font-mono">
+                <tr>
+                  <td class="p-2 text-cyan-300 font-bold font-sans">Média Móvel Causal</td>
+                  <td class="p-2 text-rose-400">τ = (M-1)/2</td>
+                  <td class="p-2">Rampa linear (t_r = M)</td>
+                  <td class="p-2 text-emerald-400">Ótima (1/M)</td>
+                  <td class="p-2 text-rose-400">Pobre (espalha pico)</td>
+                </tr>
+                <tr>
+                  <td class="p-2 text-cyan-300 font-bold font-sans">Média Centralizada</td>
+                  <td class="p-2 text-emerald-400">Zero (τ = 0)</td>
+                  <td class="p-2">Rampa simétrica</td>
+                  <td class="p-2 text-emerald-400">Ótima (1/M)</td>
+                  <td class="p-2 text-rose-400">Pobre</td>
+                </tr>
+                <tr>
+                  <td class="p-2 text-indigo-300 font-bold font-sans">Filtro de Kalman</td>
+                  <td class="p-2 text-emerald-400">Mínimo adaptativo</td>
+                  <td class="p-2 text-cyan-300">Rápida convergência</td>
+                  <td class="p-2 text-emerald-400">Ótima (MMSE)</td>
+                  <td class="p-2 text-amber-400">Moderada</td>
+                </tr>
+                <tr>
+                  <td class="p-2 text-emerald-300 font-bold font-sans">Wavelet (DWT)</td>
+                  <td class="p-2 text-emerald-400">Zero (Fase linear)</td>
+                  <td class="p-2 text-emerald-400">Excelente (Borda nítida)</td>
+                  <td class="p-2 text-emerald-400">Excelente (Multi-escala)</td>
+                  <td class="p-2 text-emerald-400">Muito boa</td>
+                </tr>
+                <tr>
+                  <td class="p-2 text-amber-300 font-bold font-sans">Filtro de Mediana</td>
+                  <td class="p-2">Zero / Causal</td>
+                  <td class="p-2 text-emerald-400">Preserva degraus</td>
+                  <td class="p-2 text-amber-400">Subótima p/ Gaussiano</td>
+                  <td class="p-2 text-emerald-400">Imbatível (Elimina 100%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/60 flex justify-end">
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/70 flex justify-end">
         <button id="closeTheoryBtnFooter" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition-colors">
-          Entendido
+          Fechar
         </button>
       </div>
     </div>
@@ -482,7 +636,7 @@
         <span>Processamento Digital de Sinais</span>
       </div>
       <div>
-        Baseado em simulação de média móvel & degrau • Licença MIT
+        Média Móvel, Filtro de Kalman & Wavelets • Licença MIT
       </div>
     </div>
   </footer>
@@ -510,9 +664,24 @@
     const regenNoiseBtn = document.getElementById('regenNoiseBtn');
 
     const filterTypeSelect = document.getElementById('filterType');
+    const windowSizeContainer = document.getElementById('windowSizeContainer');
+    const kalmanContainer = document.getElementById('kalmanContainer');
+    const waveletContainer = document.getElementById('waveletContainer');
+
     const windowSizeSlider = document.getElementById('windowSize');
     const windowSizeVal = document.getElementById('windowSizeVal');
     const presetButtons = document.querySelectorAll('.preset-m');
+
+    const kalmanQSlider = document.getElementById('kalmanQ');
+    const kalmanQVal = document.getElementById('kalmanQVal');
+    const kalmanRSlider = document.getElementById('kalmanR');
+    const kalmanRVal = document.getElementById('kalmanRVal');
+
+    const waveletLevelsSelect = document.getElementById('waveletLevels');
+    const waveletModeSelect = document.getElementById('waveletMode');
+    const waveletMultSlider = document.getElementById('waveletMultiplier');
+    const waveletMultVal = document.getElementById('waveletMultVal');
+
     const activeFormulaCard = document.getElementById('activeFormulaCard');
 
     const pauseBtn = document.getElementById('pauseBtn');
@@ -525,10 +694,22 @@
     const showFullCheck = document.getElementById('showFullCheck');
     const animProgressBadge = document.getElementById('animProgressBadge');
 
+    // Headers & Legends
+    const timePlotTitle = document.getElementById('timePlotTitle');
+    const timePlotSubtitle = document.getElementById('timePlotSubtitle');
+    const legendFilterName = document.getElementById('legendFilterName');
+    const legendActiveArea = document.getElementById('legendActiveArea');
+    const freqPlotTitle = document.getElementById('freqPlotTitle');
+    const freqPlotSubtitle = document.getElementById('freqPlotSubtitle');
+
     // Metrics elements
+    const metricLbl1 = document.getElementById('metricLbl1');
     const metricVarReduction = document.getElementById('metricVarReduction');
+    const metricLbl2 = document.getElementById('metricLbl2');
     const metricSnrGain = document.getElementById('metricSnrGain');
+    const metricLbl3 = document.getElementById('metricLbl3');
     const metricGroupDelay = document.getElementById('metricGroupDelay');
+    const metricLbl4 = document.getElementById('metricLbl4');
     const metricMse = document.getElementById('metricMse');
 
     // Frequency details
@@ -536,9 +717,11 @@
     const freqScaleLinear = document.getElementById('freqScaleLinear');
     const freqFirstNullText = document.getElementById('freqFirstNullText');
     const freqCutoffText = document.getElementById('freqCutoffText');
+    const freqSideLobeText = document.getElementById('freqSideLobeText');
 
     // Modals
     const theoryModal = document.getElementById('theoryModal');
+    const theoryModalContent = document.getElementById('theoryModalContent');
     const openTheoryBtn = document.getElementById('openTheoryBtn');
     const closeTheoryBtn = document.getElementById('closeTheoryBtn');
     const closeTheoryBtnFooter = document.getElementById('closeTheoryBtnFooter');
@@ -556,6 +739,17 @@
     let filterType = 'causal';
     let isDbScale = true;
 
+    // Kalman state
+    let kalmanQ = 0.0050;
+    let kalmanR = 0.0400;
+    let kalmanGains = [];
+    let kalmanCovs = [];
+
+    // Wavelet state
+    let waveletLevels = 3;
+    let waveletMode = 'soft';
+    let waveletMultiplier = 1.0;
+
     let idealSignal = [];
     let noiseArray = [];
     let noisySignal = [];
@@ -569,6 +763,28 @@
 
     let timeCanvasW = 0, timeCanvasH = 0;
     let freqCanvasW = 0, freqCanvasH = 0;
+
+    // Função universal e segura para renderizar KaTeX sem quebrar
+    function safeRenderMath(targetElement) {
+      const el = targetElement || document.body;
+      if (typeof renderMathInElement === 'function') {
+        try {
+          renderMathInElement(el, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false
+          });
+        } catch (err) {
+          console.warn('Erro na renderização KaTeX:', err);
+        }
+      } else {
+        setTimeout(() => safeRenderMath(targetElement), 100);
+      }
+    }
 
     // Inicialização dos Sinais
     function updateSignals() {
@@ -613,6 +829,20 @@
         case 'median':
           filteredSignal = MovingAverageEngine.filterMedian(noisySignal, M);
           break;
+        case 'kalman': {
+          const res = MovingAverageEngine.filterKalman(noisySignal, kalmanQ, kalmanR, noisySignal[0], 1.0);
+          filteredSignal = res.filtered;
+          kalmanGains = res.gains;
+          kalmanCovs = res.covariances;
+          break;
+        }
+        case 'wavelet':
+          filteredSignal = MovingAverageEngine.filterWaveletDenoise(noisySignal, {
+            levels: waveletLevels,
+            thresholdMultiplier: waveletMultiplier,
+            mode: waveletMode
+          });
+          break;
         default:
           filteredSignal = MovingAverageEngine.filterCausalMovingAverage(noisySignal, M);
       }
@@ -631,21 +861,26 @@
       if (filterType === 'causal') return M - 1;
       if (filterType === 'centralized') return Math.floor((M - 1) / 2);
       if (filterType === 'median') return Math.floor(M / 2);
-      return 0; // EMA
+      return 0; // Kalman, Wavelet, EMA
     }
 
     function updateActiveFormula() {
       let latex = '';
       if (filterType === 'causal') {
-        latex = `M = ${M} \\quad y[n] = \\frac{1}{${M}} \\sum_{k=0}^{${M - 1}} x[n-k]`;
+        latex = `y[n] = \\frac{1}{${M}} \\sum_{k=0}^{${M - 1}} x[n-k] \\quad \\left(\\tau_g = \\frac{${M}-1}{2} = ${((M - 1) / 2).toFixed(1)}\\right)`;
       } else if (filterType === 'centralized') {
         const kHalf = Math.floor((M - 1) / 2);
-        latex = `M = ${M} \\quad y[n] = \\frac{1}{${M}} \\sum_{k=-${kHalf}}^{${kHalf}} x[n+k]`;
+        latex = `y[n] = \\frac{1}{${M}} \\sum_{k=-${kHalf}}^{${kHalf}} x[n+k] \\quad (\\tau_g = 0)`;
       } else if (filterType === 'ema') {
         const alpha = (2 / (M + 1)).toFixed(3);
-        latex = `\\alpha = \\frac{2}{M+1} = ${alpha} \\quad y[n] = ${alpha} x[n] + ${(1 - alpha).toFixed(3)} y[n-1]`;
+        latex = `y[n] = ${alpha} x[n] + ${(1 - alpha).toFixed(3)} y[n-1] \\quad \\left(\\alpha = \\frac{2}{${M}+1}\\right)`;
+      } else if (filterType === 'kalman') {
+        const lastGain = (kalmanGains && kalmanGains.length > 0) ? kalmanGains[Math.min(animIndex, N - 1)] : (kalmanQ / (kalmanQ + kalmanR));
+        latex = `K_k = \\frac{P_k^-}{P_k^- + R} \\approx ${Number(lastGain || 0).toFixed(3)} \\quad \\hat{x}_k = \\hat{x}_k^- + K_k(z_k - \\hat{x}_k^-)`;
+      } else if (filterType === 'wavelet') {
+        latex = `\\lambda = \\hat{\\sigma}\\sqrt{2\\ln(N)} \\cdot ${waveletMultiplier.toFixed(1)} \\quad \\hat{d}[k] = \\text{sgn}(d)\\max(0, |d| - \\lambda)`;
       } else if (filterType === 'median') {
-        latex = `M = ${M} \\quad y[n] = \\text{mediana}\\{x[n-\\lfloor M/2\\rfloor], \\dots, x[n+\\lfloor M/2\\rfloor]\\}`;
+        latex = `y[n] = \\text{mediana}\\{x[n-\\lfloor ${M}/2\\rfloor], \\dots, x[n+\\lfloor ${M}/2\\rfloor]\\}`;
       }
 
       if (window.katex) {
@@ -655,26 +890,90 @@
           activeFormulaCard.textContent = latex;
         }
       } else {
-        activeFormulaCard.textContent = latex;
+        setTimeout(updateActiveFormula, 150);
       }
     }
 
     function updateMetricsDisplay() {
       const metrics = MovingAverageEngine.computeMetrics(idealSignal, noisySignal, filteredSignal, M, filterType);
 
-      metricVarReduction.textContent = `${metrics.theoreticalVarReduction.toFixed(3)} (${(-metrics.theoreticalSnrGainDb).toFixed(2)} dB)`;
-      metricSnrGain.textContent = `+${metrics.theoreticalSnrGainDb.toFixed(2)} dB`;
-      metricGroupDelay.textContent = `${metrics.groupDelaySamples.toFixed(1)} amostras (${(metrics.groupDelaySamples * (T_FINAL / (N - 1))).toFixed(2)} s)`;
-      metricMse.textContent = metrics.mseFiltered.toFixed(4);
+      if (filterType === 'kalman') {
+        metricLbl1.textContent = 'Ganho de Kalman (K)';
+        const currK = kalmanGains[Math.min(animIndex, N - 1)] || 0;
+        metricVarReduction.textContent = `${currK.toFixed(3)} (Adaptativo)`;
 
-      // Frequência
-      const freqInfo = MovingAverageEngine.computeFrequencyResponse(M);
-      const nullPi = (freqInfo.firstNullOmega / Math.PI).toFixed(2);
-      const nullFs = (freqInfo.firstNullOmega / (2 * Math.PI)).toFixed(2);
-      freqFirstNullText.textContent = `ω = ${nullPi}π (f = ${nullFs} fs)`;
+        metricLbl2.textContent = 'Ganho SNR (Exp.)';
+        metricSnrGain.textContent = `+${Math.max(0, metrics.snrImprovementDb).toFixed(2)} dB`;
 
-      const cutPi = (freqInfo.cutoff3DbOmega / Math.PI).toFixed(2);
-      freqCutoffText.textContent = `ω_c ≈ ${cutPi}π`;
+        metricLbl3.textContent = 'Atraso Temporal';
+        metricGroupDelay.textContent = 'Mínimo (~0 s)';
+
+        metricLbl4.textContent = 'MSE Experimental';
+        metricMse.textContent = metrics.mseFiltered.toFixed(4);
+
+        legendFilterName.textContent = 'Estimativa de Kalman x̂[n]';
+        timePlotTitle.textContent = 'Domínio do Tempo: Sinal, Ruído e Estimativa de Kalman';
+        timePlotSubtitle.textContent = 'Convergência ótima baseada na minimização da covariância do erro a posteriori';
+        freqPlotTitle.textContent = 'Domínio da Frequência: Resposta em Regime Permanente';
+        freqPlotSubtitle.textContent = 'Filtro passa-baixas adaptativo com largura de banda proporcional ao Ganho K';
+
+        freqFirstNullText.textContent = `K_ss ≈ ${(kalmanQ / (kalmanQ + kalmanR)).toFixed(3)}`;
+        freqCutoffText.textContent = `Q = ${kalmanQ.toFixed(4)}`;
+        freqSideLobeText.textContent = `R = ${kalmanR.toFixed(4)}`;
+
+      } else if (filterType === 'wavelet') {
+        metricLbl1.textContent = 'Limiar VisuShrink (λ)';
+        const sigmaEst = (noiseSigma || 0.1);
+        const lam = sigmaEst * Math.sqrt(2 * Math.log(N)) * waveletMultiplier;
+        metricVarReduction.textContent = `λ = ${lam.toFixed(3)}`;
+
+        metricLbl2.textContent = 'Ganho SNR (Exp.)';
+        metricSnrGain.textContent = `+${Math.max(0, metrics.snrImprovementDb).toFixed(2)} dB`;
+
+        metricLbl3.textContent = 'Preservação Borda';
+        metricGroupDelay.textContent = 'Excelente (tr ≈ 1)';
+
+        metricLbl4.textContent = 'MSE Experimental';
+        metricMse.textContent = metrics.mseFiltered.toFixed(4);
+
+        legendFilterName.textContent = 'Denoising Wavelet (DWT)';
+        timePlotTitle.textContent = 'Domínio do Tempo: Decomposição e Reconstrução Multi-escala';
+        timePlotSubtitle.textContent = 'Preservação de transições abruptas do degrau através de limiarização soft';
+        freqPlotTitle.textContent = 'Domínio da Frequência: Banco de Filtros de Análise (Haar)';
+        freqPlotSubtitle.textContent = 'Separação em sub-bandas de aproximação e detalhe na pirâmide de Mallat';
+
+        freqFirstNullText.textContent = `${waveletLevels} Níveis DWT`;
+        freqCutoffText.textContent = `${waveletMode.toUpperCase()}-Threshold`;
+        freqSideLobeText.textContent = `Mult: ${waveletMultiplier.toFixed(1)}x`;
+
+      } else {
+        metricLbl1.textContent = 'Atenuação Ruído (1/M)';
+        metricVarReduction.textContent = `${metrics.theoreticalVarReduction.toFixed(3)} (${(-metrics.theoreticalSnrGainDb).toFixed(2)} dB)`;
+
+        metricLbl2.textContent = 'Ganho Teórico SNR';
+        metricSnrGain.textContent = `+${metrics.theoreticalSnrGainDb.toFixed(2)} dB`;
+
+        metricLbl3.textContent = 'Atraso Grupo (τ)';
+        metricGroupDelay.textContent = `${metrics.groupDelaySamples.toFixed(1)} amostras (${(metrics.groupDelaySamples * (T_FINAL / (N - 1))).toFixed(2)} s)`;
+
+        metricLbl4.textContent = 'MSE Experimental';
+        metricMse.textContent = metrics.mseFiltered.toFixed(4);
+
+        legendFilterName.textContent = 'Saída Filtrada y[n]';
+        timePlotTitle.textContent = 'Domínio do Tempo: Sinal, Ruído e Janela Deslizante';
+        timePlotSubtitle.textContent = 'Visualização em tempo real das amostras sob a média móvel';
+        freqPlotTitle.textContent = 'Domínio da Frequência: Resposta em Magnitude |H(e^jω)|';
+        freqPlotSubtitle.textContent = 'Núcleo Sinc/Dirichlet, frequência de corte -3dB e atenuação de lóbulos secundários';
+
+        const freqInfo = MovingAverageEngine.computeFrequencyResponse(M);
+        const nullPi = (freqInfo.firstNullOmega / Math.PI).toFixed(2);
+        const nullFs = (freqInfo.firstNullOmega / (2 * Math.PI)).toFixed(2);
+        freqFirstNullText.textContent = `ω = ${nullPi}π (f = ${nullFs} fs)`;
+
+        const cutPi = (freqInfo.cutoff3DbOmega / Math.PI).toFixed(2);
+        freqCutoffText.textContent = `ω_c ≈ ${cutPi}π`;
+        freqSideLobeText.textContent = '-13.3 dB (assintótica)';
+      }
 
       animProgressBadge.textContent = `Amostra: ${Math.min(animIndex, N - 1)}/${N - 1}`;
     }
@@ -701,7 +1000,6 @@
       drawFrequencyDomain();
     }
 
-    // Time Domain Coordinates Mapping
     function getTimeMargins() {
       const isCompact = timeCanvasW < 450;
       return { top: 24, right: 18, bottom: 44, left: isCompact ? 44 : 52 };
@@ -716,7 +1014,6 @@
     function timeYOf(val) {
       const m = getTimeMargins();
       const plotH = timeCanvasH - m.top - m.bottom;
-      // Escala vertical: amplitude de 0.0 a 2.8
       const yMin = 0.2;
       const yMax = 2.8;
       return m.top + ((yMax - val) / (yMax - yMin)) * plotH;
@@ -730,12 +1027,10 @@
       const pw = timeCanvasW - m.left - m.right;
       const ph = timeCanvasH - m.top - m.bottom;
 
-      // Limpar
       timeCtx.clearRect(0, 0, timeCanvasW, timeCanvasH);
       timeCtx.fillStyle = '#090d16';
       timeCtx.fillRect(0, 0, timeCanvasW, timeCanvasH);
 
-      // Grid Y e Eixos
       timeCtx.font = timeCanvasW < 420 ? '10px Fira Code, monospace' : '11px Fira Code, monospace';
       timeCtx.lineWidth = 1;
       timeCtx.textBaseline = 'middle';
@@ -754,7 +1049,6 @@
         timeCtx.fillText(yVal.toFixed(1), m.left - 8, y);
       }
 
-      // Grid X
       const xTicks = [0, 2.5, 5.0, 7.5, 10.0];
       for (const t of xTicks) {
         const x = m.left + (t / T_FINAL) * pw;
@@ -770,7 +1064,6 @@
         timeCtx.fillText(t.toFixed(1) + 's', x, m.top + ph + 8);
       }
 
-      // Eixos principais
       timeCtx.strokeStyle = '#334155';
       timeCtx.lineWidth = 1.5;
       timeCtx.beginPath();
@@ -779,7 +1072,6 @@
       timeCtx.lineTo(m.left + pw, m.top + ph);
       timeCtx.stroke();
 
-      // Rótulos de eixos
       timeCtx.fillStyle = '#94a3b8';
       timeCtx.textAlign = 'center';
       timeCtx.textBaseline = 'bottom';
@@ -793,7 +1085,7 @@
       timeCtx.fillText('Amplitude', 0, 0);
       timeCtx.restore();
 
-      // 1. Sinal Ideal (Tracejado branco/cinza)
+      // 1. Sinal Ideal
       timeCtx.strokeStyle = '#94a3b8';
       timeCtx.lineWidth = 2.0;
       timeCtx.setLineDash([5, 4]);
@@ -805,7 +1097,7 @@
       timeCtx.stroke();
       timeCtx.setLineDash([]);
 
-      // 2. Marcador de transição de degrau se aplicável
+      // 2. Marcador de degrau
       if (signalType === 'step') {
         const stepX = (timeXOf(Math.floor(N / 2) - 1) + timeXOf(Math.floor(N / 2))) / 2;
         timeCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
@@ -823,7 +1115,7 @@
         timeCtx.fillText('degrau (t = 5s)', stepX, m.top + 4);
       }
 
-      // 3. Sinal Ruidoso (Linhas e pontos vermelhos/rosas)
+      // 3. Sinal Ruidoso
       timeCtx.strokeStyle = 'rgba(244, 63, 94, 0.35)';
       timeCtx.lineWidth = 1.2;
       timeCtx.beginPath();
@@ -841,53 +1133,70 @@
         timeCtx.fill();
       }
 
-      // 4. Janela Deslizante Ativa (se não estiver em modo 'showFull')
+      // 4. Janela / Ponto Ativo
       const isFull = showFullCheck.checked;
       const currentEnd = isFull ? N - 1 : Math.min(animIndex, N - 1);
 
       if (!isFull && animIndex >= 0 && animIndex < N) {
-        let winStart = animIndex;
-        let winEnd = animIndex;
+        if (['causal', 'centralized', 'median'].includes(filterType)) {
+          let winStart = animIndex;
+          let winEnd = animIndex;
 
-        if (filterType === 'causal') {
-          winStart = Math.max(0, animIndex - M + 1);
-          winEnd = animIndex;
-        } else if (filterType === 'centralized') {
-          const halfLeft = Math.floor((M - 1) / 2);
-          const halfRight = Math.floor(M / 2);
-          winStart = Math.max(0, animIndex - halfLeft);
-          winEnd = Math.min(N - 1, animIndex + halfRight);
-        } else if (filterType === 'median') {
-          const half = Math.floor(M / 2);
-          winStart = Math.max(0, animIndex - half);
-          winEnd = Math.min(N - 1, animIndex + half);
-        }
+          if (filterType === 'causal') {
+            winStart = Math.max(0, animIndex - M + 1);
+            winEnd = animIndex;
+          } else if (filterType === 'centralized') {
+            const halfLeft = Math.floor((M - 1) / 2);
+            const halfRight = Math.floor(M / 2);
+            winStart = Math.max(0, animIndex - halfLeft);
+            winEnd = Math.min(N - 1, animIndex + halfRight);
+          } else if (filterType === 'median') {
+            const half = Math.floor(M / 2);
+            winStart = Math.max(0, animIndex - half);
+            winEnd = Math.min(N - 1, animIndex + half);
+          }
 
-        const dx = timeXOf(1) - timeXOf(0);
-        const x0 = timeXOf(winStart) - dx * 0.45;
-        const x1 = timeXOf(winEnd) + dx * 0.45;
+          const dx = timeXOf(1) - timeXOf(0);
+          const x0 = timeXOf(winStart) - dx * 0.45;
+          const x1 = timeXOf(winEnd) + dx * 0.45;
 
-        // Fundo âmbar translúcido
-        timeCtx.fillStyle = 'rgba(245, 158, 11, 0.16)';
-        timeCtx.fillRect(x0, m.top, x1 - x0, ph);
-        timeCtx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
-        timeCtx.lineWidth = 1;
-        timeCtx.strokeRect(x0, m.top, x1 - x0, ph);
+          timeCtx.fillStyle = 'rgba(245, 158, 11, 0.16)';
+          timeCtx.fillRect(x0, m.top, x1 - x0, ph);
+          timeCtx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+          timeCtx.lineWidth = 1;
+          timeCtx.strokeRect(x0, m.top, x1 - x0, ph);
 
-        // Circunferências destacando as amostras ativas na janela
-        timeCtx.strokeStyle = '#38bdf8';
-        timeCtx.lineWidth = 2.0;
-        for (let i = winStart; i <= winEnd; i++) {
+          timeCtx.strokeStyle = '#38bdf8';
+          timeCtx.lineWidth = 2.0;
+          for (let i = winStart; i <= winEnd; i++) {
+            timeCtx.beginPath();
+            timeCtx.arc(timeXOf(i), timeYOf(noisySignal[i]), ptRadius + 3.0, 0, Math.PI * 2);
+            timeCtx.stroke();
+          }
+        } else {
+          // Kalman ou Wavelet: destaca o ponto de tempo corrente
+          const curX = timeXOf(animIndex);
+          timeCtx.strokeStyle = 'rgba(129, 140, 248, 0.5)';
+          timeCtx.lineWidth = 1.5;
+          timeCtx.setLineDash([4, 3]);
           timeCtx.beginPath();
-          timeCtx.arc(timeXOf(i), timeYOf(noisySignal[i]), ptRadius + 3.0, 0, Math.PI * 2);
+          timeCtx.moveTo(curX, m.top);
+          timeCtx.lineTo(curX, m.top + ph);
+          timeCtx.stroke();
+          timeCtx.setLineDash([]);
+
+          timeCtx.strokeStyle = '#818cf8';
+          timeCtx.lineWidth = 2.5;
+          timeCtx.beginPath();
+          timeCtx.arc(curX, timeYOf(noisySignal[animIndex]), ptRadius + 4.0, 0, Math.PI * 2);
           timeCtx.stroke();
         }
       }
 
-      // 5. Sinal Filtrado (Curva contínua ciano vibrante e pontos)
+      // 5. Sinal Filtrado
       const minValid = getMinAnimIndex();
       if (currentEnd >= minValid) {
-        timeCtx.strokeStyle = '#38bdf8';
+        timeCtx.strokeStyle = (filterType === 'kalman') ? '#818cf8' : (filterType === 'wavelet' ? '#34d399' : '#38bdf8');
         timeCtx.lineWidth = 3.2;
         timeCtx.lineJoin = 'round';
         timeCtx.lineCap = 'round';
@@ -907,9 +1216,8 @@
         }
         timeCtx.stroke();
 
-        // Pontos filtrados
-        timeCtx.fillStyle = '#0284c7';
-        timeCtx.strokeStyle = '#38bdf8';
+        timeCtx.fillStyle = (filterType === 'kalman') ? '#4338ca' : (filterType === 'wavelet' ? '#047857' : '#0284c7');
+        timeCtx.strokeStyle = (filterType === 'kalman') ? '#818cf8' : (filterType === 'wavelet' ? '#34d399' : '#38bdf8');
         timeCtx.lineWidth = 1.5;
         for (let i = minValid; i <= currentEnd; i++) {
           if (filteredSignal[i] !== null && !isNaN(filteredSignal[i])) {
@@ -934,14 +1242,46 @@
       freqCtx.fillStyle = '#090d16';
       freqCtx.fillRect(0, 0, freqCanvasW, freqCanvasH);
 
-      const freqData = MovingAverageEngine.computeFrequencyResponse(M, 256);
-      const pts = freqData.frequencies.length;
+      const pts = 256;
+      const frequencies = new Float64Array(pts);
+      const magLinear = new Float64Array(pts);
+      const magDb = new Float64Array(pts);
 
-      // Escala Vertical
+      if (filterType === 'kalman') {
+        // Resposta em regime permanente do filtro de Kalman
+        const Kss = kalmanQ / (kalmanQ + kalmanR);
+        for (let i = 0; i < pts; i++) {
+          const omega = (Math.PI * i) / (pts - 1);
+          frequencies[i] = omega;
+          // H(z) = Kss / (1 - (1 - Kss) z^-1)
+          const a = 1 - Kss;
+          const mag = Kss / Math.sqrt(1 + a * a - 2 * a * Math.cos(omega));
+          magLinear[i] = Math.min(1.0, mag);
+          magDb[i] = 20 * Math.log10(Math.max(mag, 1e-4));
+        }
+      } else if (filterType === 'wavelet') {
+        // Filtro passa-baixas de aproximação de Haar: H(e^jω) = cos(ω / 2)
+        for (let i = 0; i < pts; i++) {
+          const omega = (Math.PI * i) / (pts - 1);
+          frequencies[i] = omega;
+          const mag = Math.abs(Math.cos(omega / 2));
+          magLinear[i] = mag;
+          magDb[i] = 20 * Math.log10(Math.max(mag, 1e-4));
+        }
+      } else {
+        // Média móvel ou EMA
+        const freqData = MovingAverageEngine.computeFrequencyResponse(M, pts);
+        for (let i = 0; i < pts; i++) {
+          frequencies[i] = freqData.frequencies[i];
+          magLinear[i] = freqData.magnitudeLinear[i];
+          magDb[i] = freqData.magnitudeDb[i];
+        }
+      }
+
       let yMin = 0, yMax = 1.05;
       if (isDbScale) {
-        yMin = -40; // dB
-        yMax = 3;   // dB
+        yMin = -40;
+        yMax = 3;
       }
 
       function fyOf(val) {
@@ -952,7 +1292,6 @@
         return m.left + (omega / Math.PI) * pw;
       }
 
-      // Grade e Ticks Y
       freqCtx.font = '10px Fira Code, monospace';
       freqCtx.lineWidth = 1;
       freqCtx.textBaseline = 'middle';
@@ -971,7 +1310,6 @@
         freqCtx.fillText(isDbScale ? `${yVal}dB` : yVal.toFixed(2), m.left - 6, y);
       }
 
-      // Linha de referência -3 dB
       if (isDbScale) {
         const y3db = fyOf(-3);
         freqCtx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
@@ -984,7 +1322,6 @@
         freqCtx.setLineDash([]);
       }
 
-      // Grade e Ticks X (0, 0.25pi, 0.5pi, 0.75pi, pi)
       const xFractions = [
         { val: 0, label: '0' },
         { val: 0.25 * Math.PI, label: '0.25π' },
@@ -1007,7 +1344,6 @@
         freqCtx.fillText(t.label, x, m.top + ph + 6);
       }
 
-      // Eixos
       freqCtx.strokeStyle = '#334155';
       freqCtx.lineWidth = 1.5;
       freqCtx.beginPath();
@@ -1016,32 +1352,13 @@
       freqCtx.lineTo(m.left + pw, m.top + ph);
       freqCtx.stroke();
 
-      // Primeiro Nulo (Linha Vertical Marcadora)
-      const xNull = fxOf(freqData.firstNullOmega);
-      if (xNull <= m.left + pw) {
-        freqCtx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
-        freqCtx.lineWidth = 1.2;
-        freqCtx.setLineDash([3, 3]);
-        freqCtx.beginPath();
-        freqCtx.moveTo(xNull, m.top);
-        freqCtx.lineTo(xNull, m.top + ph);
-        freqCtx.stroke();
-        freqCtx.setLineDash([]);
-
-        freqCtx.fillStyle = '#38bdf8';
-        freqCtx.textAlign = 'center';
-        freqCtx.textBaseline = 'bottom';
-        freqCtx.fillText('1º nulo', xNull, m.top - 2);
-      }
-
-      // Curva da Resposta em Frequência
-      freqCtx.strokeStyle = '#06b6d4';
+      freqCtx.strokeStyle = (filterType === 'kalman') ? '#818cf8' : (filterType === 'wavelet' ? '#34d399' : '#06b6d4');
       freqCtx.lineWidth = 2.4;
       freqCtx.beginPath();
 
       for (let i = 0; i < pts; i++) {
-        const omega = freqData.frequencies[i];
-        const val = isDbScale ? Math.max(yMin, freqData.magnitudeDb[i]) : freqData.magnitudeLinear[i];
+        const omega = frequencies[i];
+        const val = isDbScale ? Math.max(yMin, magDb[i]) : magLinear[i];
         const x = fxOf(omega);
         const y = fyOf(val);
 
@@ -1049,10 +1366,10 @@
       }
       freqCtx.stroke();
 
-      // Preenchimento gradiente suave sob a curva
       const grad = freqCtx.createLinearGradient(0, m.top, 0, m.top + ph);
-      grad.addColorStop(0, 'rgba(6, 182, 212, 0.2)');
-      grad.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+      const colorBase = (filterType === 'kalman') ? '129, 140, 248' : (filterType === 'wavelet' ? '52, 211, 153' : '6, 182, 212');
+      grad.addColorStop(0, `rgba(${colorBase}, 0.2)`);
+      grad.addColorStop(1, `rgba(${colorBase}, 0.0)`);
       freqCtx.fillStyle = grad;
       freqCtx.lineTo(m.left + pw, m.top + ph);
       freqCtx.lineTo(m.left, m.top + ph);
@@ -1074,12 +1391,13 @@
           lastFrameTime = currentTime;
           animProgressBadge.textContent = `Amostra: ${Math.min(animIndex, N - 1)}/${N - 1}`;
           drawTimeDomain();
+          updateMetricsDisplay();
         }
       }
       animFrameId = requestAnimationFrame(animate);
     }
 
-    // Tooltip interativo com mouse sobre o canvas
+    // Tooltip interativo
     timeCanvas.addEventListener('mousemove', (e) => {
       const rect = timeCanvas.getBoundingClientRect();
       const clientX = e.clientX - rect.left;
@@ -1133,6 +1451,12 @@
     noiseSigmaSlider.addEventListener('input', () => {
       noiseSigma = Number(noiseSigmaSlider.value);
       noiseSigmaVal.textContent = noiseSigma.toFixed(2);
+      // Opcional: sincronizar ruído R de Kalman com sigma^2
+      if (filterType === 'kalman') {
+        kalmanR = Math.max(0.001, noiseSigma * noiseSigma);
+        kalmanRSlider.value = kalmanR;
+        kalmanRVal.textContent = kalmanR.toFixed(4);
+      }
       regenerateNoise();
     });
 
@@ -1142,6 +1466,22 @@
 
     filterTypeSelect.addEventListener('change', () => {
       filterType = filterTypeSelect.value;
+
+      // Exibir painéis condicionais
+      if (['causal', 'centralized', 'ema', 'median'].includes(filterType)) {
+        windowSizeContainer.classList.remove('hidden');
+        kalmanContainer.classList.add('hidden');
+        waveletContainer.classList.add('hidden');
+      } else if (filterType === 'kalman') {
+        windowSizeContainer.classList.add('hidden');
+        kalmanContainer.classList.remove('hidden');
+        waveletContainer.classList.add('hidden');
+      } else if (filterType === 'wavelet') {
+        windowSizeContainer.classList.add('hidden');
+        kalmanContainer.classList.add('hidden');
+        waveletContainer.classList.remove('hidden');
+      }
+
       recalculateFilter();
     });
 
@@ -1169,6 +1509,36 @@
       btn.addEventListener('click', () => {
         setWindowSize(btn.dataset.m);
       });
+    });
+
+    // Controles de Kalman
+    kalmanQSlider.addEventListener('input', () => {
+      kalmanQ = Number(kalmanQSlider.value);
+      kalmanQVal.textContent = kalmanQ.toFixed(4);
+      recalculateFilter();
+    });
+
+    kalmanRSlider.addEventListener('input', () => {
+      kalmanR = Number(kalmanRSlider.value);
+      kalmanRVal.textContent = kalmanR.toFixed(4);
+      recalculateFilter();
+    });
+
+    // Controles de Wavelet
+    waveletLevelsSelect.addEventListener('change', () => {
+      waveletLevels = Number(waveletLevelsSelect.value);
+      recalculateFilter();
+    });
+
+    waveletModeSelect.addEventListener('change', () => {
+      waveletMode = waveletModeSelect.value;
+      recalculateFilter();
+    });
+
+    waveletMultSlider.addEventListener('input', () => {
+      waveletMultiplier = Number(waveletMultSlider.value);
+      waveletMultVal.textContent = `${waveletMultiplier.toFixed(1)}x`;
+      recalculateFilter();
     });
 
     pauseBtn.addEventListener('click', () => {
@@ -1215,7 +1585,6 @@
       drawTimeDomain();
     });
 
-    // Escala dB vs Linear
     freqScaleDb.addEventListener('click', () => {
       isDbScale = true;
       freqScaleDb.className = 'px-2.5 py-1 rounded-md bg-cyan-600 text-white font-bold transition-colors';
@@ -1245,7 +1614,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `media_movel_usp_M${M}.csv`;
+      a.download = `sinais_filtrados_${filterType}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -1259,14 +1628,15 @@
       oCtx.drawImage(timeCanvas, 0, 0);
 
       const link = document.createElement('a');
-      link.download = `media_movel_grafico_M${M}.png`;
+      link.download = `grafico_${filterType}_usp.png`;
       link.href = offscreen.toDataURL('image/png');
       link.click();
     });
 
-    // Modal de Teoria
+    // Modal de Teoria com renderização matemática garantida
     openTheoryBtn.addEventListener('click', () => {
       theoryModal.classList.remove('hidden');
+      safeRenderMath(theoryModalContent);
     });
 
     closeTheoryBtn.addEventListener('click', () => {
@@ -1301,7 +1671,6 @@
       }
     });
 
-    // Observer de redimensionamento
     const ro = new ResizeObserver(() => {
       resizeCanvases();
     });
@@ -1312,6 +1681,16 @@
     updateSignals();
     resizeCanvases();
     requestAnimationFrame(animate);
+
+    // Disparar renderização matemática global quando scripts externos KaTeX carregarem
+    window.addEventListener('load', () => {
+      safeRenderMath(document.body);
+      updateActiveFormula();
+    });
+    setTimeout(() => {
+      safeRenderMath(document.body);
+      updateActiveFormula();
+    }, 250);
   })();
   </script>
 </body>
