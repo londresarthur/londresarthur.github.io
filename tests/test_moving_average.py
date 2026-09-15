@@ -255,6 +255,30 @@ class TestMovingAverageDSP(unittest.TestCase):
         self.assertAlmostEqual(denoised[10], 2.0, delta=0.15)
         self.assertAlmostEqual(denoised[50], 1.0, delta=0.15)
 
+    def test_sampling_parameters(self):
+        """Verifica as relacoes fundamentais dt = T/(N-1), fs = 1/dt e f_Nyq = fs/2."""
+        cases = [
+            (61, 10.0, 1.0 / 6.0, 6.0, 3.0),
+            (31, 3.0, 0.1, 10.0, 5.0),
+            (256, 10.0, 10.0 / 255.0, 255.0 / 10.0, 255.0 / 20.0),
+            (512, 20.0, 20.0 / 511.0, 511.0 / 20.0, 511.0 / 40.0),
+        ]
+        for N, T, exp_dt, exp_fs, exp_fnyq in cases:
+            dt = T / (N - 1)
+            fs = (N - 1) / T
+            f_nyq = fs / 2.0
+            self.assertAlmostEqual(dt, exp_dt, places=7)
+            self.assertAlmostEqual(fs, exp_fs, places=7)
+            self.assertAlmostEqual(f_nyq, exp_fnyq, places=7)
+
+    def test_variable_sample_sizes_moving_average(self):
+        """Filtros devem operar corretamente em diferentes ordens de N (31 a 512)."""
+        for N in [31, 61, 128, 256, 512]:
+            x = [1.0] * N
+            y = moving_average_causal(x, M=5)
+            self.assertEqual(len(y), N)
+            self.assertAlmostEqual(y[-1], 1.0, places=7)
+
 
 if __name__ == "__main__":
     unittest.main()

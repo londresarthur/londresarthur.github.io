@@ -126,11 +126,97 @@
     <!-- LEFT SIDEBAR: CONTROLS & PARAMS (4 COLS) -->
     <aside class="lg:col-span-4 flex flex-col gap-4">
 
-      <!-- 1. Signal & Noise Panel -->
+      <!-- 1. Sampling & Time Domain Configuration Panel -->
+      <div class="glass-panel p-4 rounded-2xl shadow-xl border border-cyan-500/20">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            1. Amostragem &amp; Domínio Temporal
+          </h2>
+          <span id="samplingSummaryBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">N=61 | T=10s</span>
+        </div>
+
+        <div class="space-y-3 text-sm">
+          <!-- Sample Count Slider & Presets -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="sampleCountSlider" class="text-xs font-medium text-slate-300 flex items-center gap-1">
+                <span>Número de Amostras</span>
+                <span class="font-mono text-cyan-400 font-bold">(N)</span>
+              </label>
+              <span id="sampleCountVal" class="text-xs font-mono font-bold text-cyan-400">61 amostras</span>
+            </div>
+            <input id="sampleCountSlider" type="range" min="21" max="512" step="1" value="61" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            
+            <div class="flex items-center gap-1 mt-1.5 flex-wrap">
+              <span class="text-[10px] text-slate-400 mr-1 font-semibold">N:</span>
+              <button type="button" class="preset-n px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-n="31">31</button>
+              <button type="button" class="preset-n px-2 py-0.5 rounded bg-cyan-600/40 hover:bg-cyan-600/60 border border-cyan-500/50 text-[11px] font-mono font-bold text-cyan-300 transition-colors" data-n="61">61</button>
+              <button type="button" class="preset-n px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-n="101">101</button>
+              <button type="button" class="preset-n px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-n="128">128</button>
+              <button type="button" class="preset-n px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-n="256">256</button>
+              <button type="button" class="preset-n px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-n="512">512</button>
+            </div>
+          </div>
+
+          <!-- Total Duration Slider & Presets -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="totalDurationSlider" class="text-xs font-medium text-slate-300 flex items-center gap-1">
+                <span>Duração Total</span>
+                <span class="font-mono text-cyan-400 font-bold">(T_final)</span>
+              </label>
+              <span id="totalDurationVal" class="text-xs font-mono font-bold text-cyan-400">10.0 s</span>
+            </div>
+            <input id="totalDurationSlider" type="range" min="0.5" max="30.0" step="0.5" value="10.0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            
+            <div class="flex items-center gap-1 mt-1.5 flex-wrap">
+              <span class="text-[10px] text-slate-400 mr-1 font-semibold">T:</span>
+              <button type="button" class="preset-t px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-t="1.0">1s</button>
+              <button type="button" class="preset-t px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-t="3.0">3s</button>
+              <button type="button" class="preset-t px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-t="5.0">5s</button>
+              <button type="button" class="preset-t px-2 py-0.5 rounded bg-cyan-600/40 hover:bg-cyan-600/60 border border-cyan-500/50 text-[11px] font-mono font-bold text-cyan-300 transition-colors" data-t="10.0">10s</button>
+              <button type="button" class="preset-t px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors" data-t="20.0">20s</button>
+            </div>
+          </div>
+
+          <!-- Sampling Metrics Derived Card -->
+          <div class="grid grid-cols-3 gap-2 p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-center">
+            <div class="p-0.5">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Taxa fs</div>
+              <div id="samplingRateVal" class="text-xs font-mono font-bold text-emerald-400">6.00 Hz</div>
+            </div>
+            <div class="p-0.5 border-x border-slate-800">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Período Δt</div>
+              <div id="samplingPeriodVal" class="text-xs font-mono font-bold text-sky-400">166.7 ms</div>
+            </div>
+            <div class="p-0.5">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Nyquist</div>
+              <div id="nyquistFreqVal" class="text-xs font-mono font-bold text-amber-400">3.00 Hz</div>
+            </div>
+          </div>
+
+          <!-- Step / Event Position Slider -->
+          <div id="stepPositionContainer">
+            <div class="flex justify-between items-center mb-1">
+              <label for="stepPositionSlider" class="text-xs font-medium text-slate-300">Posição da Transição / Degrau</label>
+              <span id="stepPositionVal" class="text-xs font-mono font-bold text-cyan-400">5.00 s (n=30)</span>
+            </div>
+            <input id="stepPositionSlider" type="range" min="10" max="90" step="1" value="50" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-0.5">
+              <span>10% (início)</span>
+              <span>50% (centro)</span>
+              <span>90% (fim)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Signal & Noise Panel -->
       <div class="glass-panel p-4 rounded-2xl shadow-xl">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-          1. Sinal de Entrada & Ruído
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          2. Sinal de Entrada &amp; Ruído
         </h2>
 
         <!-- Signal Type -->
@@ -175,11 +261,11 @@
         </div>
       </div>
 
-      <!-- 2. Filter Parameters Panel -->
+      <!-- 3. Filter Parameters Panel -->
       <div class="glass-panel p-4 rounded-2xl shadow-xl">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-          2. Algoritmo de Filtragem
+          3. Algoritmo de Filtragem
         </h2>
 
         <div class="space-y-3">
@@ -729,9 +815,24 @@
     const exportCsvBtn = document.getElementById('exportCsvBtn');
     const exportPngBtn = document.getElementById('exportPngBtn');
 
-    // Simulation State
-    const N = 61;
-    const T_FINAL = 10.0;
+    // Sampling & Time Domain UI Elements
+    const sampleCountSlider = document.getElementById('sampleCountSlider');
+    const sampleCountVal = document.getElementById('sampleCountVal');
+    const presetNButtons = document.querySelectorAll('.preset-n');
+    const totalDurationSlider = document.getElementById('totalDurationSlider');
+    const totalDurationVal = document.getElementById('totalDurationVal');
+    const presetTButtons = document.querySelectorAll('.preset-t');
+    const samplingSummaryBadge = document.getElementById('samplingSummaryBadge');
+    const samplingRateVal = document.getElementById('samplingRateVal');
+    const samplingPeriodVal = document.getElementById('samplingPeriodVal');
+    const nyquistFreqVal = document.getElementById('nyquistFreqVal');
+    const stepPositionSlider = document.getElementById('stepPositionSlider');
+    const stepPositionVal = document.getElementById('stepPositionVal');
+
+    // Simulation State (Dinâmico)
+    let N = 61;
+    let T_FINAL = 10.0;
+    let stepPercent = 50;
     let M = 5;
     let signalType = 'step';
     let noiseType = 'gaussian';
@@ -786,13 +887,46 @@
       }
     }
 
+    function getStepIndex() {
+      return Math.max(1, Math.min(N - 1, Math.round((stepPercent / 100) * (N - 1))));
+    }
+
+    function updateSamplingInfo() {
+      const params = MovingAverageEngine.computeSamplingParameters(N, T_FINAL);
+      if (samplingSummaryBadge) {
+        samplingSummaryBadge.textContent = `N=${N} | T=${T_FINAL >= 10 ? T_FINAL.toFixed(0) : T_FINAL.toFixed(1)}s`;
+      }
+      if (samplingRateVal) {
+        samplingRateVal.textContent = `${params.samplingRate.toFixed(2)} Hz`;
+      }
+      if (samplingPeriodVal) {
+        if (params.samplingPeriod >= 0.1) {
+          samplingPeriodVal.textContent = `${params.samplingPeriod.toFixed(3)} s`;
+        } else {
+          samplingPeriodVal.textContent = `${(params.samplingPeriod * 1000).toFixed(1)} ms`;
+        }
+      }
+      if (nyquistFreqVal) {
+        nyquistFreqVal.textContent = `${params.nyquistFrequency.toFixed(2)} Hz`;
+      }
+      if (stepPositionVal) {
+        const sIdx = getStepIndex();
+        const sTime = sIdx * params.samplingPeriod;
+        stepPositionVal.textContent = `${sTime.toFixed(2)} s (n=${sIdx})`;
+      }
+    }
+
     // Inicialização dos Sinais
     function updateSignals() {
+      updateSamplingInfo();
+      const sIdx = getStepIndex();
+
       idealSignal = MovingAverageEngine.generateSignal(signalType, N, {
-        stepIndex: Math.floor(N / 2),
+        stepIndex: sIdx,
         highVal: 2.0,
         lowVal: 1.0,
-        freq: 2.0
+        freq: 2.0,
+        totalDuration: T_FINAL
       });
 
       if (!noiseArray || noiseArray.length !== N) {
@@ -1049,9 +1183,12 @@
         timeCtx.fillText(yVal.toFixed(1), m.left - 8, y);
       }
 
-      const xTicks = [0, 2.5, 5.0, 7.5, 10.0];
-      for (const t of xTicks) {
-        const x = m.left + (t / T_FINAL) * pw;
+      // Eixo X dinâmico proporcional a T_FINAL
+      const numTicks = (timeCanvasW < 450) ? 4 : 5;
+      for (let k = 0; k <= numTicks; k++) {
+        const frac = k / numTicks;
+        const t = frac * T_FINAL;
+        const x = m.left + frac * pw;
         timeCtx.strokeStyle = '#1e293b';
         timeCtx.beginPath();
         timeCtx.moveTo(x, m.top);
@@ -1061,7 +1198,8 @@
         timeCtx.fillStyle = '#64748b';
         timeCtx.textAlign = 'center';
         timeCtx.textBaseline = 'top';
-        timeCtx.fillText(t.toFixed(1) + 's', x, m.top + ph + 8);
+        const label = (T_FINAL >= 5) ? (t % 1 === 0 ? t.toFixed(0) : t.toFixed(1)) : t.toFixed(2);
+        timeCtx.fillText(label + 's', x, m.top + ph + 8);
       }
 
       timeCtx.strokeStyle = '#334155';
@@ -1099,7 +1237,9 @@
 
       // 2. Marcador de degrau
       if (signalType === 'step') {
-        const stepX = (timeXOf(Math.floor(N / 2) - 1) + timeXOf(Math.floor(N / 2))) / 2;
+        const sIdx = getStepIndex();
+        const stepX = timeXOf(sIdx);
+        const stepTime = (sIdx / (N - 1)) * T_FINAL;
         timeCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
         timeCtx.lineWidth = 1.2;
         timeCtx.setLineDash([3, 3]);
@@ -1112,7 +1252,7 @@
         timeCtx.fillStyle = '#38bdf8';
         timeCtx.textAlign = 'center';
         timeCtx.textBaseline = 'top';
-        timeCtx.fillText('degrau (t = 5s)', stepX, m.top + 4);
+        timeCtx.fillText(`degrau (t = ${stepTime.toFixed(2)}s, n = ${sIdx})`, stepX, m.top + 4);
       }
 
       // 3. Sinal Ruidoso
@@ -1322,12 +1462,14 @@
         freqCtx.setLineDash([]);
       }
 
+      const fs = (N - 1) / T_FINAL;
+      const fNyq = fs / 2;
       const xFractions = [
         { val: 0, label: '0' },
         { val: 0.25 * Math.PI, label: '0.25π' },
         { val: 0.50 * Math.PI, label: '0.5π' },
         { val: 0.75 * Math.PI, label: '0.75π' },
-        { val: Math.PI, label: 'π (fs/2)' }
+        { val: Math.PI, label: `π (${fNyq >= 10 ? fNyq.toFixed(0) : fNyq.toFixed(1)}Hz)` }
       ];
 
       for (const t of xFractions) {
@@ -1384,7 +1526,8 @@
         const elapsed = currentTime - lastFrameTime;
 
         if (elapsed >= frameInterval) {
-          animIndex++;
+          const stepInc = N >= 250 ? 2 : 1;
+          animIndex += stepInc;
           if (animIndex > N + 8) {
             animIndex = getMinAnimIndex();
           }
@@ -1411,7 +1554,8 @@
 
       const fraction = (clientX - m.left) / pw;
       const idx = Math.min(N - 1, Math.max(0, Math.round(fraction * (N - 1))));
-      const t = (idx / (N - 1)) * T_FINAL;
+      const dt = T_FINAL / (N - 1);
+      const t = idx * dt;
 
       const idealVal = idealSignal[idx].toFixed(3);
       const noisyVal = noisySignal[idx].toFixed(3);
@@ -1420,7 +1564,7 @@
         : 'N/A';
 
       tooltip.innerHTML = `
-        <div class="text-cyan-400 font-bold mb-1 border-b border-slate-700 pb-0.5">Amostra n = ${idx} (t = ${t.toFixed(2)}s)</div>
+        <div class="text-cyan-400 font-bold mb-1 border-b border-slate-700 pb-0.5">Amostra n = ${idx} (t = ${t.toFixed(3)}s)</div>
         <div class="text-slate-300">Sinal Ideal: <span class="text-white">${idealVal}</span></div>
         <div class="text-rose-400">Com Ruído: <span class="text-rose-200">${noisyVal}</span></div>
         <div class="text-cyan-300 font-bold">Filtrado y[n]: <span class="text-cyan-100">${filtVal}</span></div>
@@ -1485,8 +1629,67 @@
       recalculateFilter();
     });
 
+    function setSampleCount(newN) {
+      N = Math.max(21, Math.min(512, Math.round(Number(newN))));
+      sampleCountSlider.value = N;
+      sampleCountVal.textContent = `${N} amostras`;
+
+      presetNButtons.forEach(btn => {
+        if (Number(btn.dataset.n) === N) {
+          btn.className = 'preset-n px-2 py-0.5 rounded bg-cyan-600/40 hover:bg-cyan-600/60 border border-cyan-500/50 text-[11px] font-mono font-bold text-cyan-300 transition-colors';
+        } else {
+          btn.className = 'preset-n px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors';
+        }
+      });
+
+      // Clamp M
+      const maxAllowedM = Math.min(51, Math.max(3, Math.floor(N * 0.75)));
+      windowSizeSlider.max = maxAllowedM;
+      if (M > maxAllowedM) {
+        M = Math.max(2, Math.min(maxAllowedM, 5));
+        windowSizeSlider.value = M;
+        windowSizeVal.textContent = `${M} amostras`;
+      }
+
+      // Clamp Wavelet levels
+      const maxWaveletLvl = Math.max(1, Math.floor(Math.log2(N)) - 1);
+      if (waveletLevels > maxWaveletLvl) {
+        waveletLevels = maxWaveletLvl;
+        waveletLevelsSelect.value = waveletLevels;
+      }
+      Array.from(waveletLevelsSelect.options).forEach(opt => {
+        opt.disabled = Number(opt.value) > maxWaveletLvl;
+      });
+
+      animIndex = getMinAnimIndex();
+      regenerateNoise();
+    }
+
+    function setTotalDuration(newT) {
+      T_FINAL = Math.max(0.5, Math.min(60.0, Number(newT)));
+      totalDurationSlider.value = T_FINAL;
+      totalDurationVal.textContent = `${T_FINAL.toFixed(1)} s`;
+
+      presetTButtons.forEach(btn => {
+        if (Math.abs(Number(btn.dataset.t) - T_FINAL) < 0.01) {
+          btn.className = 'preset-t px-2 py-0.5 rounded bg-cyan-600/40 hover:bg-cyan-600/60 border border-cyan-500/50 text-[11px] font-mono font-bold text-cyan-300 transition-colors';
+        } else {
+          btn.className = 'preset-t px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-mono font-bold text-slate-300 transition-colors';
+        }
+      });
+
+      updateSignals();
+    }
+
+    function setStepPosition(percent) {
+      stepPercent = Math.max(5, Math.min(95, Number(percent)));
+      stepPositionSlider.value = stepPercent;
+      updateSignals();
+    }
+
     function setWindowSize(newM) {
-      M = Math.max(2, Math.min(31, Number(newM)));
+      const maxAllowedM = Math.min(51, Math.max(2, Math.floor(N * 0.75)));
+      M = Math.max(2, Math.min(maxAllowedM, Number(newM)));
       windowSizeSlider.value = M;
       windowSizeVal.textContent = `${M} amostras`;
 
@@ -1500,6 +1703,30 @@
 
       recalculateFilter();
     }
+
+    sampleCountSlider.addEventListener('input', () => {
+      setSampleCount(sampleCountSlider.value);
+    });
+
+    presetNButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setSampleCount(btn.dataset.n);
+      });
+    });
+
+    totalDurationSlider.addEventListener('input', () => {
+      setTotalDuration(totalDurationSlider.value);
+    });
+
+    presetTButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setTotalDuration(btn.dataset.t);
+      });
+    });
+
+    stepPositionSlider.addEventListener('input', () => {
+      setStepPosition(stepPositionSlider.value);
+    });
 
     windowSizeSlider.addEventListener('input', () => {
       setWindowSize(windowSizeSlider.value);
@@ -1601,9 +1828,12 @@
 
     // Exportar CSV
     exportCsvBtn.addEventListener('click', () => {
-      let csv = 'amostra,tempo_s,sinal_ideal,sinal_ruidoso,sinal_filtrado\n';
+      const dt = T_FINAL / (N - 1);
+      const fs = (N - 1) / T_FINAL;
+      let csv = `# Parametros de Amostragem: N=${N}, T_total=${T_FINAL}s, fs=${fs.toFixed(4)}Hz, dt=${(dt * 1000).toFixed(4)}ms\n`;
+      csv += 'amostra,tempo_s,sinal_ideal,sinal_ruidoso,sinal_filtrado\n';
       for (let i = 0; i < N; i++) {
-        const t = ((i / (N - 1)) * T_FINAL).toFixed(4);
+        const t = (i * dt).toFixed(4);
         const ideal = idealSignal[i].toFixed(6);
         const noisy = noisySignal[i].toFixed(6);
         const filt = (filteredSignal[i] !== null && !isNaN(filteredSignal[i])) ? filteredSignal[i].toFixed(6) : '';
@@ -1614,7 +1844,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sinais_filtrados_${filterType}.csv`;
+      a.download = `sinais_filtrados_${filterType}_N${N}_T${T_FINAL}s.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });

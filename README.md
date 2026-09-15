@@ -31,6 +31,7 @@ O ecossistema disponibiliza laboratórios interativos executados diretamente no 
   - **Filtro de Kalman Ótimo (1D)**: Estimação em espaço de estados com minimização de erro quadrático médio (MMSE) e ganho adaptativo $K_k = \frac{P_k^-}{P_k^- + R}$.
   - **Denoising por Wavelets (DWT Haar)**: Decomposição em escalas de Mallat com limiar universal de Donoho-Johnstone (VisuShrink) e *Soft-Thresholding*, preservando bordas de degrau com $t_r \approx 1$ amostra.
   - **Filtro de Mediana**: Rejeição completa ($100\%$) de ruído impulsivo (*Sal e Pimenta*).
+  - **Controle Dinâmico de Amostragem & Domínio Temporal**: Configuração interativa do número de amostras ($N \in [21, 512]$), duração contínua ($T_{\text{final}} \in [0.5, 30.0]\text{ s}$), cálculo automático da taxa de amostragem ($f_s = \frac{N-1}{T_{\text{final}}}$), período ($\Delta t = \frac{T}{N-1}$), frequência de Nyquist ($f_{\text{Nyq}} = \frac{f_s}{2}$) e ajuste da posição de transições/degraus.
   - Duplo domínio: Tempo (amostras, janela deslizante e tooltips) e Frequência (magnitude analítica sinc/Dirichlet e escala em dB).
   - Exportação de dados em CSV e imagem gráfica em alta resolução.
 

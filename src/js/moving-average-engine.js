@@ -34,20 +34,24 @@
       stepIndex: Math.floor(N / 2),
       highVal: 2.0,
       lowVal: 1.0,
-      freq: 2.0
+      freq: 2.0,
+      totalDuration: 10.0
     }, params || {});
 
     const signal = new Array(N);
 
     switch (type) {
-      case 'step':
+      case 'step': {
+        const sIdx = Math.max(1, Math.min(N - 1, p.stepIndex));
         for (let i = 0; i < N; i++) {
-          signal[i] = i < p.stepIndex ? p.highVal : p.lowVal;
+          signal[i] = i < sIdx ? p.highVal : p.lowVal;
         }
         break;
+      }
 
       case 'square': {
-        const period = Math.max(8, Math.floor(N / 3));
+        const cycles = Math.max(1, p.freq || 2);
+        const period = Math.max(4, Math.floor(N / cycles));
         for (let i = 0; i < N; i++) {
           const phase = (i % period) / period;
           signal[i] = phase < 0.5 ? p.highVal : p.lowVal;
@@ -58,14 +62,15 @@
       case 'sine': {
         const mid = (p.highVal + p.lowVal) / 2;
         const amp = (p.highVal - p.lowVal) / 2;
+        const cycles = p.freq || 2.0;
         for (let i = 0; i < N; i++) {
-          signal[i] = mid + amp * Math.sin((2 * Math.PI * p.freq * i) / (N - 1));
+          signal[i] = mid + amp * Math.sin((2 * Math.PI * cycles * i) / (N - 1));
         }
         break;
       }
 
       case 'impulse': {
-        const pulseIdx = Math.floor(N / 3);
+        const pulseIdx = Math.max(1, Math.min(N - 2, p.stepIndex !== undefined ? p.stepIndex : Math.floor(N / 3)));
         for (let i = 0; i < N; i++) {
           signal[i] = (i === pulseIdx) ? p.highVal : p.lowVal;
         }
@@ -73,30 +78,53 @@
       }
 
       case 'ecg': {
-        // Sinal biomédico sintético tipo ECG simplificado
+        // Sinal biomédico sintético tipo ECG normalizado para qualquer N
         const base = p.lowVal;
         const span = p.highVal - p.lowVal;
-        const period = Math.floor(N / 2);
+        const period = Math.max(8, Math.floor(N / 2));
         for (let i = 0; i < N; i++) {
           const mod = i % period;
+          const pNorm = mod / period;
           let val = base;
-          if (mod === 5) val += 0.15 * span; // Onda P
-          else if (mod === 10) val -= 0.15 * span; // Onda Q
-          else if (mod === 12) val += 1.0 * span; // Pico R
-          else if (mod === 14) val -= 0.25 * span; // Onda S
-          else if (mod === 19) val += 0.25 * span; // Onda T
+          if (pNorm >= 0.08 && pNorm < 0.14) val += 0.15 * span; // Onda P
+          else if (pNorm >= 0.18 && pNorm < 0.22) val -= 0.15 * span; // Onda Q
+          else if (pNorm >= 0.22 && pNorm < 0.28) val += 1.0 * span; // Pico R
+          else if (pNorm >= 0.28 && pNorm < 0.32) val -= 0.25 * span; // Onda S
+          else if (pNorm >= 0.38 && pNorm < 0.48) val += 0.25 * span; // Onda T
           signal[i] = val;
         }
         break;
       }
 
-      default:
+      default: {
+        const sIdx = Math.max(1, Math.min(N - 1, p.stepIndex));
         for (let i = 0; i < N; i++) {
-          signal[i] = i < p.stepIndex ? p.highVal : p.lowVal;
+          signal[i] = i < sIdx ? p.highVal : p.lowVal;
         }
+      }
     }
 
     return signal;
+  }
+
+  /**
+   * Calcula grandezas físicas de amostragem temporal
+   * @param {number} N Quantidade de amostras discretas
+   * @param {number} totalDuration Duração temporal contínua total (s)
+   */
+  function computeSamplingParameters(N, totalDuration) {
+    const nSamples = Math.max(2, Math.round(N) || 61);
+    const duration = Math.max(1e-4, Number(totalDuration) || 10.0);
+    const dt = duration / (nSamples - 1);
+    const fs = (nSamples - 1) / duration;
+    const nyquistFreq = fs / 2.0;
+    return {
+      nSamples: nSamples,
+      totalDuration: duration,
+      samplingPeriod: dt,
+      samplingRate: fs,
+      nyquistFrequency: nyquistFreq
+    };
   }
 
   /**
@@ -516,7 +544,8 @@
     dwtHaar1D: dwtHaar1D,
     idwtHaar1D: idwtHaar1D,
     computeFrequencyResponse: computeFrequencyResponse,
-    computeMetrics: computeMetrics
+    computeMetrics: computeMetrics,
+    computeSamplingParameters: computeSamplingParameters
   };
 }));
 
