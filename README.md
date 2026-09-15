@@ -1,39 +1,38 @@
-# 🌌 Fourier Studio USP & Acervo Acadêmico
+# 🌌 Arthur Londres — Laboratórios Virtuais & Acervo Acadêmico USP
 
-Laboratório interativo avançado de **Transformada e Séries de Fourier**, Conservação de Energia (Teorema de Parseval), Convergência de Dirichlet e decomposição harmônica, integrado ao acervo de disciplinas da **Universidade de São Paulo (USP)**.
+Portal institucional e educacional da **Universidade de São Paulo (USP)** hospedando aplicações web computacionais interativas, ferramentas científicas e o acervo de disciplinas de Ciências Exatas e Engenharia.
 
----
-
-## 🚀 Fourier Studio (Aplicação Web)
-
-Acesse o simulador online em produção:  
-👉 **[https://londresarthur.github.io/usp/](https://londresarthur.github.io/usp/)**
-
-### 🎨 Principais Recursos:
-- 📈 **Plotter Estilo Desmos/GeoGebra**: Navegação fluida com Pan & Zoom (mouse e touch pinch com ponto focal), inspeção de coordenadas $(x, f(x), S_N(x))$, e destaque dinâmico de descontinuidades.
-- 🎚️ **Controle Dinâmico de Termos ($N$)**: Ajuste em tempo real de $0$ a $60$ harmônicos com animação com throttling otimizado.
-- ⚡ **Conservação de Energia & Identidade de Parseval**:
-  - Energia da Função Original: $E_{\text{orig}} = \frac{1}{L}\int_{-L}^L [f(x)]^2 dx$
-  - Energia da Série de Fourier: $E_N = \frac{a_0^2}{2} + \sum_{n=1}^N (a_n^2 + b_n^2)$
-  - Erro Médio Quadrático Residual ($L^2$ MSE) e Desigualdade de Bessel.
-  - Gráfico assintótico com distribuição harmônica e tracking de convergência.
-- 🎯 **Teorema de Dirichlet & Análise de Gibbs**: Destaque visual dos limites laterais $f(x^+), f(x^-)$, convergência pontual no ponto médio do salto $\frac{f(x^+) + f(x^-)}{2}$ e medição do percentual de overshoot de Gibbs.
-- 🌀 **Epiciclos Fasoriais (3Blue1Brown)**: Visualização dos vetores complexos rotativos com correção de fase desenhando a onda no tempo.
-- 🔊 **Sintetizador de Áudio Harmônico (Web Audio API)**: Timbre acústico em tempo real com `PeriodicWave` sintetizando a expansão em série de Fourier.
-- 📐 **Presets Canônicos da USP**:
-  - $f(x) = |x|$ (Apostila 17/08 — Dedução da Série de Basel $\pi^2/6$ e Parseval $\pi^4/90$)
-  - $f(x) = \pi - x$ (Apostila 20/08 — Extensão Ímpar de Senos, Par de Cossenos e Direta)
-  - Pulso Causal em $[-2, 2]$ (Teorema de Dirichlet)
-  - Onda Quadrada, Dente de Serra, Triangular, Exponencial amortecida e Seno Retificado.
-- 🧪 **Compilador de Expressões Customizadas**: Suporte para expressões matemáticas arbitrárias como `abs(x)`, `pi - x`, `sign(x)`, `x^2`, `exp(-abs(x)) * cos(2*x)`, etc.
+- 🌐 **Portal Online**: **[https://londresarthur.github.io/](https://londresarthur.github.io/)**
 
 ---
 
-## 🔬 Laboratórios Virtuais (Aplicações Web)
+## 🔬 Laboratórios Virtuais Interativos (Aplicações Web)
 
-O repositório publica aplicações interativas de alta fidelidade:
-1. **[Fourier Studio USP](https://londresarthur.github.io/usp/)**: Análise harmônica, convergência de Dirichlet, conservação de energia de Parseval e síntese sonora.
-2. **[Filtro de Média Móvel (PDS/DSP)](https://londresarthur.github.io/media-movel/)**: Simulação interativa no domínio do tempo e da frequência com sinais degrau, ruído branco aditivo (AWGN), controle de janela $M$, atraso de grupo $\tau_g = (M-1)/2$, resposta analítica sinc/Dirichlet e exportação de dados.
+O ecossistema disponibiliza laboratórios interativos executados diretamente no navegador com tecnologia HTML5 Canvas HiDPI, Web Audio API e KaTeX:
+
+### 1. [Fourier Toolbox (Fourier Studio USP)](https://londresarthur.github.io/fourier-toolbox/)
+- **Localização**: [`fourier-toolbox/index.html`](fourier-toolbox/index.html)
+- **Recursos**:
+  - Plotter interativo estilo Desmos/GeoGebra com Pan & Zoom e rastreamento analítico.
+  - Ajuste dinâmico de harmônicos de $N = 0$ a $N = 60$ termos.
+  - Conservação de Energia (Teorema de Parseval em $L^2$) e Identidade de Basel ($\pi^2/6$).
+  - Teorema de Dirichlet, salto de descontinuidade e medição do overshoot de Gibbs ($8.95\%$).
+  - Epiciclos Fasoriais 2D rotativos (decomposição harmônica complexa).
+  - Síntese sonora em tempo real via Web Audio API e exportação de áudio PCM WAV (44.1 kHz).
+  - 11 presets analíticos canônicos das apostilas da USP e compilador de fórmulas customizadas.
+
+### 2. [Filtragem Digital de Sinais (PDS): Média Móvel, Kalman & Wavelets](https://londresarthur.github.io/media-movel/)
+- **Localização**: [`media-movel/index.html`](media-movel/index.html)
+- **Recursos**:
+  - Comparativo estocástico de eliminação de ruído branco em sinais transitórios e degraus.
+  - **Média Móvel Causal**: FIR linear clássico com atraso de grupo $\tau_g = \frac{M-1}{2}$ amostras.
+  - **Média Móvel Centralizada**: Filtragem de fase zero ($\tau_g = 0$) para pós-processamento.
+  - **Média Móvel Exponencial (EMA)**: IIR recursivo de 1º polo com $\alpha = \frac{2}{M+1}$.
+  - **Filtro de Kalman Ótimo (1D)**: Estimação em espaço de estados com minimização de erro quadrático médio (MMSE) e ganho adaptativo $K_k = \frac{P_k^-}{P_k^- + R}$.
+  - **Denoising por Wavelets (DWT Haar)**: Decomposição em escalas de Mallat com limiar universal de Donoho-Johnstone (VisuShrink) e *Soft-Thresholding*, preservando bordas de degrau com $t_r \approx 1$ amostra.
+  - **Filtro de Mediana**: Rejeição completa ($100\%$) de ruído impulsivo (*Sal e Pimenta*).
+  - Duplo domínio: Tempo (amostras, janela deslizante e tooltips) e Frequência (magnitude analítica sinc/Dirichlet e escala em dB).
+  - Exportação de dados em CSV e imagem gráfica em alta resolução.
 
 ---
 
@@ -49,27 +48,29 @@ O ecossistema conta também com a versão dedicada para Windows / Desktop em rep
 O projeto segue uma arquitetura modular, limpa e padronizada com documentação no framework **Diátaxis**:
 
 ```
-usp/
-├── index.html                     # Ponto de entrada web (Fourier Studio)
-├── media-movel/                   # Aplicação web do Filtro de Média Móvel (PDS)
-│   └── index.html                 # Simulador interativo com gráficos de tempo e frequência
-├── src/                           # Código-fonte da aplicação web
+londresarthur.github.io/
+├── index.html                     # Portal principal (Homepage https://londresarthur.github.io/)
+├── fourier-toolbox/               # Aplicação web Fourier Toolbox (Fourier Studio USP)
+│   └── index.html                 # Simulador de Fourier, Parseval, Dirichlet e áudio
+├── media-movel/                   # Aplicação web de Filtragem Digital de Sinais (PDS)
+│   └── index.html                 # Laboratório de Média Móvel, Kalman e Wavelet
+├── src/                           # Código-fonte compartilhado da aplicação web
 │   ├── css/
 │   │   └── style.css              # Glassmorphism, temas claro/escuro e estilos UI
 │   └── js/
 │       ├── fourier-engine.js      # Motor matemático de quadratura, Parseval e Gibbs
-│       ├── moving-average-engine.js # Motor matemático de DSP e filtragem de média móvel
+│       ├── moving-average-engine.js # Motor matemático de DSP, Kalman e Wavelets
 │       ├── canvas-renderer.js     # Motor gráfico interativo 2D HiDPI
 │       ├── spectrum-chart.js      # Gráfico de espectro e convergência de energia
 │       ├── audio-synth.js         # Sintetizador aditivo Web Audio API
 │       └── app.js                 # Orquestrador da interface e KaTeX
 ├── tests/                         # Suíte de testes unitários automatizados
-│   └── test_moving_average.py     # Testes matemáticos de invariância, resposta e ruído
+│   └── test_moving_average.py     # Testes matemáticos de invariância, resposta, Kalman e DWT
 ├── docs/                          # Documentação Técnica (Framework Diátaxis)
 │   ├── tutorials/                 # 🚀 Tutoriais práticos (getting started)
 │   ├── how-to/                    # 🛠️ Guias "Como Fazer" (custom formulas, export)
 │   ├── reference/                 # 📖 Especificações de APIs e catálogos de presets
-│   ├── explanation/               # 💡 Teoria, Parseval, Dirichlet e arquitetura
+│   ├── explanation/               # 💡 Teoria, Parseval, Dirichlet, Kalman e Wavelets
 │   └── README.md                  # Índice do portal de documentação
 ├── academico/                     # Acervo acadêmico e material de estudo USP
 │   ├── calculo/                   # Apostilas e notas de aula de Cálculo Avançado
@@ -88,7 +89,7 @@ usp/
 
 ## 💻 Executando Localmente
 
-Para rodar a aplicação web localmente:
+Para rodar o portal e as aplicações web localmente:
 
 ```bash
 # Com Python 3

@@ -19,8 +19,8 @@ Biblioteca de notas de aula, apostilas teóricas, roteiros de prova e exercício
 
 O repositório inclui aplicações interativas para exploração visual e computacional:
 
-1. **Fourier Studio**: Análise de Fourier, Conservação de Energia (Parseval) e Decomposição Harmônica.
-   - Acesse online: **[https://londresarthur.github.io/usp/](https://londresarthur.github.io/usp/)**
+1. **Fourier Toolbox (Fourier Studio USP)**: Análise de Fourier, Conservação de Energia (Parseval), Dirichlet, Gibbs e síntese sonora.
+   - Acesse online: **[https://londresarthur.github.io/fourier-toolbox/](https://londresarthur.github.io/fourier-toolbox/)**
 
-2. **Filtro de Média Móvel (PDS/DSP)**: Simulação interativa no domínio do tempo e frequência, atenuação de ruído branco, atraso de grupo e resposta ao degrau.
+2. **Filtragem Digital de Sinais (PDS)**: Simulação interativa comparativa de Média Móvel, Filtro de Kalman Ótimo e Denoising por Wavelets em sinal degrau com ruído branco.
    - Acesse online: **[https://londresarthur.github.io/media-movel/](https://londresarthur.github.io/media-movel/)**
